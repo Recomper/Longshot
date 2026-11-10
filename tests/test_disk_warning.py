@@ -25,7 +25,7 @@ def put(path, text):
 
 class DriveTypeTests(unittest.TestCase):
     def test_a_partition_reads_the_disk_above_it(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-disk-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-disk-") as tmp:
             sda = os.path.join(tmp, "devices", "pci", "block", "sda")
             put(os.path.join(sda, "queue", "rotational"), "1\n")
             os.makedirs(os.path.join(sda, "sda1"))
@@ -35,7 +35,7 @@ class DriveTypeTests(unittest.TestCase):
             self.assertIs(disk._device_rotational(os.path.join(sda, "sda1")), False)
 
     def test_a_device_mapper_disk_follows_its_slaves(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-disk-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-disk-") as tmp:
             dm = os.path.join(tmp, "devices", "virtual", "block", "dm-0")
             put(os.path.join(dm, "queue", "rotational"), "0\n")   # (dm reports its own, not what it lies on)
             sda = os.path.join(tmp, "devices", "pci", "block", "sda")
@@ -50,11 +50,11 @@ class DriveTypeTests(unittest.TestCase):
             self.assertIs(disk._device_rotational(dm), True)   # (one spinning slave makes the build slow)
 
     def test_an_unknown_device_is_not_guessed(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-disk-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-disk-") as tmp:
             self.assertIsNone(disk._device_rotational(os.path.join(tmp, "nowhere")))
 
     def test_spinning_picks_the_system_reader(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-disk-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-disk-") as tmp:
             with mock.patch.object(disk.os, "name", "nt"), \
                  mock.patch.object(disk, "_windows_spinning", return_value=True) as windows, \
                  mock.patch.object(disk, "_linux_spinning") as linux:
@@ -69,8 +69,8 @@ class DriveTypeTests(unittest.TestCase):
                 windows.assert_not_called()
 
     def test_a_folder_made_later_is_measured_at_its_existing_parent(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-disk-") as tmp:
-            self.assertEqual(disk.existing_parent(os.path.join(tmp, "Games", "Hookshot")), os.path.abspath(tmp))
+        with tempfile.TemporaryDirectory(prefix="longshot-disk-") as tmp:
+            self.assertEqual(disk.existing_parent(os.path.join(tmp, "Games", "Longshot")), os.path.abspath(tmp))
 
 
 class WarningTests(unittest.TestCase):
@@ -108,18 +108,18 @@ class BuilderTests(unittest.TestCase):
     """The three builders ask before a build on a hard drive, and their "Build" goes on when the player says so"""
 
     def test_the_windows_builder_asks(self):
-        source = (ROOT / "builder" / "HookshotBuilder" / "MainWindow.xaml.cs").read_text(encoding="utf-8")
+        source = (ROOT / "builder" / "LongshotBuilder" / "MainWindow.xaml.cs").read_text(encoding="utf-8")
         self.assertIn("HardDriveWarning()", source)
         self.assertIn("Disk.Spinning", source)
         self.assertIn("MessageBoxButton.OKCancel", source)
 
     def test_the_python_builder_asks(self):
-        source = (ROOT / "builder" / "py" / "hookshot_builder" / "window.py").read_text(encoding="utf-8")
+        source = (ROOT / "builder" / "py" / "longshot_builder" / "window.py").read_text(encoding="utf-8")
         self.assertIn("hard_drive_warning()", source)
         self.assertIn("core.spinning", source)
 
     def test_the_linux_builder_asks(self):
-        source = (ROOT / "builder" / "linux" / "hookshot_builder.py").read_text(encoding="utf-8")
+        source = (ROOT / "builder" / "linux" / "longshot_builder.py").read_text(encoding="utf-8")
         self.assertIn("slow_disk_warning(out)", source)
         self.assertIn("askokcancel", source)
 

@@ -2,7 +2,7 @@
 import os
 
 
-SYSROOT_PART = "usr/lib/hookshot/sysroot"
+SYSROOT_PART = "usr/lib/longshot/sysroot"
 
 
 def is_absolute_link(target):

@@ -44,7 +44,7 @@ def main():
     template = (ROOT / "tests/log_batch_test.c").read_text(encoding="utf-8")
     fixture = template.replace("/* ACTUAL_LOG */", log_block(a.source.read_text(encoding="utf-8")))
     failed = []
-    with tempfile.TemporaryDirectory(prefix="hookshot-log-batch-") as temp:
+    with tempfile.TemporaryDirectory(prefix="longshot-log-batch-") as temp:
         c_file, exe = Path(temp) / "fixture.c", Path(temp) / "fixture.exe"
         c_file.write_text(fixture, encoding="utf-8")
         cmd = [a.cc, "-std=gnu11", "-O1", "-Wall", "-Wextra", "-Werror", str(c_file), "-o", str(exe)]

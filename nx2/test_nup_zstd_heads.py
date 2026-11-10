@@ -70,14 +70,14 @@ class Heads(unittest.TestCase):
             romfs = os.path.join(out, "romfs")
             os.replace(os.path.join(game, "romfs"), romfs)
             stamp = "unpacked by this builder: authored.nup 123"
-            Path(out, ".hookshot_romfs").write_text(stamp + "\n")
+            Path(out, ".longshot_romfs").write_text(stamp + "\n")
             make_game.keep_heads(out, game, stamp)
             with mock.patch.object(nup, "damaged_game_files", side_effect=AssertionError("every file opened again")):
                 make_game.stand_in_damaged_files(out, romfs)
             # (the damaged file now holds its stand-in: a whole one of the same kind)
             self.assertEqual(Path(romfs, "Model", "damaged.bntx.zs").read_bytes(), WHOLE)
             self.assertFalse(os.path.exists(os.path.join(out, make_game.HEADS)))
-            self.assertEqual(Path(out, ".hookshot_romfs_checked").read_text(), stamp + "\n")
+            self.assertEqual(Path(out, ".longshot_romfs_checked").read_text(), stamp + "\n")
 
     def test_a_list_from_another_unpack_is_not_taken(self):
         with tempfile.TemporaryDirectory() as d:
@@ -87,7 +87,7 @@ class Heads(unittest.TestCase):
             romfs = os.path.join(out, "romfs")
             os.replace(os.path.join(game, "romfs"), romfs)
             make_game.keep_heads(out, game, "unpacked by this builder: an older.nup 1")
-            Path(out, ".hookshot_romfs").write_text("unpacked by this builder: authored.nup 123\n")
+            Path(out, ".longshot_romfs").write_text("unpacked by this builder: authored.nup 123\n")
             with mock.patch.object(nup, "damaged_game_files", wraps=nup.damaged_game_files) as opened:
                 make_game.stand_in_damaged_files(out, romfs)
             opened.assert_called_once()

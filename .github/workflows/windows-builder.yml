@@ -1,10 +1,10 @@
-# What a Windows player downloads, made without game data: HookshotBuilder-Setup.exe (builder/setup/setup.c, with
-# llvm-mingw) and the Hookshot Builder package (dotnet publish, versioned from the tag as docs/versioning.md says), split
+# What a Windows player downloads, made without game data: LongshotBuilder-Setup.exe (builder/setup/setup.c, with
+# llvm-mingw) and the Longshot Builder package (dotnet publish, versioned from the tag as docs/versioning.md says), split
 # into the parts the setup downloads by scripts/make_setup_parts.py. The Python, emsdk, CPM and wgpu-native parts, and the
 # third_party part's prebuilt files, are the latest release's (scripts/release_parts.py). The Windows Vulkan back end is
 # compiled too, with the same llvm-mingw: players build it on their PC, this only checks that it still builds.
 # A workflow artifact on every run; on a tag, the new parts go to the builder-parts release and the setup
-# (HookshotBuilder.exe) and its list (hookshot-setup.txt) to the tag's release, beside the Linux AppImage.
+# (LongshotBuilder.exe) and its list (longshot-setup.txt) to the tag's release, beside the Linux AppImage.
 name: Windows builder
 
 on:
@@ -27,7 +27,7 @@ defaults:
 
 jobs:
   package:
-    name: Hookshot Builder package and setup
+    name: Longshot Builder package and setup
     # (builder-parts holds the installer's parts: no package there)
     if: github.ref_name != 'builder-parts'
     runs-on: windows-2022
@@ -80,7 +80,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if python -I scripts/release_parts.py previous "$RUNNER_TEMP/previous-setup.txt" \
-              --repo "$GITHUB_REPOSITORY" --repo NotRexed/Hookshot --skip-tag "$TAG"; then
+              --repo "$GITHUB_REPOSITORY" --repo Recomper/Longshot --skip-tag "$TAG"; then
             echo "PREVIOUS=$RUNNER_TEMP/previous-setup.txt" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
             exit 1
@@ -88,53 +88,53 @@ jobs:
             echo "::warning::no earlier release's setup list: the package has only the app and .NET parts"
           fi
 
-      # (work/hookshot.ico is the builder's icon, builder/HookshotBuilder/HookshotBuilder.csproj)
+      # (work/longshot.ico is the builder's icon, builder/LongshotBuilder/LongshotBuilder.csproj)
       - name: Play profile
         if: env.PREVIOUS != ''
         run: python -I scripts/release_parts.py profile "$PREVIOUS" work
 
       # (--dependent-load-flag 0x800, LOAD_LIBRARY_SEARCH_SYSTEM32: the libraries it imports come from System32, not from
       # the folder it was downloaded to)
-      - name: HookshotBuilder-Setup.exe
+      - name: LongshotBuilder-Setup.exe
         working-directory: builder/setup
         run: |
           "$LLVM_MINGW/bin/x86_64-w64-mingw32-windres" setup.rc -O coff -o "$RUNNER_TEMP/setup_rc.o"
           "$LLVM_MINGW/bin/x86_64-w64-mingw32-clang" -O2 -mwindows -municode setup.c "$RUNNER_TEMP/setup_rc.o" \
             -lwinhttp -lbcrypt -lcomctl32 -lshell32 -lole32 -Wl,--dependent-load-flag=0x800 \
-            -o "$RUNNER_TEMP/HookshotBuilder-Setup.exe"
-          ls -l "$RUNNER_TEMP/HookshotBuilder-Setup.exe"
+            -o "$RUNNER_TEMP/LongshotBuilder-Setup.exe"
+          ls -l "$RUNNER_TEMP/LongshotBuilder-Setup.exe"
 
-      - name: Hookshot Builder
+      - name: Longshot Builder
         run: >-
-          dotnet publish builder/HookshotBuilder/HookshotBuilder.csproj --configuration Release
+          dotnet publish builder/LongshotBuilder/LongshotBuilder.csproj --configuration Release
           -p:Version="$VERSION" -p:NuGetAudit=false --output "$RUNNER_TEMP/publish"
 
       # (it stops when assets/pipeline_states.bin.xz, the pipeline state list every release ships, is missing or does not read)
       - name: Package folder
         run: >-
           python -I scripts/release_parts.py package "$RUNNER_TEMP/package"
-          --publish "$RUNNER_TEMP/publish" --setup "$RUNNER_TEMP/HookshotBuilder-Setup.exe"
+          --publish "$RUNNER_TEMP/publish" --setup "$RUNNER_TEMP/LongshotBuilder-Setup.exe"
           ${PREVIOUS:+--list "$PREVIOUS" --python-packages nx2/prompt_requirements.txt}
 
       - name: Setup parts
         run: |
           python -I scripts/make_setup_parts.py "$RUNNER_TEMP/package" "$TAG" dist \
             --base "https://github.com/$GITHUB_REPOSITORY/releases/download/builder-parts" ${PREVIOUS:+--reuse "$PREVIOUS"}
-          # (a release holds the setup as HookshotBuilder.exe: builder/HookshotBuilder/Updater.cs)
-          cp "$RUNNER_TEMP/HookshotBuilder-Setup.exe" dist/HookshotBuilder.exe
+          # (a release holds the setup as LongshotBuilder.exe: builder/LongshotBuilder/Updater.cs)
+          cp "$RUNNER_TEMP/LongshotBuilder-Setup.exe" dist/LongshotBuilder.exe
           # (RecompLauncher installs this zip: the setup beside its recomplauncher.json, named for its system and processor)
-          python -I - "dist/Hookshot-$TAG-Windows-x64.zip" <<'PY'
+          python -I - "dist/Longshot-$TAG-Windows-x64.zip" <<'PY'
           import sys, zipfile
           with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_DEFLATED) as z:
-              z.write("dist/HookshotBuilder.exe", "HookshotBuilder.exe")
+              z.write("dist/LongshotBuilder.exe", "LongshotBuilder.exe")
               z.write("recomplauncher.json", "recomplauncher.json")
           PY
-          cat dist/hookshot-setup.txt
+          cat dist/longshot-setup.txt
           ls -l dist
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: HookshotBuilder-windows
+          name: LongshotBuilder-windows
           path: dist/
           if-no-files-found: error
 
@@ -184,25 +184,25 @@ jobs:
           path: ${{ runner.temp }}/llvm
           key: ${{ steps.llvm.outputs.name }}
       - name: llvm-mingw
-        run: echo "HOOKSHOT_MINGW=$(python -I scripts/release_parts.py llvm-mingw "$RUNNER_TEMP/llvm")" >> "$GITHUB_ENV"
+        run: echo "LONGSHOT_MINGW=$(python -I scripts/release_parts.py llvm-mingw "$RUNNER_TEMP/llvm")" >> "$GITHUB_ENV"
       # (as scripts/linux/appimage.sh builds Linux's: the back end alone, no lift, no game)
-      - name: hookshot_vk.dll
+      - name: longshot_vk.dll
         env:
           RX_VK_ONLY: '1'
           RX_RELEASE: '1'
         run: |
           OOT_WORK="$RUNNER_TEMP/vk-work" RX_CPM="$GITHUB_WORKSPACE/_deps/cpm" \
             python -I nx2/build.py --standalone --jobs "$NUMBER_OF_PROCESSORS"
-          ls -l "$RUNNER_TEMP/vk-work/sa/build/hookshot_vk.dll"
+          ls -l "$RUNNER_TEMP/vk-work/sa/build/longshot_vk.dll"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: hookshot_vk-windows
-          path: ${{ runner.temp }}/vk-work/sa/build/hookshot_vk.dll
+          name: longshot_vk-windows
+          path: ${{ runner.temp }}/vk-work/sa/build/longshot_vk.dll
           if-no-files-found: error
 
   release:
     name: Release assets
-    # (off until the maintainer switches it on: releases are published by hand with HookshotBuilder.exe and hookshot-setup.txt,
+    # (off until the maintainer switches it on: releases are published by hand with LongshotBuilder.exe and longshot-setup.txt,
     # and a second upload of them on the tag would race that. Set vars.CI_RELEASE_WINDOWS to 'true' to turn it on)
     if: startsWith(github.ref, 'refs/tags/') && github.ref_name != 'builder-parts' && vars.CI_RELEASE_WINDOWS == 'true'
     needs: [package, vulkan]
@@ -220,7 +220,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: HookshotBuilder-windows
+          name: LongshotBuilder-windows
           path: dist
       # (named by their SHA-256: a part already there is the same file and is not uploaded again. Before the list, which
       # names them)
@@ -228,10 +228,10 @@ jobs:
         run: |
           if ! gh release view builder-parts >/dev/null 2>&1; then
             gh release create builder-parts --prerelease --latest=false --target "$GITHUB_SHA" --title builder-parts \
-              --notes "The parts HookshotBuilder-Setup.exe downloads, named by each release's hookshot-setup.txt."
+              --notes "The parts LongshotBuilder-Setup.exe downloads, named by each release's longshot-setup.txt."
           fi
           have=$(gh release view builder-parts --json assets --jq '.assets[].name')
-          for f in dist/HookshotBuilder-*.zip; do
+          for f in dist/LongshotBuilder-*.zip; do
             if grep -qxF "$(basename "$f")" <<<"$have"; then
               echo "$(basename "$f"): already there"
             else
@@ -239,4 +239,4 @@ jobs:
             fi
           done
       - name: Setup and its list to the release
-        run: scripts/release_upload.sh "$GITHUB_REF_NAME" dist/HookshotBuilder.exe dist/hookshot-setup.txt dist/Hookshot-*-Windows-x64.zip
+        run: scripts/release_upload.sh "$GITHUB_REF_NAME" dist/LongshotBuilder.exe dist/longshot-setup.txt dist/Longshot-*-Windows-x64.zip

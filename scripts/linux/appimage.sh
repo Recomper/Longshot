@@ -1,13 +1,13 @@
 #!/bin/bash
-# The Linux AppImage: Hookshot Builder with everything it needs to build the game on the player's PC. No game data and
+# The Linux AppImage: Longshot Builder with everything it needs to build the game on the player's PC. No game data and
 # nothing made from it is in it: the game is built from the player's own copy, as on Windows.
 #
 #   scripts/linux/deps.sh        (first: the compiler, Python, FFmpeg, SDL2, headers into build-linux/deps)
-#   scripts/linux/appimage.sh    -> build-linux/Hookshot-<version>-x86_64.AppImage
+#   scripts/linux/appimage.sh    -> build-linux/Longshot-<version>-x86_64.AppImage
 # The same image builds the game and, with --play, starts the one it saved.
 #
 # Built on the oldest system it is for (CI: Ubuntu 22.04): the sysroot it carries is that system's C library, so the
-# game it builds runs on glibc 2.35 and newer. work/ (hot_funcs.txt, hot_order.txt, hookshot_pieces.prof,
+# game it builds runs on glibc 2.35 and newer. work/ (hot_funcs.txt, hot_order.txt, longshot_pieces.prof,
 # image/chunks.txt: addresses and counts from playing, no game code) is carried along when it is there.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -15,16 +15,16 @@ ROOT=$PWD
 B=$ROOT/build-linux
 DEPS=${DEPS:-$B/deps}
 APPDIR=$B/AppDir
-VERSION=${HOOKSHOT_VERSION:-$(git describe --tags --always --match "v[0-9]*" 2>/dev/null || echo dev)}
+VERSION=${LONGSHOT_VERSION:-$(git describe --tags --always --match "v[0-9]*" 2>/dev/null || echo dev)}
 export EMSDK=$DEPS/emsdk RX_CPM=$DEPS/cpm
 PY=$DEPS/python/bin/python3
 
 # ---- the Vulkan back end, built here once (it needs no game) ----
 VKW=$B/vk-work
-rm -rf "$VKW/sa/build/hookshot_vk.so"
+rm -rf "$VKW/sa/build/longshot_vk.so"
 OOT_WORK=$VKW RX_MARCH=x86-64-v3 RX_VK_ONLY=1 RX_RELEASE=1 "$PY" -I nx2/build.py --standalone --jobs "${JOBS:-$(nproc)}"
-VK=$VKW/sa/build/hookshot_vk.so
-[ -f "$VK" ] || { echo "hookshot_vk.so was not built"; exit 1; }
+VK=$VKW/sa/build/longshot_vk.so
+[ -f "$VK" ] || { echo "longshot_vk.so was not built"; exit 1; }
 
 # ---- the tools' native helpers, built now: the AppImage is read-only. a64emit with its C++ runtime inside (the one this system
 # builds with is newer than older systems have), and the stamp build_emit.py checks, so it is not built again ----
@@ -36,9 +36,9 @@ E=third_party/a64-kit/lift
 "$PY" -I -c "import sys; sys.path.insert(0, 'nx2'); import zbic; zbic.lib()"
 
 rm -rf "$APPDIR"
-mkdir -p "$APPDIR/usr/share/hookshot" "$APPDIR/usr/lib/hookshot"
-T=$APPDIR/usr/share/hookshot
-L=$APPDIR/usr/lib/hookshot
+mkdir -p "$APPDIR/usr/share/longshot" "$APPDIR/usr/lib/longshot"
+T=$APPDIR/usr/share/longshot
+L=$APPDIR/usr/lib/longshot
 
 # ---- the tools (the sources the player's build compiles, and the scripts) ----
 cp -a nx2 host scripts LICENSE readme.md assets "$T/"
@@ -52,7 +52,7 @@ cp -a gpu/render/*.h "$T/gpu/render/"
 for h in $(grep -rhoE 'gpu/vk/[A-Za-z0-9_]+[.]h' host | sort -u); do if [ -f "$h" ]; then cp -a "$h" "$T/gpu/vk/"; fi; done
 cp -a third_party/opus "$T/third_party/"
 cp -a third_party/kenney_input "$T/third_party/"
-# (NVIDIA DLSS, when ticked in the builder: scripts/ngx_sdk.py and the Vulkan back end's sources, compiled with HOOKSHOT_NGX_SDK)
+# (NVIDIA DLSS, when ticked in the builder: scripts/ngx_sdk.py and the Vulkan back end's sources, compiled with LONGSHOT_NGX_SDK)
 mkdir -p "$T/scripts"
 cp scripts/ngx_sdk.py "$T/scripts/"
 cp -a gpu/vk gpu/compat gpu/third_party "$T/gpu/"
@@ -63,7 +63,7 @@ cp -a third_party/a64-kit/* "$T/third_party/a64-kit/"
 rm -f "$T/third_party/a64-kit/tools/lld-link.exe"
 if [ -d work ]; then
     mkdir -p "$T/work/image"
-    for f in hot_funcs.txt hot_order.txt hookshot_pieces.prof; do [ -f "work/$f" ] && cp "work/$f" "$T/work/"; done
+    for f in hot_funcs.txt hot_order.txt longshot_pieces.prof; do [ -f "work/$f" ] && cp "work/$f" "$T/work/"; done
     [ -f work/image/chunks.txt ] && cp work/image/chunks.txt "$T/work/image/"
 fi
 # (the pipeline state list, assets/pipeline_states.bin.xz, came with assets/ above, and is required: without it a new install's
@@ -78,14 +78,14 @@ cp "$DEPS/tk/libtcl9tk9.0.so" "$DEPS/tk/libXft.so.2" "$DEPS/tk/libXrender.so.1" 
 mkdir -p "$L/emsdk"
 cp -a "$DEPS/emsdk/upstream" "$L/emsdk/"
 cp -a "$DEPS/ffmpeg" "$L/ffmpeg"
-cp "$VK" "$L/hookshot_vk.so"
+cp "$VK" "$L/longshot_vk.so"
 cp "$DEPS/sdl2/libSDL2-2.0.so.0" "$L/libSDL2-2.0.so.0"
 for d in "$DEPS"/cpm/*/*; do
     mkdir -p "$T/cpm/${d#"$DEPS/cpm/"}"
     cp -a "$d/include" "$T/cpm/${d#"$DEPS/cpm/"}/"
 done
-cp -a "$DEPS/licenses" "$T/licenses"   # (LLVM, FFmpeg, dav1d, SDL2: what this AppImage carries besides Hookshot)
-# ---- the licences of the third-party parts compiled into hookshot_vk.so (tests/test_appimage_licenses.py) ----
+cp -a "$DEPS/licenses" "$T/licenses"   # (LLVM, FFmpeg, dav1d, SDL2: what this AppImage carries besides Longshot)
+# ---- the licences of the third-party parts compiled into longshot_vk.so (tests/test_appimage_licenses.py) ----
 mkdir -p "$T/licenses/imgui" "$T/licenses/zstd" "$T/licenses/libertinus"
 cp third_party/imgui/LICENSE.txt third_party/imgui/PROVENANCE.md "$T/licenses/imgui/"
 cp third_party/zstd/LICENSE third_party/zstd/PROVENANCE.md "$T/licenses/zstd/"
@@ -139,21 +139,21 @@ EOF
 
 # ---- the AppDir's own files ----
 cp builder/linux/AppRun "$APPDIR/AppRun"
-cp builder/linux/hookshot-builder.desktop "$APPDIR/"
+cp builder/linux/longshot-builder.desktop "$APPDIR/"
 # (RecompLauncher reads this from inside the AppImage, at /recomplauncher.json)
 cp recomplauncher.json "$APPDIR/recomplauncher.json"
-cp assets/hookshot.png "$APPDIR/hookshot.png"
+cp assets/longshot.png "$APPDIR/longshot.png"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
-cp assets/hookshot.png "$APPDIR/usr/share/icons/hicolor/256x256/apps/hookshot.png"
+cp assets/longshot.png "$APPDIR/usr/share/icons/hicolor/256x256/apps/longshot.png"
 
-# (the update list, beside AppRun and not inside a hashed part: hookshot-linux.txt names each part's checksum)
+# (the update list, beside AppRun and not inside a hashed part: longshot-linux.txt names each part's checksum)
 # (the parts are served from the linux-parts release of the repository this is built in, where
-# scripts/linux/publish_parts.sh uploads them: without --base the list named NotRexed/Hookshot's release, which a fork's
+# scripts/linux/publish_parts.sh uploads them: without --base the list named Recomper/Longshot's release, which a fork's
 # CI does not upload to, so a fork's update list named parts that were not there)
 python3 scripts/linux/make_parts.py "$APPDIR" "$VERSION" "$B/parts" \
-    --base "https://github.com/${GITHUB_REPOSITORY:-NotRexed/Hookshot}/releases/download/linux-parts"
+    --base "https://github.com/${GITHUB_REPOSITORY:-Recomper/Longshot}/releases/download/linux-parts"
 
-OUT=$B/Hookshot-$VERSION-x86_64.AppImage
+OUT=$B/Longshot-$VERSION-x86_64.AppImage
 rm -f "$OUT"
 ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 "$DEPS/appimagetool" --runtime-file "$DEPS/runtime-x86_64" --comp zstd "$APPDIR" "$OUT"
 echo "$OUT: $(du -h "$OUT" | cut -f1)"

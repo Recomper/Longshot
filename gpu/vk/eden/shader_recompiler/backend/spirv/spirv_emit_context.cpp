@@ -322,7 +322,7 @@ void DefineSsbos(EmitContext& ctx, StorageTypeDefinition& type_def,
     u32 index{};
     size_t table{};
     for (const StorageBufferDescriptor& desc : info.storage_buffers_descriptors) {
-        if (desc.count > 1) {   // (hookshot: a storage buffer table, Info::global_tables)
+        if (desc.count > 1) {   // (longshot: a storage buffer table, Info::global_tables)
             const Id array{ctx.TypeArray(struct_type, ctx.Const(desc.count))};
             const Id id{ctx.AddGlobalVariable(ctx.TypePointer(spv::StorageClass::StorageBuffer, array),
                                               spv::StorageClass::StorageBuffer)};
@@ -393,7 +393,7 @@ Id CasFunction(EmitContext& ctx, Operation operation, Id value_type) {
     return func;
 }
 
-// (hookshot, issue 17) A ceiling on a compare-exchange loop's attempts. Every attempt that fails does so because
+// (longshot, issue 17) A ceiling on a compare-exchange loop's attempts. Every attempt that fails does so because
 // another invocation's succeeded, so a contended word is always written in far fewer tries than this; the ceiling
 // only matters when the exchange never returns what it was given, as for a word out of bounds under robust buffer
 // access (seen on Intel Arc B390: no device loss, the frame never came back). One attempt counts: the condition to
@@ -1303,7 +1303,7 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
             callback(ssbo_pointer);
             AddLabel(else_label);
         }
-        for (const GlobalTableVars& table : ssbo_tables) {   // (hookshot: Info::global_tables)
+        for (const GlobalTableVars& table : ssbo_tables) {   // (longshot: Info::global_tables)
             const Id table_id{table.vars.*ssbo_member};
             if (!Sirit::ValidId(table_id) || !Sirit::ValidId(cbufs[table.cbuf_index].U32x2)) {
                 continue;
@@ -1381,7 +1381,7 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
             OpStore(ssbo_pointer, data);
             OpReturn();
         });
-        if (follow_stores) guest_lookup(addr, 1U << shift, [&](Id target) {   // (hookshot: through the page table, as the loads: the culling's outputs)
+        if (follow_stores) guest_lookup(addr, 1U << shift, [&](Id target) {   // (longshot: through the page table, as the loads: the culling's outputs)
             if (gp_level >= 3) OpStore(psb_member(type, target), data, spv::MemoryAccessMask::Aligned, 4U);
             OpReturn();
         });
@@ -1419,7 +1419,7 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
                 const Id scope{Const(static_cast<u32>(spv::Scope::Device))};
                 OpReturnValue((this->*atomics[i])(U32[1], ssbo_pointer, scope, u32_zero_value, value));
             });
-            if (follow_stores) guest_lookup(addr, 4U, [&](Id target) {   // (hookshot: the culling's counters, through the page table)
+            if (follow_stores) guest_lookup(addr, 4U, [&](Id target) {   // (longshot: the culling's counters, through the page table)
                 const Id scope{Const(static_cast<u32>(spv::Scope::Device))};
                 if (gp_level >= 3) OpReturnValue((this->*atomics[i])(U32[1], psb_member(U32[1], target), scope, u32_zero_value, value));
                 else OpReturnValue(u32_zero_value);
@@ -1554,7 +1554,7 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
 }
 
 void EmitContext::DefineRescalingInput(const Info& info) {
-    if (!info.uses_rescaling_uniform || rescaling_push_constants.value != 0) {   // (hookshot: or made already, for the page table)
+    if (!info.uses_rescaling_uniform || rescaling_push_constants.value != 0) {   // (longshot: or made already, for the page table)
         return;
     }
     if (profile.unified_descriptor_binding) {

@@ -278,7 +278,7 @@ struct MeshInfo {
 struct Info {
     static constexpr size_t MAX_INDIRECT_CBUFS{14};
     static constexpr size_t MAX_CBUFS{18};
-    // (hookshot, as Lichii #434: 64. Fritchii's pass binds every candidate pointer of an ambiguous access; the back end's
+    // (longshot, as Lichii #434: 64. Fritchii's pass binds every candidate pointer of an ambiguous access; the back end's
     // layouts are built from the list, gpu/vk/vk_draw.cpp ensure_layout)
     static constexpr size_t MAX_SSBOS{64};
 
@@ -323,7 +323,7 @@ struct Info {
     bool uses_local_memory{};
 
     bool uses_fp16{};
-    bool uses_cooperative_matrix{};   // (hookshot: HMMA_nx2)
+    bool uses_cooperative_matrix{};   // (longshot: HMMA_nx2)
     bool uses_fp64{};
     bool uses_fp16_denorms_flush{};
     bool uses_fp16_denorms_preserve{};

@@ -44,7 +44,7 @@ def main():
     # the user's key, and tag.gpgSign made `git tag v0.1.0` an annotated tag that wants a message, so the test failed.
     # The changelog script's git runs inherit this)
     os.environ.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
-    root = tempfile.mkdtemp(prefix="hookshot-changelog-")
+    root = tempfile.mkdtemp(prefix="longshot-changelog-")
     try:
         os.makedirs(os.path.join(root, "scripts"))
         shutil.copy2(SCRIPT, os.path.join(root, "scripts", "changelog.py"))

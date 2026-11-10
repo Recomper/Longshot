@@ -1,8 +1,8 @@
 # Using a save from an emulator
 
-Hookshot and the emulators and ports that run the Switch 2 Ocarina of Time on a PC all keep the game's saves as the
-**same files**. You can carry on in Hookshot from a save made in Lichii (or Eglantine, Orchid, NX2navi, ...), or take
-your Hookshot save to one of them, at the same spot: nothing is converted, the files are copied across.
+Longshot and the emulators and ports that run the Switch 2 Ocarina of Time on a PC all keep the game's saves as the
+**same files**. You can carry on in Longshot from a save made in Lichii (or Eglantine, Orchid, NX2navi, ...), or take
+your Longshot save to one of them, at the same spot: nothing is converted, the files are copied across.
 `scripts/oot_saves.py` finds the folders and does the copy safely.
 
 You need your own copy of the game. Nothing here
@@ -26,7 +26,7 @@ Only the folder they are in differs.
 
 | Program | Linux | Windows | How sure |
 |---|---|---|---|
-| Hookshot | `~/.local/share/hookshot/save/<user id>/` | `<game folder>\user\save\<user id>\` | Hookshot's source; Linux tested |
+| Longshot | `~/.local/share/longshot/save/<user id>/` | `<game folder>\user\save\<user id>\` | Longshot's source; Linux tested |
 | [Lichii](https://github.com/zortos293/Lichii) | `~/.local/share/eden/` + Eden's save path below | `%APPDATA%\eden\` + Eden's save path | Lichii's source; Linux tested, Windows not |
 | [Frizti (Fritchii)](https://github.com/Frizti/Lichii), a Lichii fork | (Windows only) | `%APPDATA%\eden\` + Eden's save path | its source (`fritchii-v5.5`); not tried |
 | [Orchid](https://github.com/MythosOfs/Orchid) | `~/.local/share/eden/` + Eden's save path | `%APPDATA%\eden\` + Eden's save path | its source; not tried |
@@ -37,7 +37,7 @@ Only the folder they are in differs.
 Eden's save path, under that data folder: `nand/user/save/0000000000000000/<profile id>/0400486024DEC000/`.
 
 - `0400486024DEC000` is the game's title id. Eden's `<profile id>` is the Switch user profile you play with;
-  Hookshot's `<user id>` and NX2navi's `<account>` are one folder with a 32-character hex name.
+  Longshot's `<user id>` and NX2navi's `<account>` are one folder with a 32-character hex name.
 - **Lichii, Frizti, Orchid and PokeDinner share one folder**, Eden's (`eden`): a save there is the same save in all of
   them. Eglantine has its own (`eglantine`).
 - The emulators use a `user` folder beside the program (Linux: in the folder you start it from) instead of the paths
@@ -47,7 +47,7 @@ Eden's save path, under that data folder: `nand/user/save/0000000000000000/<prof
 - NX2navi writes a save to `profile/save-tx` first and moves it into place after. While something is waiting there,
   that is the save the game loads next, so the script refuses to copy until NX2navi has been started and quit (or
   `--force`). NX2navi's launcher also has its own **Import Saves**, which takes an emulator's save folder.
-- `$XDG_DATA_HOME` replaces `~/.local/share` when it is set. Hookshot's `--user <folder>` puts its saves in
+- `$XDG_DATA_HOME` replaces `~/.local/share` when it is set. Longshot's `--user <folder>` puts its saves in
   `<folder>/save/<user id>/` ([command line arguments](../readme.md#running-the-game-from-the-command-line)).
 - The emulator paths come from each one's `src/common/fs/fs_paths.h`, `path_util.cpp` and
   `src/core/file_sys/savedata_factory.cpp`. Official Eden does not run Switch 2 games; its name is accepted because
@@ -58,24 +58,24 @@ Eden's save path, under that data folder: `nand/user/save/0000000000000000/<prof
 ## Copy with the script
 
 `scripts/oot_saves.py` (Python 3, nothing to install) copies the slots, `account.sav` and `option.sav` one way, after
-backing up the side it overwrites. From the Hookshot folder (or a clone):
+backing up the side it overwrites. From the Longshot folder (or a clone):
 
 ```sh
 python -I scripts/oot_saves.py list              # every save it finds, its slots and when each was saved
-python -I scripts/oot_saves.py import lichii     # Lichii -> Hookshot
-python -I scripts/oot_saves.py export lichii     # Hookshot -> Lichii
-python -I scripts/oot_saves.py import --from ~/Downloads/my-save   # any folder holding a save -> Hookshot
-python -I scripts/oot_saves.py export --to ~/Lichii/user           # Hookshot -> a portable emulator
+python -I scripts/oot_saves.py import lichii     # Lichii -> Longshot
+python -I scripts/oot_saves.py export lichii     # Longshot -> Lichii
+python -I scripts/oot_saves.py import --from ~/Downloads/my-save   # any folder holding a save -> Longshot
+python -I scripts/oot_saves.py export --to ~/Lichii/user           # Longshot -> a portable emulator
 ```
 
 The names are `lichii`, `frizti` (or `fritchii`), `orchid`, `pokedinner`, `eden`, `eglantine` and `nx2navi`.
-`to-lichii` and `to-hookshot` still work: they are `export lichii` and `import lichii`.
+`to-lichii` and `to-longshot` still work: they are `export lichii` and `import lichii`.
 
-On Windows Hookshot's folder is your game folder, which the script cannot guess, so name it:
+On Windows Longshot's folder is your game folder, which the script cannot guess, so name it:
 
 ```powershell
-python -I scripts\oot_saves.py import lichii --hookshot "C:\Games\Hookshot"
-python -I scripts\oot_saves.py export nx2navi --hookshot "C:\Games\Hookshot"
+python -I scripts\oot_saves.py import lichii --longshot "C:\Games\Longshot"
+python -I scripts\oot_saves.py export nx2navi --longshot "C:\Games\Longshot"
 ```
 
 | Option | What it does |
@@ -84,13 +84,13 @@ python -I scripts\oot_saves.py export nx2navi --hookshot "C:\Games\Hookshot"
 | `--keep-settings` | Leaves the target's `option.sav` alone, so each program keeps its own settings |
 | `--profile <id>` | The emulator's profile to use. Needed when more than one profile has saves: the script lists them and stops rather than pick one |
 | `--from <folder>`, `--to <folder>` | The emulator's side: the save folder itself, or a folder above it to search (a data folder, a portable `user` folder, NX2navi's game folder). With a name, it replaces where that emulator is looked for; without one, any folder works |
-| `--hookshot <folder>` | Hookshot's data folder (Windows: the game folder), or its `save\<user id>` folder |
+| `--longshot <folder>` | Longshot's data folder (Windows: the game folder), or its `save\<user id>` folder |
 | `--backup-dir <folder>` | Where the backup goes, outside the target save folder |
 | `--force` | Copies even if a game seems to be running, or NX2navi has a save waiting |
 
-The script refuses to run while it sees Hookshot or any of the programs above running. The side being overwritten is
+The script refuses to run while it sees Longshot or any of the programs above running. The side being overwritten is
 copied to `oot-save-backups/<import or export>-<name>-<date>-<time>/` first: in `~/.local/share` on Linux, in
-`%LOCALAPPDATA%\Hookshot` on Windows. To undo a copy, put the backup's contents back.
+`%LOCALAPPDATA%\Longshot` on Windows. To undo a copy, put the backup's contents back.
 
 ## Copy by hand
 
@@ -111,9 +111,9 @@ that only exists on that side does not stay mixed in with the new save.
 
 ## What was tested
 
-- Linux (Arch-based), Hookshot v2.0.5 and Lichii built from source on the same day.
-- A Hookshot save copied to Lichii loads in Lichii at the same spot (Kokiri Forest, the spawn by the flower patch).
-- A Lichii save copied to Hookshot arrives identical, but has not been played through on the Hookshot side.
+- Linux (Arch-based), Longshot v2.0.5 and Lichii built from source on the same day.
+- A Longshot save copied to Lichii loads in Lichii at the same spot (Kokiri Forest, the spawn by the flower patch).
+- A Lichii save copied to Longshot arrives identical, but has not been played through on the Longshot side.
 - The script's discovery for every program above, its copies and backups are covered by `tests/test_oot_saves.py`, on
   temporary folders.
 - **Not tested:** Windows, and every program but Lichii. Their folders come from their source or, for NX2navi, its

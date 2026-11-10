@@ -1,4 +1,4 @@
-using HookshotBuilder;
+using LongshotBuilder;
 
 sealed class Tools;
 static class Storage { public static string NgxSdk = ""; }
@@ -44,7 +44,7 @@ static class Program
     static void Main()
     {
         // Authored placeholders only: no NVIDIA SDK, runtime or game data is used.
-        var root = Path.Combine(Path.GetTempPath(), "hookshot-dlss-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(Path.GetTempPath(), "longshot-dlss-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {

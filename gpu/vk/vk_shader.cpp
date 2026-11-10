@@ -152,7 +152,7 @@ Code read_code(const nvn_stage_data& sd) {
     if (!sd.control || !sd.data || !host->gpu_read(sd.control, ctl, sizeof ctl) || !control_end(ctl, &end)) return Code{};
     std::vector<uint8_t> area(end);
     if (!host->gpu_read(sd.data, area.data(), end)) return Code{};
-    if (const char* dir = getenv("RX_VK_DUMP_STAGES")) {   // (hookshot, RX_VK_DUMP_STAGES=<folder>: control and code as the game has them)
+    if (const char* dir = getenv("RX_VK_DUMP_STAGES")) {   // (longshot, RX_VK_DUMP_STAGES=<folder>: control and code as the game has them)
         char path[512];
         snprintf(path, sizeof path, "%s/%016llx.bin", dir, (unsigned long long)code_key(ctl, area.data(), end));
         if (FILE* f = fopen(path, "wb")) fwrite(ctl, 1, sizeof ctl, f), fwrite(area.data(), 1, end, f), fclose(f);
@@ -197,7 +197,7 @@ Code parse_code(const uint8_t* ctl, const std::vector<uint8_t>& area) {
         if (r == Shader::Ampere::ProgramCaptureState::Result::InvalidTarget) return c;
         if (r == Shader::Ampere::ProgramCaptureState::Result::Complete) break;
     }
-    {   // (hookshot, for bisecting a bad translation) RX_VK_REJECT_STAGES=<n,...> (NVN stages) and RX_VK_REJECT_KEYS=
+    {   // (longshot, for bisecting a bad translation) RX_VK_REJECT_STAGES=<n,...> (NVN stages) and RX_VK_REJECT_KEYS=
         // <hex prefix,...>: those programs are taken as untranslatable, as a lowering failure leaves them
         static const std::string stages = getenv("RX_VK_REJECT_STAGES") ? getenv("RX_VK_REJECT_STAGES") : "";
         // (none by default: OoT's mesh program 32423793502c71e7 stayed out while it lost the device; it no longer does)
@@ -263,7 +263,7 @@ Code parse_code(const uint8_t* ctl, const std::vector<uint8_t>& area) {
             q = *e ? e + 1 : e;
         }
     }
-    if (!lowered) {   // (hookshot: each program once, up to 400, with the native opcode it stopped at)
+    if (!lowered) {   // (longshot: each program once, up to 400, with the native opcode it stopped at)
         static std::mutex mu;
         static std::unordered_set<uint64_t> seen;
         std::lock_guard lk(mu);
@@ -456,7 +456,7 @@ public:
     }
     u32 SharedMemorySize() const override {
         // (what the program declares, from the control section: 48 KB for every one was past an RX 9070 XT's 32 KB, and its
-        // pipelines were invalid. klimovich008, Hookshot PR 91. RX_VK_SHARED_48K=1: as before)
+        // pipelines were invalid. klimovich008, Longshot PR 91. RX_VK_SHARED_48K=1: as before)
         static const bool old = getenv("RX_VK_SHARED_48K") != nullptr;
         return old ? 48u << 10 : nvn.shared_memory;
     }
@@ -916,7 +916,7 @@ void dump_ir(const Program& p, const char* stage, const Shader::IR::Program& pro
     if (!want) return;
     char key[24], alt[24];
     snprintf(key, sizeof key, "%016llx", (unsigned long long)p.key);
-    snprintf(alt, sizeof alt, "%016llx", (unsigned long long)code_key);   // (hookshot: or the stage code's own key)
+    snprintf(alt, sizeof alt, "%016llx", (unsigned long long)code_key);   // (longshot: or the stage code's own key)
     bool match = false;
     for (const char* q = want; *q;) {
         const char* e = q;
@@ -954,7 +954,7 @@ void oot_visual(Shader::IR::Program& program, uint64_t key) {
 
 // (hookshot) RX_VK_MESH_NOCULL=<task shader code key prefixes,...>, off unless set. OoT's meshlet
 // culling task shader walks every cell of a coarse depth grid its meshlet covers, reading four words a cell from c3 by a
-// dynamic index: on RDNA 2 one draw runs past the kernel's 10 s and the GPU is reset (Hookshot issue 817). Its answer is
+// dynamic index: on RDNA 2 one draw runs past the kernel's 10 s and the GPU is reset (Longshot issue 817). Its answer is
 // visible = (result & 1) | (c3[2320] & 4), bit 4 being the game's own "draw everything". That comparison becomes true,
 // and dead code elimination takes the grid walk with it: every meshlet is drawn (the rasterizer clips what is off
 // screen), none is left out; RX_VK_SKIP_CODE left these programs out instead, and their models with them. The Steam
@@ -1019,19 +1019,19 @@ void mesh_nocull(Shader::IR::Program& program, uint64_t code_key) {
              made ? "off, every meshlet drawn" : "pattern not found, left as it is");
 }
 
-// ---- (hookshot) The program cache, hookshot_programs.bin beside the executable: what translation made, by the key of the
+// ---- (hookshot) The program cache, longshot_programs.bin beside the executable: what translation made, by the key of the
 // stages' code and inputs. A program met for the first time stopped the frame for its translation, 9 s of it each run,
 // the long stutters when walking somewhere (replay workers in jobs_wait for up to 150 ms). The pipelines themselves were
-// already kept (mkw_vk_pipelines.bin). Written as made; good for this translator (HOOKSHOT_SHADER_STAMP) and these switches only
+// already kept (mkw_vk_pipelines.bin). Written as made; good for this translator (LONGSHOT_SHADER_STAMP) and these switches only
 // (a file made by another starts again). RX_VK_NO_PROGRAM_CACHE=1: off ----
 struct DiskRecord { int64_t at; size_t size; uint32_t kind; };
 std::mutex disk_mu;
 // (read as wanted: with every program of the game in it the file is gigabytes, and it was read into memory whole)
 FILE* disk_in = nullptr;
-std::string disk_path;   // (hookshot_programs.bin: the precompile opens it once a thread)
+std::string disk_path;   // (longshot_programs.bin: the precompile opens it once a thread)
 std::unordered_map<uint64_t, std::vector<DiskRecord>> disk_records;
 FILE* disk_out = nullptr;
-// (the records' heads, in the file's order, in hookshot_programs.idx beside it: see disk_init)
+// (the records' heads, in the file's order, in longshot_programs.idx beside it: see disk_init)
 FILE* disk_idx = nullptr;
 bool disk_listing = false;
 bool disk_on = false;
@@ -1070,7 +1070,7 @@ uint64_t disk_stamp() {
     };
     // (what translates shaders, nx2/build.py: a rebuild of anything else keeps the cache. It was the DLL's bytes, and every build
     // lost it)
-    const uint64_t translator = HOOKSHOT_SHADER_STAMP;
+    const uint64_t translator = LONGSHOT_SHADER_STAMP;
     add(&translator, sizeof translator);
     const uint32_t depth = host->depth_minus_w() != 0;   // (d3zessete's PR 54: programs made in either depth mode are kept apart)
     add(&depth, sizeof depth);
@@ -1119,15 +1119,15 @@ void disk_init() {
         char exe[MAX_PATH];
         const DWORD n = game_module_path(exe, MAX_PATH);
         std::string path(exe, n);
-        path = path.substr(0, path.find_last_of("\\/") + 1) + "hookshot_programs.bin";
-        // (one Hookshot at a time on a cache: a second one, started while the first wrote, took the record being written for one
+        path = path.substr(0, path.find_last_of("\\/") + 1) + "longshot_programs.bin";
+        // (one Longshot at a time on a cache: a second one, started while the first wrote, took the record being written for one
         // cut short and cut the file there, under the first, whose list of records then named bytes written over since. Held
         // until the process ends)
         {
             uint64_t h = 0xCBF29CE484222325ull;
             for (const char ch : path) h = (h ^ (uint8_t)tolower((unsigned char)ch)) * 1099511628211ull;
             char name[64];
-            snprintf(name, sizeof name, "Local\\HookshotProgramCache_%016llx", (unsigned long long)h);
+            snprintf(name, sizeof name, "Local\\LongshotProgramCache_%016llx", (unsigned long long)h);
 #ifdef _WIN32
             const HANDLE held = CreateMutexA(nullptr, FALSE, name);
             const bool taken = !held || GetLastError() == ERROR_ALREADY_EXISTS;
@@ -1136,12 +1136,12 @@ void disk_init() {
             const bool taken = fd >= 0 && flock(fd, LOCK_EX | LOCK_NB) != 0;
 #endif
             if (taken) {
-                logf("vk: program cache %s: another Hookshot is using it: this one runs without it", path.c_str());
+                logf("vk: program cache %s: another Longshot is using it: this one runs without it", path.c_str());
                 return;
             }
         }
         const uint64_t stamp = disk_stamp();
-        // (hookshot_programs.idx: the records' heads, 20 bytes each, in the file's order. The records follow one another in the
+        // (longshot_programs.idx: the records' heads, 20 bytes each, in the file's order. The records follow one another in the
         // file, so finding them was a read of each one's head, 22000 of them over the 4 GB: seconds at every start, each a read
         // somewhere else on the disk (and on a compressed file system a block of 128 KB unpacked for those 20 bytes). The index
         // is taken when its stamp is the cache's, its sizes fit in the file and the last record's head in the file is the one
@@ -1337,7 +1337,7 @@ void put_info(std::vector<uint8_t>& o, const Shader::Info& i) {
     put(o, (uint64_t)i.handle_programs.size());
     for (const auto& h : i.handle_programs) put_list(o, h);
 }
-/// (hookshot) every descriptor array within kMaxDescriptorCount: the counts come from hookshot_programs.bin, and two of 2^31
+/// (hookshot) every descriptor array within kMaxDescriptorCount: the counts come from longshot_programs.bin, and two of 2^31
 /// wrapped the layout's sum to 0 (a push layout with billions of descriptors), and one made the binds loop that often
 constexpr uint32_t kMaxDescriptorCount = 4096;
 template <class Info> bool descriptor_counts_fit(const Info& i) {
@@ -1455,7 +1455,7 @@ void program_cache_read(FILE* in, std::mutex* mu, uint64_t key, const std::vecto
             st.module = make_module(spirv);
             ok = ok && st.module;
         }
-        ok = ok && answers_fit(*p, p->answers);   // (hookshot: an answer past the stages or their slots: not this record)
+        ok = ok && answers_fit(*p, p->answers);   // (longshot: an answer past the stages or their slots: not this record)
         if (!ok) {
             static std::atomic<int> logged{0};
             // Program owns the stage containers, but their Vulkan handles are not RAII-managed.
@@ -1550,7 +1550,7 @@ void translate_into(Program& p, const NvnState& s, const Code* vsc, const Code* 
                      t->program.workgroup_size[0], t->program.workgroup_size[1], t->program.workgroup_size[2],
                      t->program.shared_memory_size, t->program.local_memory_size);
             // (hookshot) The movie upscaler's dozen networks, on a card that cannot run them as the console does: their software matrix multiplies
-            // took minutes each for AMD's compiler (the black screen with sound, Hookshot issue 26: JaredEzz's analysis) and the movies ran at 10 fps
+            // took minutes each for AMD's compiler (the black screen with sound, Longshot issue 26: JaredEzz's analysis) and the movies ran at 10 fps
             // (issues 38, 43). Left out, the last pass becomes a linear upscale of the movie (upscale_stub in vk_draw.cpp): the same picture at 60
             // fps, a little softer. The gameplay TAAU network stays. RX_VK_NETWORK_KEEP=<key prefixes>, "all": every one runs
             if (t->program.info.uses_cooperative_matrix) {
@@ -1693,7 +1693,7 @@ std::array<u32, 3> mesh_registers_of(const Code* task, const Code& mesh) {
     // (the control section's topology in GL's numbers: 3 triangles; 1 points, not lines. OoT's four mesh programs with a 1 (the grass
     // drawn into the 2400 x 2400 shadow map around Link) write one index byte per primitive, the primitive count = their vertex
     // count, and a point size. Read as lines, each joined vertex 2i to 2i + 1 of its meshlet: a mesh of long thin dark stripes on
-    // the ground, the water and Link around him, on AMD; Hookshot issue 302)
+    // the ground, the water and Link around him, on AMD; Longshot issue 302)
     const uint32_t topology = mesh.topology == 3 ? 4 : mesh.topology == 1 ? 0 : mesh.topology;
     const uint32_t lines = task ? (task->payload_bytes + 127) / 128 : 0;
     // (the larger of the two for both: the control section's pair is not always vertices and primitives in that order. The door's
@@ -2297,7 +2297,7 @@ void program_cache_borrow(uint64_t key, const std::function<void(Program&)>& fn)
     }
 }
 
-/// (hookshot, the prepare's driver part: vk_draw.cpp warm_libraries) the key of every kept graphics and mesh program, whoever made
+/// (longshot, the prepare's driver part: vk_draw.cpp warm_libraries) the key of every kept graphics and mesh program, whoever made
 /// it (the seed, a state list, play), in the file's order, from the list of records alone: program_cache_each reads every record
 /// for its list, the whole file (6.7 GB with every program of the game). *loaded: the variants read in already, whose records
 /// that list no longer names (see loaded_variants)
@@ -2320,7 +2320,7 @@ std::vector<uint64_t> program_cache_keys(std::vector<Program*>* loaded) {
     return keys;
 }
 
-/// (hookshot, the prediction: vk_predict.cpp) every kept graphics program variant, read without making its modules
+/// (longshot, the prediction: vk_predict.cpp) every kept graphics program variant, read without making its modules
 void program_cache_each(const std::function<void(const KeptProgram&)>& fn) {
     disk_init();
     if (!disk_on) return;
@@ -2361,8 +2361,8 @@ void program_cache_each(const std::function<void(const KeptProgram&)>& fn) {
 }
 
 // ---- (hookshot) Every shader of the game before it starts, as TotK Recomp's tools/prepare_shaders.py and totk.exe --prepare-shaders: the
-// builder writes hookshot_shaders.bin (nx2/shader_census.py) from the archives, each program's stages, and here each is translated
-// for the default state (nothing bound, float inputs and outputs) and kept in hookshot_programs.bin. What a draw then asks for is on
+// builder writes longshot_shaders.bin (nx2/shader_census.py) from the archives, each program's stages, and here each is translated
+// for the default state (nothing bound, float inputs and outputs) and kept in longshot_programs.bin. What a draw then asks for is on
 // disk, whatever part of the game it is first met in ----
 namespace {
 struct SeedStage {
@@ -2389,7 +2389,7 @@ Code stage_of_seed(const SeedStage& st) {
 }
 } // namespace
 
-std::string seed_path() { return beside_exe("hookshot_shaders.bin"); }
+std::string seed_path() { return beside_exe("longshot_shaders.bin"); }
 
 size_t seed_open() {
     if (FILE* f = fopen(seed_path().c_str(), "rb")) {
@@ -2558,7 +2558,7 @@ bool seed_is_compute(size_t i) {
 // (hookshot) The seed's compute programs, each with its texture variants. A program's texture questions are answered in play by the
 // textures bound (Program::answers), which nothing before the game knows; the questions themselves are few, so each is tried with every
 // answer it can get, and an answer that changes the SPIR-V makes a variant. Variants of two answers and more are taken fewest first, up
-// to cap: one of them is the variant play makes, which still_valid then finds kept. All go to hookshot_programs.bin, as play keeps them,
+// to cap: one of them is the variant play makes, which still_valid then finds kept. All go to longshot_programs.bin, as play keeps them,
 // and each new one is given to made (its modules live until it returns)
 SeedVariants seed_compute(size_t i, size_t cap, const std::function<void(Program&)>& made) {
     static const uint8_t no_types[8]{};

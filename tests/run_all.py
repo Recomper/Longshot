@@ -77,8 +77,8 @@ def header_dir(env, cpm_name, probe):
 
 def find_tools():
     return {
-        "spirv_headers": header_dir("HOOKSHOT_SPIRV_HEADERS", "spirv-headers", os.path.join("spirv", "unified1", "spirv.h")),
-        "vulkan_headers": header_dir("HOOKSHOT_VULKAN_HEADERS", "vulkanheaders", os.path.join("vulkan", "vulkan.h")),
+        "spirv_headers": header_dir("LONGSHOT_SPIRV_HEADERS", "spirv-headers", os.path.join("spirv", "unified1", "spirv.h")),
+        "vulkan_headers": header_dir("LONGSHOT_VULKAN_HEADERS", "vulkanheaders", os.path.join("vulkan", "vulkan.h")),
         "spirv_val": which("spirv-val"),
         "glslang": which("glslangValidator", "glslang"),
         "dotnet": which("dotnet"),

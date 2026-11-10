@@ -33,7 +33,7 @@ static HMODULE load_one(const char *dll) {   /* beside the executable, else the 
     while (n && path[n - 1] != '\\' && path[n - 1] != '/') n--;
     snprintf(path + n, sizeof path - n, "%s", dll);
     HMODULE m = n ? LoadLibraryA(path) : NULL;   /* (no folder: a bare name would search the current folder and PATH) */
-#ifdef _WIN32   /* (hookshot: else the system's, not the current folder's or PATH's) */
+#ifdef _WIN32   /* (longshot: else the system's, not the current folder's or PATH's) */
     return m ? m : LoadLibraryExA(dll, NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 #else
     return m ? m : LoadLibraryA(dll);

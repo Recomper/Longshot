@@ -5,7 +5,7 @@
 Each directory that changes on its own is one zip: the tools (every release), Python, clang, FFmpeg, the sysroot, and
 the two libraries beside them. A zip is deterministic, so a directory whose files did not change has the same SHA-256
 next time and the builder copies the one it already has. The zips are uploaded to the linux-parts release; the version's
-own release carries hookshot-linux.txt, which names them.
+own release carries longshot-linux.txt, which names them.
 
 The list is not inside a zip (it names the zips' checksums).
 """
@@ -21,12 +21,12 @@ from part_links import SYSROOT_PART, is_absolute_link, relative_sysroot_link  # 
 
 # (dest under the AppDir, and None for the whole directory or the file names when the directory holds other parts too)
 PARTS = (
-    ("usr/share/hookshot", None),
+    ("usr/share/longshot", None),
     ("usr/python", None),
-    ("usr/lib/hookshot/emsdk", None),
-    ("usr/lib/hookshot/ffmpeg", None),
-    ("usr/lib/hookshot/sysroot", None),
-    ("usr/lib/hookshot", ("hookshot_vk.so", "libSDL2-2.0.so.0")),
+    ("usr/lib/longshot/emsdk", None),
+    ("usr/lib/longshot/ffmpeg", None),
+    ("usr/lib/longshot/sysroot", None),
+    ("usr/lib/longshot", ("longshot_vk.so", "libSDL2-2.0.so.0")),
 )
 
 
@@ -86,7 +86,7 @@ def main():
     parser.add_argument("appdir")
     parser.add_argument("tag")
     parser.add_argument("out")
-    parser.add_argument("--base", default="https://github.com/NotRexed/Hookshot/releases/download/linux-parts")
+    parser.add_argument("--base", default="https://github.com/Recomper/Longshot/releases/download/linux-parts")
     args = parser.parse_args()
     root = os.path.abspath(args.appdir)
     if not os.path.isfile(os.path.join(root, "AppRun")):
@@ -98,18 +98,18 @@ def main():
         if not os.path.isdir(os.path.join(root, dest)):
             sys.exit("the AppDir has no %s" % dest)
         leaf = dest.replace("/", "-")
-        path = os.path.join(args.out, "HookshotLinux-%s.zip" % leaf)
+        path = os.path.join(args.out, "LongshotLinux-%s.zip" % leaf)
         digest, size = write_zip(path, root, dest, files)
-        named = os.path.join(args.out, "HookshotLinux-%s-%s.zip" % (leaf, digest[:12]))
+        named = os.path.join(args.out, "LongshotLinux-%s-%s.zip" % (leaf, digest[:12]))
         os.replace(path, named)
         lines.append("part %s %d %s %s/%s" % (digest, size, dest, base, os.path.basename(named)))
         lines.append("tree" if files is None else "\n".join("file %s" % name for name in files))
         print("%-32s %5d MB  %s" % (dest, size >> 20, digest[:16]), flush=True)
     text = "\n".join(lines) + "\n"
-    with open(os.path.join(args.out, "hookshot-linux.txt"), "w", encoding="utf-8", newline="\n") as handle:
+    with open(os.path.join(args.out, "longshot-linux.txt"), "w", encoding="utf-8", newline="\n") as handle:
         handle.write(text)
     # (beside AppRun, not inside a hashed part: the list names those checksums)
-    with open(os.path.join(root, "hookshot-linux.txt"), "w", encoding="utf-8", newline="\n") as handle:
+    with open(os.path.join(root, "longshot-linux.txt"), "w", encoding="utf-8", newline="\n") as handle:
         handle.write(text)
 
 

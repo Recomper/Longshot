@@ -1,6 +1,6 @@
-"""Local bake, step 1: every shader program in a game tree, as hookshot_shaders.bin (bake-deepseek).
+"""Local bake, step 1: every shader program in a game tree, as longshot_shaders.bin (bake-deepseek).
 
-    python3 nx2/bake_ds/romenum.py <romfs> [--out hookshot_shaders.bin] [--manifest enum.json]
+    python3 nx2/bake_ds/romenum.py <romfs> [--out longshot_shaders.bin] [--manifest enum.json]
 
 The walk and the containers are the ones nx2/shader_census.py documents (BNSH variations, agl's BAHS,
 NDSR networks, NDVE upscaler tables, Effect's .vsetb BNSH, SARC wrappers, zstd with the game's

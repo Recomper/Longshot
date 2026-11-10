@@ -478,7 +478,7 @@ HLE(_ZN2nn5audio15ReadInputStreamEPNS0_15InputStreamTypeEPvi) {
         const int have = filled(s);
         frames = (int)ARG(2) < have ? (int)ARG(2) : have;
         const int cap = s->capacity * s->frame_bytes, n = frames * s->frame_bytes;
-        uint8_t *dst = (uint8_t *)hos_guest_range(ARG(1), (uint64_t)n);   /* (hookshot: only into guest memory) */
+        uint8_t *dst = (uint8_t *)hos_guest_range(ARG(1), (uint64_t)n);   /* (longshot: only into guest memory) */
         if (!dst) frames = 0;
         else {
             const int first = n < cap - s->ring_start ? n : cap - s->ring_start;

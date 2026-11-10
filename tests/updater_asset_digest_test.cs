@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using HookshotBuilder;
+using LongshotBuilder;
 
 namespace DigestFixture
 {
@@ -80,7 +80,7 @@ namespace DigestFixture
     sealed class State : IDisposable
     {
         public static State Current = null!;
-        public readonly string Root = Path.Combine(Path.GetTempPath(), "hookshot-updater-digest-" + Guid.NewGuid().ToString("N"));
+        public readonly string Root = Path.Combine(Path.GetTempPath(), "longshot-updater-digest-" + Guid.NewGuid().ToString("N"));
         public readonly Handler Handler = new();
         public readonly List<ProcessStartInfo> Starts = new();
         public readonly CancellationTokenSource Cancel = new();
@@ -90,8 +90,8 @@ namespace DigestFixture
         public readonly byte[] Old = Encoding.ASCII.GetBytes("keep previous cached file");
         public readonly List<double> Progress = new();
         public int MetadataRequests;
-        public string Cache => Path.Combine(Root, "HookshotBuilder", "update");
-        public string Setup => Path.Combine(Cache, "HookshotBuilder.exe");
+        public string Cache => Path.Combine(Root, "LongshotBuilder", "update");
+        public string Setup => Path.Combine(Cache, "LongshotBuilder.exe");
         public string Game => Path.Combine(Root, "authored-game-folder");
 
         public State()
@@ -115,10 +115,10 @@ namespace DigestFixture
                 ["name"] = name, ["browser_download_url"] = "https://fixture.invalid/browser",
                 ["url"] = "https://fixture.invalid/api", ["size"] = served.Length, ["digest"] = hash
             };
-            assets.Add(Asset(zip ? "HookshotBuilder.zip" : "HookshotBuilder.exe", digest));
+            assets.Add(Asset(zip ? "LongshotBuilder.zip" : "LongshotBuilder.exe", digest));
             if (omitDigest) assets[0].Remove("digest");
-            if (list) assets.Add(new() { ["name"] = "hookshot-setup.txt" });
-            if (unusedBadZip) assets.Add(Asset("HookshotBuilder.zip", null));
+            if (list) assets.Add(new() { ["name"] = "longshot-setup.txt" });
+            if (unusedBadZip) assets.Add(Asset("LongshotBuilder.zip", null));
             var json = JsonSerializer.SerializeToUtf8Bytes(new { tag_name = "v9.9.9", assets });
             Handler.Respond = request =>
             {
@@ -144,7 +144,7 @@ namespace DigestFixture
         public void NoUse()
         {
             Program.Check(Starts.Count == 0, "Unverified payload reached process-launch spy.");
-            Program.Check(!Directory.Exists(Path.Combine(Root, "current", "HookshotBuilder v9.9.9")), "Unverified ZIP was extracted.");
+            Program.Check(!Directory.Exists(Path.Combine(Root, "current", "LongshotBuilder v9.9.9")), "Unverified ZIP was extracted.");
             Program.Check(File.ReadAllText(Path.Combine(Game, "keep.txt")) == "unchanged authored sentinel", "Game sentinel changed.");
         }
 
@@ -155,7 +155,7 @@ namespace DigestFixture
             Cancel.Dispose(); Handler.Dispose();
             var full = Path.GetFullPath(Root);
             Program.Check(Path.GetDirectoryName(full) == Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar)
-                && Path.GetFileName(full).StartsWith("hookshot-updater-digest-", StringComparison.Ordinal), "Temporary cleanup escaped fixture root.");
+                && Path.GetFileName(full).StartsWith("longshot-updater-digest-", StringComparison.Ordinal), "Temporary cleanup escaped fixture root.");
             Directory.Delete(full, recursive: true);
         }
     }
@@ -176,7 +176,7 @@ namespace DigestFixture
             using var bytes = new MemoryStream();
             using (var zip = new ZipArchive(bytes, ZipArchiveMode.Create, leaveOpen: true))
             {
-                var entry = zip.CreateEntry("HookshotBuilder/HookshotBuilder.exe", CompressionLevel.NoCompression);
+                var entry = zip.CreateEntry("LongshotBuilder/LongshotBuilder.exe", CompressionLevel.NoCompression);
                 entry.LastWriteTime = new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 using var writer = new StreamWriter(entry.Open(), Encoding.ASCII);
                 writer.Write(text);
@@ -326,7 +326,7 @@ namespace DigestFixture
     }
 }
 
-namespace HookshotBuilder
+namespace LongshotBuilder
 {
     sealed class Tools
     {

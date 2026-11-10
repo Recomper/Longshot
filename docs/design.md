@@ -1,4 +1,4 @@
-# Hookshot (oot-recomp): design
+# Longshot (oot-recomp): design
 
 A native x86-64 Windows and Linux build of the Switch 2 *The Legend of Zelda: Ocarina of Time* remake: the game's AArch64
 code translated to C ahead of time from the user's own decrypted dump and compiled with clang, the Horizon OS and
@@ -66,8 +66,8 @@ message. OoT-specific code goes into new files where it can, so the shared files
  one C function per guest function (work/sa/gen, ~1 GB, local), 64-bit guest window (nx2/rtgen.py)
         │  clang (llvm-mingw, emsdk or the system's) -O1, the hot functions -O2 with the play profile, lld (nx2/build.py --standalone)
         ▼
- hookshot.exe = lifted game + host/ (Horizon: threads, SVCs, memory, fs, hid, audio, vi, gs, NVN2)
- hookshot_vk.dll = the Vulkan back end (gpu/vk), loaded by host/rx_backend.c unless RX_BACKEND names another renderer
+ longshot.exe = lifted game + host/ (Horizon: threads, SVCs, memory, fs, hid, audio, vi, gs, NVN2)
+ longshot_vk.dll = the Vulkan back end (gpu/vk), loaded by host/rx_backend.c unless RX_BACKEND names another renderer
 ```
 
 - **Standalone from the start.** MKW went emulator-hosted first (Eglantine with a recompiled CPU backend), then
@@ -132,7 +132,7 @@ id (`hos_game_is_mkw`); OoT gets its own once its pacer is found, never by addre
 |---|---|---|
 | **S0** | the dump located and characterized (`nx2/dump.py --set`) | the six signals agree; program id, build ids, module sizes, SDK and NVN versions, romfs size recorded in section 9 |
 | **S1** | loader + RELR, image in Eden's layout, discovery, coverage, census; instruction test (every form the game uses) and function tests (self-contained and call trees) against Unicorn | 100 % of discovered instructions translated (UDF aside), no BR without a jump table, every form bit-exact, every comparable function case identical |
-| **S2** | the standalone lift (`lift.py --standalone --write`) and a full build (`build.py --standalone`): hookshot.exe and hookshot_vk.dll link | the boot runs `_init_libc*`, `nnosInitialize`, `nninitStartup`, the modules' DT_INIT, `nnMain` and reaches `nvnBootstrapLoader` |
+| **S2** | the standalone lift (`lift.py --standalone --write`) and a full build (`build.py --standalone`): longshot.exe and longshot_vk.dll link | the boot runs `_init_libc*`, `nnosInitialize`, `nninitStartup`, the modules' DT_INIT, `nnMain` and reaches `nvnBootstrapLoader` |
 | **S3** | NVN2 for this game: the procs it asks for, device limits, its window; the Vulkan replay | **the first frame**: a `run-vk.ps1` screenshot shows what the game draws first (a logo or loading screen) |
 | **S4** | title screen and menus: romfs, save data, hid, audio (muted in tests), movies, the stubs it hits | the title screen and the file select are reachable by scripted input (`HOS_INPUT_SCRIPT` / `HOS_INPUT_LIVE`) |
 | **S5** | gameplay: correctness (the flash detector `RX_VK_FLASH=1`, frame dumps) and speed (the profiler) | Kokiri Forest plays without flashes at the game's own frame rate |
@@ -145,7 +145,7 @@ id (`hos_game_is_mkw`); OoT gets its own once its pacer is found, never by addre
 - **Whole functions** (`nx2/test_leaf.py`, `--calls` for call trees): random functions of every module on the real
   relocated image, natively and in Unicorn, on the 64-bit window with polls firing; registers, V registers and
   every changed page compared.
-- **The production build** (`nx2/test_dll.py`, when a `hookshot_game.dll` is built).
+- **The production build** (`nx2/test_dll.py`, when a `longshot_game.dll` is built).
 - **In the game**: `scripts/run-vk.ps1` screenshots, the flash detector, frame dumps (`RX_VK_DUMP*`), the sampled
   profiler (`HOS_SAMPLE` + `scripts/prof.py`), and Eglantine as the A/B reference for what a frame should look like.
 
@@ -157,7 +157,7 @@ id (`hos_game_is_mkw`); OoT gets its own once its pacer is found, never by addre
 - `..\Eglantine` is read and run, never modified; mkw-recomp and the other ports are read and copied from, never
   edited.
 - One game run at a time on this PC (mkw-recomp's runs take ~10 GB): `run-vk.ps1` refuses while `mkw.exe` or
-  another `hookshot.exe` runs, and while Rainbow Six Siege is open; no heavy builds while Siege is open either. Runs are
+  another `longshot.exe` runs, and while Rainbow Six Siege is open; no heavy builds while Siege is open either. Runs are
   muted (`HOS_AUDIO=0`), at the priority `-Priority` gives (High by default), and screenshot folders are deleted once looked at.
 - The lifted C and every build are GPL (suyu's translator is GPL-2.0-or-later; Eden's code is GPL-3.0).
 
@@ -183,7 +183,7 @@ dump, the runtime made game-neutral, the stage-1 tools checked on MKW's dump as 
   tables, no BR without one. Instruction test: 742 forms, 44,172 cases, all pass.
 - **S2:** the standalone lift: 294,450 functions in 57 chunks (1.4 GB of C), 485 HLE functions, 243 OS imports
   stubbed, 22 sdk NVN functions routed to `host/nvn2.c`.
-  The build links (`hookshot.exe`, 426 MB; ~25 min for a full build with 4 jobs, a few minutes after a relift).
+  The build links (`longshot.exe`, 426 MB; ~25 min for a full build with 4 jobs, a few minutes after a relift).
 - **S3 done (2026-11-04, boot13).** The title screen renders at 60 fps: black for ~23 s (~1,400 presents) while it
   loads, then the logo, smoke and the menu (New Game / Options / ZELDA NOTES Setting), through the Vulkan back end.
   It runs the 150 s out with no crash. What it took, in boot order:
@@ -240,7 +240,7 @@ dump, the runtime made game-neutral, the stage-1 tools checked on MKW's dump as 
   slower, narrow barriers no change, RX_VK_WAIT_GPU no help.
 - Tools: RX_VK_FRAMELOG + scripts/framelog.py (every frame shown), RX_VK_PROBE=2 (the passes at speed), RX_VK_SLOW_LOG, HOS_WATCH.
 - A release build (`RX_RELEASE=1` at build time) precompiles before the game starts; test builds do not unless RX_VK_PRECOMPILE=1.
-  hookshot_programs.bin (with hookshot_programs.idx, the list of its records), hookshot_pipelines.bin and mkw_vk_pipelines.bin go
+  longshot_programs.bin (with longshot_programs.idx, the list of its records), longshot_pipelines.bin and mkw_vk_pipelines.bin go
   beside the executable.
 
 ## 11. Findings, 2026-11-06, day

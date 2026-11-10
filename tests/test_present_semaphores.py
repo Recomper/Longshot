@@ -58,7 +58,7 @@ bool idle=false, bad_destroy=false; std::set<uint64_t> live,used;
 std::set<uint64_t> chains, retired;
 uint64_t next_chain=0;int create_result=0;bool bad_chain=false;
 struct CreateInfo {uint64_t oldSwapchain=0;unsigned imageUsage=1,minImageCount=4,flags=0;const void* pNext=nullptr;};
-// (hookshot: the overlays' mutable sRGB swapchain, vk_main.cpp: its format list, never used by these formats)
+// (longshot: the overlays' mutable sRGB swapchain, vk_main.cpp: its format list, never used by these formats)
 using VkFormat=int;
 constexpr int VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO=2, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT=16,
     VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR=4;
@@ -96,7 +96,7 @@ void queue_flush_locked() {}
 void vkDeviceWaitIdle(int) {idle=true;}
 // (vk_replay.cpp's helper: held submits out, then the device idle; the real one also takes the present queue's own lock)
 void device_wait_idle_locked() {queue_flush_locked();vkDeviceWaitIdle(dev.device);}
-void swap_views_drop() {}   // (hookshot: the overlays' views, vk_main.cpp)
+void swap_views_drop() {}   // (longshot: the overlays' views, vk_main.cpp)
 bool recreate() {
     uint32_t n=0,width=640,height=480; struct {int format=1;} fmt;
     struct {uint32_t minImageCount=2;} caps;   // (the surface's: present ahead holds images past it, vk_framegen.cpp)

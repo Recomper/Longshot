@@ -36,7 +36,7 @@ def main():
     dpi = source.index("if (window_dpi(hwnd)", create)
     functions.append("static void create_window(void) {\n" + source[create:dpi] + "}\n")
     fixture = template.replace("/* ACTUAL_DISPLAY_STARTUP */", "\n".join(functions))
-    with tempfile.TemporaryDirectory(prefix="hookshot-display-startup-") as temp:
+    with tempfile.TemporaryDirectory(prefix="longshot-display-startup-") as temp:
         c_file, executable = Path(temp) / "fixture.c", Path(temp) / "fixture.exe"
         c_file.write_text(fixture, encoding="utf-8")
         if Path(args.cc).name.lower() in ("cl", "cl.exe"):

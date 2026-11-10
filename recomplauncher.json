@@ -1,8 +1,8 @@
 {
   "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
   "format": 1,
-  "name": "Hookshot",
-  "repo": "NotRexed/Hookshot",
+  "name": "Longshot",
+  "repo": "Recomper/Longshot",
   "game": {
     "kind": "iso_or_folder",
     "label": "Your copy of The Legend of Zelda: Ocarina of Time for Nintendo Switch 2, version 131072 (build e0f3ccfa): the .nup file, or the folder that holds its romfs and exefs.",
@@ -12,18 +12,18 @@
   },
   "start": {
     "program": [
-      "Hookshot.AppImage",
-      "HookshotBuilder.exe"
+      "Longshot.AppImage",
+      "LongshotBuilder.exe"
     ],
     "args": [
       "--play",
-      "{home}/Games/Hookshot"
+      "{home}/Games/Longshot"
     ]
   },
   "prepare": {
     "program": [
-      "Hookshot.AppImage",
-      "HookshotBuilder.exe"
+      "Longshot.AppImage",
+      "LongshotBuilder.exe"
     ],
     "args": [
       "--cli",
@@ -40,28 +40,28 @@
       "format": "ini",
       "file": [
         {
-          "path": "{home}/Games/Hookshot/hookshot_options.ini"
+          "path": "{home}/Games/Longshot/longshot_options.ini"
         }
       ]
     }
   ],
   "saves": [
-    "{local}/hookshot",
-    "{home}/Games/Hookshot/user"
+    "{local}/longshot",
+    "{home}/Games/Longshot/user"
   ],
   "folders": {
     "saves": [
       {
-        "path": "{home}/Games/Hookshot/user",
-        "if": "{home}/Games/Hookshot/user"
+        "path": "{home}/Games/Longshot/user",
+        "if": "{home}/Games/Longshot/user"
       },
       {
-        "path": "{local}/hookshot"
+        "path": "{local}/longshot"
       }
     ],
     "game": [
       {
-        "path": "{home}/Games/Hookshot"
+        "path": "{home}/Games/Longshot"
       }
     ]
   },

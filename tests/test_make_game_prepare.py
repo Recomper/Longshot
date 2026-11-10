@@ -55,7 +55,7 @@ class PrepareTests(unittest.TestCase):
     def test_prepare_defaults_the_out_folder(self):
         a = self.parse("--game", self.nup, "--prepare")
         self.assertTrue(make_game.PREPARE)
-        self.assertEqual(a.out, os.path.join(os.path.expanduser("~"), "Games", "Hookshot"))
+        self.assertEqual(a.out, os.path.join(os.path.expanduser("~"), "Games", "Longshot"))
         self.assertEqual(self.parse("--game", self.nup, "--prepare", "--out", "o").out, "o")
 
     def test_missing_game_is_an_error_line(self):
@@ -76,9 +76,9 @@ class PrepareTests(unittest.TestCase):
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             make_game.say("error", "The compile stopped.")
-            make_game.say("check", "ok", "This is the version Hookshot supports (build e0f3ccfa).")
+            make_game.say("check", "ok", "This is the version Longshot supports (build e0f3ccfa).")
         self.assertEqual(out.getvalue().splitlines(),
-                         ["error The compile stopped.", "check ok This is the version Hookshot supports (build e0f3ccfa)."])
+                         ["error The compile stopped.", "check ok This is the version Longshot supports (build e0f3ccfa)."])
         self.assertEqual(err.getvalue(), "")
 
     def test_progress_lines(self):

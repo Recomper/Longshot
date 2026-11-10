@@ -4,7 +4,7 @@
 
 semantic-release calls this from its prepare step with the version being released and the last release's tag. The
 commits after that tag are read from git and the entry is put at the top of changelog.txt. Only Conventional Commits
-that make a release are listed, so the changelog says what the version rules say. HOOKSHOT_RELEASE_DATE=YYYY-MM-DD
+that make a release are listed, so the changelog says what the version rules say. LONGSHOT_RELEASE_DATE=YYYY-MM-DD
 fixes the date, for a release job that runs again.
 
 A prerelease (`0.2.0-rc.1`) changes nothing: Factorio's parser accepts only `major.minor.patch` versions, and two
@@ -68,7 +68,7 @@ def bullet(scope, text):
 
 
 def date_line(value=None):
-    value = value or os.environ.get("HOOKSHOT_RELEASE_DATE", "").strip()
+    value = value or os.environ.get("LONGSHOT_RELEASE_DATE", "").strip()
     day = datetime.date.fromisoformat(value) if value else datetime.date.today()
     return "%02d. %02d. %04d" % (day.day, day.month, day.year)
 
@@ -129,7 +129,7 @@ def main():
     ap = argparse.ArgumentParser(description="Add the next version's entry to changelog.txt.")
     ap.add_argument("version", help="the version being released, without the v (0.2.0)")
     ap.add_argument("since", nargs="?", default="", help="the last release's tag (v0.1.0); every commit if omitted")
-    ap.add_argument("--date", help="YYYY-MM-DD; default today, or HOOKSHOT_RELEASE_DATE")
+    ap.add_argument("--date", help="YYYY-MM-DD; default today, or LONGSHOT_RELEASE_DATE")
     a = ap.parse_args()
     if not VERSION.match(a.version):
         ap.error("not a semantic version: %s" % a.version)

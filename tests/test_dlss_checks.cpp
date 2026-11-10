@@ -49,21 +49,21 @@ int main() {
     // ---- UTF-8 paths as NGX's wide strings, in the C locale (the decoding must not depend on it) ----
     std::setlocale(LC_ALL, "C");
     // (which paths NGX's Linux library takes as they are: ASCII only. The others go to it as /proc/self/fd/<n>)
-    CHECK("ASCII path", dc::ascii("/home/u/Games/Hookshot/ngx") && dc::ascii(""));
-    CHECK("accented path", !dc::ascii("/home/u/Games/Hookshot-Caf\xC3\xA9/ngx"));
+    CHECK("ASCII path", dc::ascii("/home/u/Games/Longshot/ngx") && dc::ascii(""));
+    CHECK("accented path", !dc::ascii("/home/u/Games/Longshot-Caf\xC3\xA9/ngx"));
     CHECK("CJK path", !dc::ascii("/g/\xE3\x82\xBC"));
     CHECK("a byte that is not UTF-8", !dc::ascii("/g/\xFF"));
     bool bad = false;
-    CHECK("ASCII", decode("/home/u/Games/Hookshot/ngx", bad) == L"/home/u/Games/Hookshot/ngx" && !bad);
-    CHECK("accented", decode("/home/u/Games/Hookshot-Caf\xC3\xA9/ngx", bad) == L"/home/u/Games/Hookshot-Café/ngx" && !bad);
+    CHECK("ASCII", decode("/home/u/Games/Longshot/ngx", bad) == L"/home/u/Games/Longshot/ngx" && !bad);
+    CHECK("accented", decode("/home/u/Games/Longshot-Caf\xC3\xA9/ngx", bad) == L"/home/u/Games/Longshot-Café/ngx" && !bad);
     CHECK("CJK", decode("/g/\xE3\x82\xBC\xE3\x83\xAB\xE3\x83\x80/ngx", bad) == L"/g/ゼルダ/ngx" && !bad);
     // (U+1F3AE: one wchar_t where it has 32 bits, a surrogate pair where it has 16, as on Windows)
     const std::wstring gamepad = sizeof(wchar_t) == 2 ? std::wstring{(wchar_t)0xD83C, (wchar_t)0xDFAE}
                                                       : std::wstring(1, (wchar_t)0x1F3AE);
     CHECK("four bytes", decode("/g/\xF0\x9F\x8E\xAE", bad) == L"/g/" + gamepad && !bad);
     CHECK("all together",
-          decode("/home/u/Games/Hookshot-dlss-utf8-Caf\xC3\xA9-\xE3\x82\xBC\xE3\x83\xAB\xE3\x83\x80/ngx", bad) ==
-              L"/home/u/Games/Hookshot-dlss-utf8-Café-ゼルダ/ngx" && !bad);
+          decode("/home/u/Games/Longshot-dlss-utf8-Caf\xC3\xA9-\xE3\x82\xBC\xE3\x83\xAB\xE3\x83\x80/ngx", bad) ==
+              L"/home/u/Games/Longshot-dlss-utf8-Café-ゼルダ/ngx" && !bad);
     // (the bug this replaces: each byte widened alone)
     const std::string cafe = "Caf\xC3\xA9";
     CHECK("the old widening was wrong", std::wstring(cafe.begin(), cafe.end()) != decode(cafe, bad));

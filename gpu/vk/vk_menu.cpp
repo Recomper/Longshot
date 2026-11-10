@@ -44,8 +44,8 @@
 #include "upscaler_rows.h"
 #include "menu_restart.h"
 #include "vk_work.h"   // (after the others: counts the commands that do GPU work, for full_barrier)
-#ifndef HOOKSHOT_VERSION   // (nx2/build.py gives it to this file: nx2/version.py)
-#define HOOKSHOT_VERSION "unknown"
+#ifndef LONGSHOT_VERSION   // (nx2/build.py gives it to this file: nx2/version.py)
+#define LONGSHOT_VERSION "unknown"
 #endif
 
 namespace mkwvk {
@@ -61,9 +61,9 @@ enum MenuTab {
     TAB_CONTROLS = 3,
     TAB_DEBUG = 4,   // (the OoT debug tools of #785, a tab of their own)
     TAB_COUNT = 5,
-    TAB_MOTION = TAB_COUNT,   // (hookshot: not a tab of the strip, the Motion page that the Controls tab's Motion row
+    TAB_MOTION = TAB_COUNT,   // (longshot: not a tab of the strip, the Motion page that the Controls tab's Motion row
                               // opens: one past the strip's tabs, so a tab added before TAB_COUNT moves it along)
-    TAB_PAGE = TAB_MOTION + 1   // (hookshot: the Controls page's rows, above its grid; no tab shows them)
+    TAB_PAGE = TAB_MOTION + 1   // (longshot: the Controls page's rows, above its grid; no tab shows them)
 };
 
 struct Row {
@@ -267,7 +267,7 @@ struct Out {
     uint32_t w, h;
 };
 // The Output resolution's choices: the sizes offered (0 the game's own), then, last, a size of the player's own from
-// hookshot_options.ini (output_res=<width>x<height>, host/nn_applet.c hos_output_parse: the same rules) when it is none of them.
+// longshot_options.ini (output_res=<width>x<height>, host/nn_applet.c hos_output_parse: the same rules) when it is none of them.
 // The ini keeps the size, not the choice's number: output_res=3840x2160
 constexpr Out kOutputs[] = {{2048, 1152}, {2560, 1440}, {3840, 2160}, {1920, 1080}, {5120, 1440}, {5120, 2880}};
 constexpr int kCustomOutput = std::size(kOutputs), kLastOutput = kCustomOutput;
@@ -431,7 +431,7 @@ size_t text_char_start(const std::string& text, size_t at) {
 }
 std::string mic_key(const char* name) {
     std::string k(name ? name : "");
-    for (char& c : k)   // (a device's name goes into hookshot_options.ini: a line break in it would add lines there)
+    for (char& c : k)   // (a device's name goes into longshot_options.ini: a line break in it would add lines there)
         if ((unsigned char)c < 0x20 || c == 0x7f) c = ' ';
     if (k.size() <= kMicNameKept) return k;
     return k.substr(0, text_char_start(k, kMicNameKept));
@@ -580,7 +580,7 @@ MENU_HINTS(hn_output_res, 0, "The game's own size.",
            "The sharpest on a 1920x1080 screen: the HUD and text pixel for pixel, nothing to scale to the window.",
            "The sharpest on a 5120x1440 ultrawide screen: the whole frame pixel for pixel. The game's render targets get a bigger GPU pool, so a full-size 3D fits.",
            "The sharpest on a 5120x2880 (5K) screen: the whole frame pixel for pixel. The game's render targets get a bigger GPU pool, so a full-size 3D fits.",
-           "Your own size, from output_res= in hookshot_options.ini.")
+           "Your own size, from output_res= in longshot_options.ini.")
 /// The Window scaling filter: its filter, or that none is needed at this window's size
 const char* hn_filter(int v, int variant) {
     static const char* const t[] = {"The plain copy.", "Sharper.", "Sharper still; can ring on edges."};
@@ -715,7 +715,7 @@ Row rows[] = {
      "What the ocarina hears when the game's microphone option is on (playing an instrument, or humming).", hn_mic, false,
      true},
     {TAB_GAMEPLAY, "Discord status", &opts.discord, 0, 1, 1, tx_onoff,
-     "Shows \"Playing Hookshot\" and the time played in your Discord status, while Discord runs on this PC.", nullptr, false,
+     "Shows \"Playing Longshot\" and the time played in your Discord status, while Discord runs on this PC.", nullptr, false,
      true},
 
     // Controls (12 rows; Motion opens the 6 TAB_MOTION rows, Controls its page with the 2 TAB_PAGE rows)
@@ -757,7 +757,7 @@ Row rows[] = {
     {TAB_MOTION, "Motion deadzone", &opts.gyro_deadzone, 0, 2, 1, tx_deadzone,
      "How slow a turn counts as none, the console's three settings: Standard is its own. High steadies a pad that jitters "
      "when held still; Low keeps the smallest movements.", nullptr, false, true},
-    {TAB_CONTROLS, "Motion", nullptr, 0, 0, 0, nullptr,   // (hookshot: opens the Motion page, the TAB_MOTION rows)
+    {TAB_CONTROLS, "Motion", nullptr, 0, 0, 0, nullptr,   // (longshot: opens the Motion page, the TAB_MOTION rows)
      "Motion controls: aiming with the controller's gyroscope, its sensitivity and its inverts."},
     // (hookshot) the Controls page's own rows, above its grid (TAB_PAGE: no tab shows them)
     {TAB_PAGE, "Layout preset", &opts.pad_layout, 0, 3, 1, tx_pad_layout,
@@ -765,7 +765,7 @@ Row rows[] = {
     {TAB_PAGE, "Button prompts", &opts.prompts, 0, HOS_PROMPT_N, 1, tx_prompts,
      "The button icons the game shows, in its texts and menus: those of this controller, for the buttons your controls "
      "put each action on.", hn_prompts, true, true},
-    {TAB_CONTROLS, "Controls", nullptr, 0, 0, 0, nullptr,   // (hookshot: opens its page)
+    {TAB_CONTROLS, "Controls", nullptr, 0, 0, 0, nullptr,   // (longshot: opens its page)
      "The layout preset, the button prompts, and which gamepad button and which keys press each of the Switch's "
      "buttons."},
     {TAB_CONTROLS, "Menu shortcut", &opts.menu_shortcut, 0, 1, 1, tx_menu_shortcut,
@@ -1067,7 +1067,7 @@ std::string ini_path() {
     char exe[MAX_PATH];
     const DWORD n = game_module_path(exe, MAX_PATH);
     std::string dir(exe, n);
-    return dir.substr(0, dir.find_last_of("\\/") + 1) + "hookshot_options.ini";
+    return dir.substr(0, dir.find_last_of("\\/") + 1) + "longshot_options.ini";
 }
 const char* ini_key(const Row& r) {
     if (r.value == &opts.output_res) return "output_res";   // (host/nn_applet.c reads it at the start)
@@ -1198,7 +1198,7 @@ void save() {
                 fprintf(f, "%s=%d\n", ini_key(r), *r.value);
             }
         }
-        if (!mic_want.empty()) fprintf(f, "microphone_device=%s\n", mic_want.c_str());   // (hookshot: also while it is unplugged)
+        if (!mic_want.empty()) fprintf(f, "microphone_device=%s\n", mic_want.c_str());   // (longshot: also while it is unplugged)
         // (2: game_speed below 2 was only ever the old default, see menu_init; 3: the mouse's buttons are bindings, see
         // host/nn_hid.c binds_load; 4: Descriptor reuse on by default, see menu_init and vk_draw.cpp desc_slotgen_on)
         fprintf(f, "options_version=4\n");
@@ -1243,7 +1243,7 @@ void set_row(Row& r, int v, int dir, bool keep = true) {
         }
     }
     if (r.value == &opts.mic && can_mic()) mic_chosen();   // (hookshot)
-    // (hookshot: the samplers made again, at once: their anisotropy, and the upscalers' LOD bias, vk_draw.cpp upscale_lod_bias)
+    // (longshot: the samplers made again, at once: their anisotropy, and the upscalers' LOD bias, vk_draw.cpp upscale_lod_bias)
     if (r.value == &opts.anisotropy || r.value == &opts.dlss || r.value == &opts.resolution || r.value == &opts.preset)
         samplers_changed();
     {   // (a row that takes a restart, or a preset that sets one: asked again at the next close)
@@ -1776,7 +1776,7 @@ void draw_options(ui::Ctx& c) {
     }
     {   // (which build, at the banner's left, so a report can say it without opening the log; the release alone when the whole
         // line would run into the tabs)
-        std::string ver = std::string("Hookshot ") + HOOKSHOT_VERSION;
+        std::string ver = std::string("Longshot ") + LONGSHOT_VERSION;
         const float room = (c.w - total) * 0.5f - 60 * s - c.safe;
         if (ui::size_of(c.f.body, 15 * s, ver.c_str()).x > room && ver.find(" (") != std::string::npos) ver.resize(ver.find(" ("));
         if (ui::size_of(c.f.body, 15 * s, ver.c_str()).x <= room) ui::text_mid(c, c.f.body, 15 * s, c.safe, ty, ui::kBannerInk, ver.c_str());
@@ -2375,7 +2375,7 @@ void draw_startup(ui::Ctx& c) {
     ImTextureData* logo = ui::logo(&aspect);
     if (logo) c.d->AddImage(logo->GetTexRef(), ImVec2(cx - lh * aspect * 0.5f, top), ImVec2(cx + lh * aspect * 0.5f, top + lh));
     float y = top + lh + 16 * s;
-    ui::spaced(c, c.f.heading, 42 * k, ImVec2(cx, y), ui::rgba(246, 232, 204), "HOOKSHOT", 6 * k);
+    ui::spaced(c, c.f.heading, 42 * k, ImVec2(cx, y), ui::rgba(246, 232, 204), "LONGSHOT", 6 * k);
     ui::flourish(c, cx - 190 * k, cx + 190 * k, y + 66 * k, ui::kAccent);
     ui::text_centre(c, c.f.body, 14.5f * k, ImVec2(cx, y + 78 * k), ui::kDim, v.version.c_str());
     if (!v.title.empty()) {
@@ -2426,7 +2426,7 @@ void startup_screen(const StartupView* view) {
         return;
     }
     StartupView v = *view;
-    if (v.version.empty()) v.version = version_text(HOOKSHOT_VERSION);   // ("v2.0.5"; "v2.0.5 dev" between releases)
+    if (v.version.empty()) v.version = version_text(LONGSHOT_VERSION);   // ("v2.0.5"; "v2.0.5 dev" between releases)
     {
         std::lock_guard lk(startup_mu);
         startup = v;
@@ -2466,7 +2466,7 @@ void menu_init() {
             v2 |= !strcmp(line, "options_version");
             if (!strcmp(line, "options_version")) version = atoi(eq + 1);
             if (!strcmp(line, "dynamic_resolution")) old_dynres = atoi(eq + 1);
-            if (!strcmp(line, "microphone_device")) {   // (hookshot: the microphone, by its name)
+            if (!strcmp(line, "microphone_device")) {   // (longshot: the microphone, by its name)
                 mic_want = mic_key(eq + 1);
                 while (!mic_want.empty() && (mic_want.back() == '\n' || mic_want.back() == '\r')) mic_want.pop_back();
             }

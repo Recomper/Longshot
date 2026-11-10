@@ -15,7 +15,7 @@ from unittest import mock
 # (Linux only)
 RUN_ALL_SKIP = {
     "windows": "the save script's folder discovery is the Linux one"
-               " (on Windows Hookshot's saves are in the game folder: --hookshot)",
+               " (on Windows Longshot's saves are in the game folder: --longshot)",
 }
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,7 +55,7 @@ class Case(unittest.TestCase):
         self.data = self.home / ".local" / "share"
         self.appdata = self.home / "AppData" / "Roaming"
         self.localappdata = self.home / "AppData" / "Local"
-        self.hs = self.data / "hookshot" / "save" / UID
+        self.hs = self.data / "longshot" / "save" / UID
         self.li = eden_save(self.data / "eden")
         make_save(self.hs, b"HS")
         make_save(self.li, b"LI", slots=("slot_00",))
@@ -89,7 +89,7 @@ class Discovery(Case):
         for program in oot.EMULATORS:
             folder, found = oot.locate(program, None, "--from")
             self.assertEqual(list(found.values()), [str(expect[program.name])], program.name)
-        self.assertEqual(oot.locate(oot.HOOKSHOT, None, "--hookshot")[1], {UID: str(self.hs)})
+        self.assertEqual(oot.locate(oot.LONGSHOT, None, "--longshot")[1], {UID: str(self.hs)})
 
     def test_every_entry_on_windows(self):
         win_li = eden_save(self.appdata / "eden")
@@ -103,11 +103,11 @@ class Discovery(Case):
             for program in oot.EMULATORS:
                 self.assertEqual(list(oot.locate(program, None, "--from")[1].values()), [str(expect[program.name])])
             with self.assertRaises(oot.Fail) as e:
-                oot.locate(oot.HOOKSHOT, None, "--hookshot")
-            self.assertIn("--hookshot", str(e.exception))
-            game = self.tmp / "Hookshot"
+                oot.locate(oot.LONGSHOT, None, "--longshot")
+            self.assertIn("--longshot", str(e.exception))
+            game = self.tmp / "Longshot"
             make_save(game / "user" / "save" / UID, b"W")
-            self.assertEqual(oot.locate(oot.HOOKSHOT, str(game), "--hookshot")[1], {UID: str(game / "user" / "save" / UID)})
+            self.assertEqual(oot.locate(oot.LONGSHOT, str(game), "--longshot")[1], {UID: str(game / "user" / "save" / UID)})
 
     def test_aliases_of_names(self):
         self.assertIs(oot.program_named("Fritchii"), oot.program_named("frizti"))
@@ -119,7 +119,7 @@ class Discovery(Case):
         for root in (data, data / "nand", data / "nand" / "user" / "save", self.li.parent.parent, self.li.parent,
                      self.li):
             self.assertEqual(oot.find_saves(str(root)), {PROFILE: str(self.li)}, root)
-        for root in (self.data / "hookshot", self.hs.parent, self.hs):
+        for root in (self.data / "longshot", self.hs.parent, self.hs):
             self.assertEqual(oot.find_saves(str(root)), {UID: str(self.hs)}, root)
 
     def test_empty_title_folder_is_a_target(self):
@@ -174,7 +174,7 @@ class Discovery(Case):
                      "Eglantine: nothing in"):
             self.assertIn(text, out)
 
-    def test_list_without_hookshot(self):
+    def test_list_without_longshot(self):
         (self.hs / "account.sav").unlink()
         for s in ("slot_00", "slot_01"):
             for f in (self.hs / s).iterdir():
@@ -182,7 +182,7 @@ class Discovery(Case):
             (self.hs / s).rmdir()
         code, out, err = self.run_main("list")
         self.assertEqual(code, 0, err)
-        self.assertIn("Hookshot: no Hookshot save found", out)
+        self.assertIn("Longshot: no Longshot save found", out)
         self.assertIn(PROFILE, out)
 
 
@@ -211,7 +211,7 @@ class Copy(Case):
         self.assertEqual(code, 0, err)
         self.assertEqual(tree(self.li), tree(self.hs))
         make_save(self.li / "slot_02", b"X", slots=())
-        code, out, err = self.run_main("to-hookshot", "--lichii", str(self.data / "eden"))
+        code, out, err = self.run_main("to-longshot", "--lichii", str(self.data / "eden"))
         self.assertEqual(code, 0, err)
         self.assertIn("slot_02", {Path(k).parts[0] for k in tree(self.hs)})
         names = [b.name for b in self.backup_dirs()]
@@ -298,7 +298,7 @@ class Copy(Case):
             with self.subTest(extra=extra), mock.patch.object(
                 oot.shutil, "copytree", side_effect=AssertionError("recursive backup copy started")
             ):
-                code, _, err = self.run_main("import", "--from", str(self.li), "--hookshot", str(self.hs), *extra)
+                code, _, err = self.run_main("import", "--from", str(self.li), "--longshot", str(self.hs), *extra)
                 self.assertEqual(code, 1)
                 self.assertIn("--backup-dir outside the target save folder", err)
                 self.assertFalse(self.backups.exists())
@@ -365,11 +365,11 @@ class NX2navi(Case):
 
 class Guard(Case):
     def test_refuses_while_running(self):
-        self.running.return_value = ["Hookshot"]
+        self.running.return_value = ["Longshot"]
         before = (tree(self.hs), tree(self.li))
         code, out, err = self.run_main("export", "lichii")
         self.assertEqual(code, 1)
-        self.assertIn("Hookshot", err)
+        self.assertIn("Longshot", err)
         self.assertEqual((tree(self.hs), tree(self.li)), before)
         self.assertEqual(self.backup_dirs(), [])
 
@@ -388,7 +388,7 @@ class Guard(Case):
     def test_every_process_name_on_windows(self):
         real = self.real()
         names = real.process_names()
-        for program in [real.HOOKSHOT] + real.EMULATORS:
+        for program in [real.LONGSHOT] + real.EMULATORS:
             self.assertTrue(program.processes, program.name)
             for p in program.processes:
                 self.assertIn(program.display, names[p])

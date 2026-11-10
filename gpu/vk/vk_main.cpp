@@ -38,7 +38,7 @@ VKX_DEVICE3(VKX_DEFINE)
 static PFN_vkGetInstanceProcAddr get_instance_proc;
 
 bool load_global() {
-#ifdef _WIN32   // (hookshot: the loader from System32 only, not from the current folder or PATH)
+#ifdef _WIN32   // (longshot: the loader from System32 only, not from the current folder or PATH)
     HMODULE m = LoadLibraryExA("vulkan-1.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
 #else
     HMODULE m = LoadLibraryA("vulkan-1.dll");   // (linux: libvulkan.so.1, host/posix/win32_posix.c)
@@ -255,12 +255,12 @@ bool create_device() {
         optional(VK_AMD_BUFFER_MARKER_EXTENSION_NAME, dev.buffer_marker);
     optional(VK_EXT_DEVICE_FAULT_EXTENSION_NAME, dev.device_fault);
     optional(VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME, dev.coop_matrix);
-    optional(VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME, dev.swap_mutable);   // (hookshot: the overlays, vk_imgui.cpp)
-    dlss_device_extensions(want, exts);   // (hookshot: NVIDIA DLSS's, vk_dlss.cpp)
-    bool fsr_descriptor_buffer = false;   // (hookshot, linux: only with a Vulkan FSR 4 library beside the game, vk_fsr4.cpp)
+    optional(VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME, dev.swap_mutable);   // (longshot: the overlays, vk_imgui.cpp)
+    dlss_device_extensions(want, exts);   // (longshot: NVIDIA DLSS's, vk_dlss.cpp)
+    bool fsr_descriptor_buffer = false;   // (longshot, linux: only with a Vulkan FSR 4 library beside the game, vk_fsr4.cpp)
     if (fsr4_wants_descriptor_buffer()) optional(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME, fsr_descriptor_buffer);
-    reflex_device_extensions(want, exts);   // (hookshot: NVIDIA Reflex's, vk_reflex.cpp)
-    antilag_device_extensions(want, exts);   // (hookshot: AMD Anti-Lag 2's, vk_antilag.cpp)
+    reflex_device_extensions(want, exts);   // (longshot: NVIDIA Reflex's, vk_reflex.cpp)
+    antilag_device_extensions(want, exts);   // (longshot: AMD Anti-Lag 2's, vk_antilag.cpp)
 
     // the queue: one family for graphics, compute and transfer
     vkGetPhysicalDeviceQueueFamilyProperties(dev.physical, &n, nullptr);
@@ -353,14 +353,14 @@ bool create_device() {
     // (bounds-checked buffer access: an out-of-range access dropped instead of faulting the device. On by default: the GPU
     // culling pass 53caac5f faulted the device while a save loaded, about one start in three, and the scene's lighting read garbage
     // for single frames (the black flashes); with it, neither in A/B runs at the same GPU time. Lichii's OoT branch keeps it on too.
-    // The 'Robust buffers' row of hookshot_options.ini chooses (0 Auto: on, on every vendor; 1 Off; 2 On); RX_VK_ROBUST=0 or 1
+    // The 'Robust buffers' row of longshot_options.ini chooses (0 Auto: on, on every vendor; 1 Off; 2 On); RX_VK_ROBUST=0 or 1
     // over it. Off is null descriptors only: some NVIDIA cards ran slower with it on, issues 394, 418, 419)
     static const bool robust = []() -> bool {
         if (const char* e = getenv("RX_VK_ROBUST")) return atoi(e) != 0;
         char exe[MAX_PATH];
         const DWORD n = game_module_path(exe, MAX_PATH);   // (the game folder, not bin beside the launcher: vk_paths.h)
         std::string ini(exe, n);
-        ini = ini.substr(0, ini.find_last_of("\\/") + 1) + "hookshot_options.ini";
+        ini = ini.substr(0, ini.find_last_of("\\/") + 1) + "longshot_options.ini";
         int v = 0;   // (Auto)
         if (FILE* f = fopen(ini.c_str(), "r")) {
             char line[80];
@@ -397,9 +397,9 @@ bool create_device() {
     dev.eds3_a2c = dev.dynamic_state3 && eds3.extendedDynamicState3AlphaToCoverageEnable;
     dev.vk12 = f12;
     dev.vk13 = f13;
-    {   // (hookshot, after TotK Recomp's vk_caps.c) NVN's programs are written for 32 lanes: the translator is told 32, and the lane
+    {   // (longshot, after TotK Recomp's vk_caps.c) NVN's programs are written for 32 lanes: the translator is told 32, and the lane
         // shuffles of OoT's networks and the lane masks of its mesh programs depend on it. NVIDIA's GPUs have no other size; AMD's
-        // default to 64 where they like, and the networks' output came out as coloured noise (Hookshot issues 10 and 14)
+        // default to 64 where they like, and the networks' output came out as coloured noise (Longshot issues 10 and 14)
         VkPhysicalDeviceDriverProperties drv{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
         VkPhysicalDeviceSubgroupSizeControlProperties sc{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES};
         sc.pNext = &drv;
@@ -425,7 +425,7 @@ bool create_device() {
     // (task and mesh shader counts in pipeline statistics, a feature of their own: RADV has it off on RDNA2, and a query
     // pool made with those counts all the same can hang the GPU)
     dev.mesh_queries = dev.mesh_shader && mesh.meshShaderQueries;
-    // (hookshot, issue 640) RDNA1 and older GPUs: no mesh shaders, but task and mesh programs run as compute shaders
+    // (longshot, issue 640) RDNA1 and older GPUs: no mesh shaders, but task and mesh programs run as compute shaders
     // that write their vertices to buffers, drawn through an ordinary graphics pipeline. It needs buffer device addresses.
     dev.mesh_fallback = !dev.mesh_shader && f12.bufferDeviceAddress && !getenv("RX_VK_NO_MESH_FALLBACK");
     if (dev.mesh_fallback) logf("vk: no mesh shaders: task and mesh programs run as compute shaders (issue 640 fallback)");
@@ -589,7 +589,7 @@ bool create_swapchain(uint32_t width, uint32_t height) {
     }
     VkSwapchainCreateInfoKHR ci{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
     ci.surface = dev.surface;
-    ci.minImageCount = std::max(caps.minImageCount, 4u);   // (hookshot: mailbox with frame interpolation: an image always free)
+    ci.minImageCount = std::max(caps.minImageCount, 4u);   // (longshot: mailbox with frame interpolation: an image always free)
     if (caps.maxImageCount) ci.minImageCount = std::min(ci.minImageCount, caps.maxImageCount);
     ci.imageFormat = fmt.format;
     ci.imageColorSpace = fmt.colorSpace;
@@ -638,7 +638,7 @@ bool create_swapchain(uint32_t width, uint32_t height) {
     if (dev.swapchain) {
         device_wait_idle_locked();   // (the present queue's presents of the old swapchain done too)
         reflex_swapchain_destroyed();   // (no latency sleep or markers may use the destroyed chain)
-        swap_views_drop();   // (hookshot: the overlays' views of its images, before it)
+        swap_views_drop();   // (longshot: the overlays' views of its images, before it)
         for (auto semaphore : dev.swap_rendered) vkDestroySemaphore(dev.device, semaphore, nullptr);
         vkDestroySwapchainKHR(dev.device, dev.swapchain, nullptr);
         dev.swapchain = VK_NULL_HANDLE;
@@ -687,15 +687,15 @@ bool create_swapchain(uint32_t width, uint32_t height) {
 namespace {
 
 HWND main_window = nullptr;
-// (hookshot) hookshot --prepare-shaders (a builder, after a build): the same work with no game, its progress as
-// "@@progress" lines on stdout. A skip there leaves hookshot_prepare_skipped beside the game: its own starts then
+// (hookshot) longshot --prepare-shaders (a builder, after a build): the same work with no game, its progress as
+// "@@progress" lines on stdout. A skip there leaves longshot_prepare_skipped beside the game: its own starts then
 // leave the work out too (what was not prepared is built when first drawn), until a --prepare-shaders run ends it
-bool prepare_only() { return getenv("HOOKSHOT_PREPARE_ONLY") != nullptr; }
+bool prepare_only() { return getenv("LONGSHOT_PREPARE_ONLY") != nullptr; }
 std::string skipped_path() {
     char exe[MAX_PATH];
     const DWORD n = game_module_path(exe, MAX_PATH);
     std::string path(exe, n);
-    return path.substr(0, path.find_last_of("\\/") + 1) + "hookshot_prepare_skipped";
+    return path.substr(0, path.find_last_of("\\/") + 1) + "longshot_prepare_skipped";
 }
 // (hookshot) The first start after an update prepares every shader (prepare_run) and the pipelines the last sessions noted
 // (precompile_run): a minute and more, before the game's first frame. They run on a thread of their own while this one, the
@@ -889,7 +889,7 @@ bool started_up() {
                         CloseHandle(input);
                     }
 #endif
-                    SetConsoleTitleA("Hookshot");
+                    SetConsoleTitleA("Longshot");
                     console = CreateFileA("CONOUT$", GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
                     if (console == INVALID_HANDLE_VALUE) console = nullptr;
                 }
@@ -1053,10 +1053,10 @@ const MkwVkRenderer* mkwvk_init(const MkwVkHost* h) {
 #ifdef _WIN32
         std::thread([name = std::string(dev.props.deviceName)] {
             const std::string text = "Your graphics card (" + name + ") or its driver has no mesh shader support, which Ocarina of Time "
-                "uses for foliage, grass and many effects, so parts of the picture will be missing or broken.\n\nHookshot needs a GPU "
+                "uses for foliage, grass and many effects, so parts of the picture will be missing or broken.\n\nLongshot needs a GPU "
                 "with mesh shaders: NVIDIA GeForce RTX 20 series or newer, AMD Radeon RX 6000 series or newer, or Intel Arc. If your "
                 "card is one of those, update its driver.";
-            MessageBoxA(nullptr, text.c_str(), "Hookshot: graphics card", MB_OK | MB_ICONWARNING | MB_TOPMOST);
+            MessageBoxA(nullptr, text.c_str(), "Longshot: graphics card", MB_OK | MB_ICONWARNING | MB_TOPMOST);
         }).detach();
 #endif
     }
@@ -1069,7 +1069,7 @@ const MkwVkRenderer* mkwvk_init(const MkwVkHost* h) {
 }
 
 namespace mkwvk {
-HWND app_window() { return main_window; }   // (hookshot: the Insert menu's Fullscreen row)
+HWND app_window() { return main_window; }   // (longshot: the Insert menu's Fullscreen row)
 
 /// (hookshot) The refresh rate of the display the window is on, in mHz; 0 when not known (frame generation's Auto). Asked
 /// again once a second at most: the window may move to another display, and Windows' answer costs a few system calls

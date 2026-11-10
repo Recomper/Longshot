@@ -1,6 +1,6 @@
 # Versioning and releases
 
-Hookshot follows [Semantic Versioning 2.0.0](https://semver.org/) and the conventions of
+Longshot follows [Semantic Versioning 2.0.0](https://semver.org/) and the conventions of
 [semantic-release](https://semantic-release.org/). The current version is **0.1.0**.
 
 The git tag is the only source of truth. No file carries a version that has to be edited for a release: the game reads
@@ -12,13 +12,13 @@ packaged.
 `MAJOR.MINOR.PATCH`, with an optional prerelease suffix: `0.1.0`, `0.2.0`, `0.2.0-rc.1`. A release is tagged
 `v0.1.0`: the `v` belongs to the tag, not to the version. Build metadata is not used in tags.
 
-One version covers the whole project: the game (`hookshot.exe` / `hookshot`), the Vulkan back end, the lift pipeline
-and its scripts, Hookshot Builder and the Linux AppImage. They are built from the same commit and released together,
+One version covers the whole project: the game (`longshot.exe` / `longshot`), the Vulkan back end, the lift pipeline
+and its scripts, Longshot Builder and the Linux AppImage. They are built from the same commit and released together,
 so they never carry different versions.
 
 The "public" surface the rules protect is the command line of `make_game.py` and the builder, the `RX_` and `HOS_`
-switches, the files a build writes into a game folder (`hookshot_options.ini`, `hookshot_env.txt`, `language.txt`,
-`hookshot_version.txt`), saves, and the format of `hookshot_log.txt`. The C sources and internal headers are not an
+switches, the files a build writes into a game folder (`longshot_options.ini`, `longshot_env.txt`, `language.txt`,
+`longshot_version.txt`), saves, and the format of `longshot_log.txt`. The C sources and internal headers are not an
 API and may change in any release.
 
 ## Commits decide the version
@@ -60,7 +60,7 @@ semantic-release does not treat major version zero specially: a breaking change 
 This is deliberate. Its documentation says that SemVer's different rules for `0.x` are out of scope, and it recommends
 `1.0.0` as the first release.
 
-Hookshot starts at `0.1.0` anyway, because the first versioned release is not stable. That tag is made once by hand
+Longshot starts at `0.1.0` anyway, because the first versioned release is not stable. That tag is made once by hand
 (see below); after it, the release workflow is the only thing that creates tags. Consequence: the first breaking change
 merged to `main` releases `1.0.0`, not `0.2.0`.
 
@@ -81,8 +81,8 @@ Every push to `main` or `next` runs the [Release workflow](../.github/workflows/
 3. runs `scripts/changelog.py` to put the new entry at the top of `changelog.txt`;
 4. commits `changelog.txt` as `chore(release): <version> [skip ci] [skip release]`;
 5. tags the release commit. The tag starts the Linux AppImage and Windows builder workflows: the first to finish makes
-   the GitHub release, and each attaches its files (the AppImage; `HookshotBuilder.exe`, the setup, and
-   `hookshot-setup.txt`, with the new parts in the `builder-parts` release). `scripts/release_upload.sh` is shared by both.
+   the GitHub release, and each attaches its files (the AppImage; `LongshotBuilder.exe`, the setup, and
+   `longshot-setup.txt`, with the new parts in the `builder-parts` release). `scripts/release_upload.sh` is shared by both.
 
 A merge with no releasable commit (only docs, chores, and so on) makes no release. A release is never edited by hand,
 never re-tagged and never deleted. Require the *Game-free source regressions* workflow on `main` and `next` (branch
@@ -100,7 +100,7 @@ semantic-release's first release is `1.0.0` when it finds no tag. To make `0.1.0
 commit that introduces this scheme once:
 
 ```sh
-git tag -a v0.1.0 -m "Hookshot 0.1.0"
+git tag -a v0.1.0 -m "Longshot 0.1.0"
 git push origin v0.1.0
 ```
 
@@ -134,10 +134,10 @@ patch. The project does not keep maintenance branches for older minor versions: 
 |---|---|
 | git tag | semantic-release; the source of truth |
 | `changelog.txt` | `scripts/changelog.py` during the release |
-| `hookshot_log.txt` and the Insert menu | `nx2/version.py`: `HOOKSHOT_VERSION`, then `VERSION`/`version.txt`, then `git describe --tags --match "v[0-9]*"` |
-| `hookshot_version.txt` in a build | the `VERSION` file written when the tools are packaged (`nx2/make_game.py`) |
+| `longshot_log.txt` and the Insert menu | `nx2/version.py`: `LONGSHOT_VERSION`, then `VERSION`/`version.txt`, then `git describe --tags --match "v[0-9]*"` |
+| `longshot_version.txt` in a build | the `VERSION` file written when the tools are packaged (`nx2/make_game.py`) |
 | AppImage file name | `git describe --tags --match "v[0-9]*"` (`scripts/linux/appimage.sh`) |
-| `HookshotBuilder.exe` | the MSBuild `Version` passed at publish time (`dotnet publish -p:Version=<version>`, the Windows builder workflow); the `csproj`'s `0.1.0` is only the default for a local build |
+| `LongshotBuilder.exe` | the MSBuild `Version` passed at publish time (`dotnet publish -p:Version=<version>`, the Windows builder workflow); the `csproj`'s `0.1.0` is only the default for a local build |
 
 `nx2/version.py` also appends a fingerprint of the source files, `(source 1a2b3c4d)`. It is not a version: it tells
 two builds of the same release apart, and it is the only identifier a build from a modified checkout has.

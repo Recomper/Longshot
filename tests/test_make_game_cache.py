@@ -16,7 +16,7 @@ import unittest
 from unittest import mock
 
 
-SOURCE = Path(os.environ.get("HOOKSHOT_CACHE_TEST_SOURCE", Path(__file__).resolve().parents[1] / "nx2" / "make_game.py"))
+SOURCE = Path(os.environ.get("LONGSHOT_CACHE_TEST_SOURCE", Path(__file__).resolve().parents[1] / "nx2" / "make_game.py"))
 spec = importlib.util.spec_from_file_location("make_game_under_test", SOURCE)
 make_game = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(make_game)
@@ -35,7 +35,7 @@ def module_bytes(supported=True, payload=b"new authored module"):
 
 class NupCacheTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="hookshot-cache-test-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="longshot-cache-test-")
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.out = self.root / "output"
@@ -49,9 +49,9 @@ class NupCacheTests(unittest.TestCase):
         self.new_nup.write_bytes(b"new authored input of a different size")
         (self.out / "romfs").mkdir()
         (self.out / "romfs" / "asset.txt").write_bytes(b"old authored assets")
-        (self.out / ".hookshot_exefs").mkdir()
-        (self.out / ".hookshot_exefs" / "main").write_bytes(module_bytes(payload=b"old authored module"))
-        self.marker = self.out / ".hookshot_romfs"
+        (self.out / ".longshot_exefs").mkdir()
+        (self.out / ".longshot_exefs" / "main").write_bytes(module_bytes(payload=b"old authored module"))
+        self.marker = self.out / ".longshot_romfs"
         self.marker.write_text(self.stamp(self.old_nup) + "\n")
         save = self.out / "user" / "save"
         save.mkdir(parents=True)
@@ -175,9 +175,9 @@ class NupCacheTests(unittest.TestCase):
         self.assertEqual(self.extractions, [])
         after = self.cache()
         # (the one file added: the damaged-texture check's note that this unpack was checked, nup.stand_in_damaged)
-        self.assertEqual(after.pop(".hookshot_romfs_checked", None), before[".hookshot_romfs"])
+        self.assertEqual(after.pop(".longshot_romfs_checked", None), before[".longshot_romfs"])
         self.assertEqual(after, before)
-        self.assertEqual((scratch / "main").read_bytes(), (self.out / ".hookshot_exefs/main").read_bytes())
+        self.assertEqual((scratch / "main").read_bytes(), (self.out / ".longshot_exefs/main").read_bytes())
 
     def test_changed_source_replaces_romfs_and_exefs_together(self):
         with self.assertRaises(Prepared):
@@ -185,7 +185,7 @@ class NupCacheTests(unittest.TestCase):
         self.assertEqual(self.extractions, [self.new_nup])
         self.assertEqual((self.out / "romfs" / "asset.txt").read_bytes(), b"new authored assets")
         self.assertTrue((self.out / "romfs" / "new-only.txt").is_file())
-        self.assertEqual((self.out / ".hookshot_exefs" / "main").read_bytes(), module_bytes())
+        self.assertEqual((self.out / ".longshot_exefs" / "main").read_bytes(), module_bytes())
         self.assertEqual(self.marker.read_text(), self.stamp(self.new_nup) + "\n")
         self.assertEqual((self.out / "user/save/sentinel.txt").read_bytes(), b"authored save sentinel")
 
@@ -196,10 +196,10 @@ class NupCacheTests(unittest.TestCase):
         self.assertEqual(self.extractions, [])
         after = self.cache()
         # (the one file added: the damaged-texture check's note that this unpack was checked, nup.stand_in_damaged)
-        self.assertEqual(after.pop(".hookshot_romfs_checked", None), before[".hookshot_romfs"])
+        self.assertEqual(after.pop(".longshot_romfs_checked", None), before[".longshot_romfs"])
         self.assertEqual(after, before)
         self.assertEqual((self.work / "exefs/main").read_bytes(),
-                         (self.out / ".hookshot_exefs/main").read_bytes())
+                         (self.out / ".longshot_exefs/main").read_bytes())
 
     def test_failed_extraction_preserves_the_previous_cache_and_save(self):
         before = self.cache()
@@ -218,7 +218,7 @@ class NupCacheTests(unittest.TestCase):
             self.run_to_lift(self.new_nup, supported=False)
         self.assertEqual(self.extractions, [self.new_nup])
         self.assertEqual(result.exception.code, 1)
-        self.assertIn("This is build 01234567. Hookshot supports build %s." % make_game.BUILD_ID, self.output)
+        self.assertIn("This is build 01234567. Longshot supports build %s." % make_game.BUILD_ID, self.output)
         self.assertEqual(self.cache(), before)
         self.assertFalse((self.out / ".game").exists())
 
@@ -268,7 +268,7 @@ class NupCacheTests(unittest.TestCase):
 
 class RomfsCopyTests(unittest.TestCase):
     def test_interrupted_cross_volume_copy_can_be_retried(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-romfs-copy-") as folder:
+        with tempfile.TemporaryDirectory(prefix="longshot-romfs-copy-") as folder:
             src, dst = Path(folder) / "source", Path(folder) / "destination"
             src.mkdir()
             dst.mkdir()
@@ -295,7 +295,7 @@ class RomfsCopyTests(unittest.TestCase):
             self.assertEqual({p.name for p in dst.iterdir()}, {"asset.bin", "existing.bin"})
 
     def test_failed_replacement_removes_the_staged_read_only_copy(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-romfs-replace-") as folder:
+        with tempfile.TemporaryDirectory(prefix="longshot-romfs-replace-") as folder:
             src, dst = Path(folder) / "source", Path(folder) / "destination"
             src.mkdir()
             source = src / "asset.bin"
@@ -311,7 +311,7 @@ class RomfsCopyTests(unittest.TestCase):
 
     def test_links_in_an_extracted_dump_are_refused(self):
         # (a link in --romfs or --exefs was followed: the file it named was hard-linked or copied into the game folder)
-        with tempfile.TemporaryDirectory(prefix="hookshot-dump-links-") as folder:
+        with tempfile.TemporaryDirectory(prefix="longshot-dump-links-") as folder:
             src, secret = Path(folder) / "romfs", Path(folder) / "secret"
             (src / "Model").mkdir(parents=True)
             (src / "Model" / "a.zs").write_bytes(b"game data")

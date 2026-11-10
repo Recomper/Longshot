@@ -56,13 +56,13 @@ typedef struct { uint8_t *rgba, *nv12; int w, h; int64_t pts; int last; } Pictur
 /* a submission waiting to be decoded (pkt NULL: the stream's end) */
 typedef struct Pending { AVPacket *pkt; struct Pending *next; } Pending;
 #ifdef _WIN32
-/* (hookshot, issue 380) once, when Windows has no AV1 decoder: OoT's movies are AV1, and Windows decodes it only with
+/* (longshot, issue 380) once, when Windows has no AV1 decoder: OoT's movies are AV1, and Windows decodes it only with
    Microsoft's free "AV1 Video Extension" (preinstalled on most PCs, not all). Yes opens its Store page */
 static DWORD WINAPI av1_notice(LPVOID unused) {
     (void)unused;
     if (MessageBoxA(NULL, "The game's movies need Microsoft's free \"AV1 Video Extension\", which this PC doesn't have, so they "
                           "show black (the sound plays).\n\nOpen its page in the Microsoft Store now? Install it, then start the game again.",
-                    "Hookshot", MB_YESNO | MB_ICONINFORMATION | MB_SETFOREGROUND) == IDYES)
+                    "Longshot", MB_YESNO | MB_ICONINFORMATION | MB_SETFOREGROUND) == IDYES)
         ShellExecuteA(NULL, "open", "ms-windows-store://pdp/?ProductId=9MVZQVXJBQ9V", NULL, NULL, SW_SHOWNORMAL);
     return 0;
 }
@@ -166,7 +166,7 @@ HLE(_ZN2nn5codec26InitializeDecoderImagePoolEPNS0_25VideoDecoderImagePoolTypeEPv
     o->format = p->magic == PREF_MAGIC ? (int)p->format : 2;
     o->count = (int)ARG(4) > 0 ? (int)ARG(4) : 1;
     o->rgba = (uint8_t *)calloc((size_t)o->count, (size_t)o->w * o->h * 4);
-    /* (hookshot, issue 342: an allocation that failed went on as a NULL picture, and the movie thread read address 0) */
+    /* (longshot, issue 342: an allocation that failed went on as a NULL picture, and the movie thread read address 0) */
     o->nv12 = (uint8_t *)calloc((size_t)o->count, (size_t)o->w * o->h * 3 / 2);
     /* (hookshot) video black, not zeros. A buffer the game takes before the decoder's first picture is shown as it is
        (dec_acquire: "nothing decoded, the buffer again", up to ~100 ms into a movie's start), and NV12 zeros are bright
@@ -217,7 +217,7 @@ HLE(_ZN2nn5codec26ReadDecoderOutputImageRgbaEPKNS0_25VideoDecoderImagePoolTypeEj
     Pool *o = (Pool *)host_of(ARG(0), POOL_MAGIC);
     const uint32_t i = (uint32_t)ARG(1), x = (uint16_t)ARG(2), y = (uint16_t)ARG(3), w = (uint16_t)ARG(4), h = (uint16_t)ARG(5);
     const uint64_t dst = ARG(6), stride = ARG(7) ? ARG(7) : (uint64_t)w * 4;
-    {   /* (hookshot, HOS_VIDEO_LOG) the first reads, with where they go */
+    {   /* (longshot, HOS_VIDEO_LOG) the first reads, with where they go */
         static volatile LONG n;
         if (video_log() && InterlockedIncrement(&n) <= 4)
             hos_log("video: ReadDecoderOutputImageRgba(pool %s, index %u, %u,%u %ux%u, dst %#llx stride %llu)",
@@ -229,7 +229,7 @@ HLE(_ZN2nn5codec26ReadDecoderOutputImageRgbaEPKNS0_25VideoDecoderImagePoolTypeEj
     const uint8_t *src = o->rgba + (size_t)i * o->w * o->h * 4;
     const uint32_t cw = x + w <= (uint32_t)o->w ? w : o->w - x;
     for (uint32_t r = 0; r < h && y + r < (uint32_t)o->h; r++) {
-        void *row = hos_guest_range(dst + r * stride, (size_t)cw * 4);   /* (hookshot: only into guest memory) */
+        void *row = hos_guest_range(dst + r * stride, (size_t)cw * 4);   /* (longshot: only into guest memory) */
         if (row) memcpy(row, src + ((size_t)(y + r) * o->w + x) * 4, (size_t)cw * 4);
     }
     HOS_WRITTEN(GP(dst), (size_t)(h ? h - 1 : 0) * stride + (size_t)cw * 4);   /* (the game may give it to the GPU) */
@@ -261,7 +261,7 @@ HLE(_ZN2nn5codec26ReadDecoderOutputImageNv12EPKNS0_25VideoDecoderImagePoolTypeEj
     const uint8_t *yp = o->nv12 + (size_t)i * o->w * o->h * 3 / 2, *uvp = yp + (size_t)o->w * o->h;
     const uint32_t cw = x + w <= (uint32_t)o->w ? w : o->w - x;
     for (uint32_t r = 0; ydst && r < h && y + r < (uint32_t)o->h; r++) {
-        void *row = hos_guest_range(ydst + r * ystride, cw);   /* (hookshot: only into guest memory) */
+        void *row = hos_guest_range(ydst + r * ystride, cw);   /* (longshot: only into guest memory) */
         if (row) memcpy(row, yp + (size_t)(y + r) * o->w + x, cw);
     }
     for (uint32_t r = 0; uvdst && r < h / 2 && y / 2 + r < (uint32_t)o->h / 2; r++) {
@@ -297,7 +297,7 @@ static void dec_init_sized(Ctx *c, enum AVCodecID id, const char *what, int w, i
         static volatile LONG told;
         if (!InterlockedExchange(&told, 1)) {
             hos_log("video: no AV1 decoder: install Microsoft's free AV1 Video Extension for the movies");
-            if (!getenv("HOS_HEADLESS") && !getenv("HOOKSHOT_NO_AV1_NOTICE"))
+            if (!getenv("HOS_HEADLESS") && !getenv("LONGSHOT_NO_AV1_NOTICE"))
                 CreateThread(NULL, 0, av1_notice, NULL, 0, NULL);
         }
     }
@@ -348,7 +348,7 @@ static void queue_frame(Dec *d, const AVFrame *f) {
     }
     Picture p = {0};
     p.w = w, p.h = h, p.pts = f->pts;
-    const int nv12 = f->format == AV_PIX_FMT_NV12;   /* (hookshot: Media Foundation's pictures, kept as NV12 alone) */
+    const int nv12 = f->format == AV_PIX_FMT_NV12;   /* (longshot: Media Foundation's pictures, kept as NV12 alone) */
     p.rgba = nv12 ? NULL : (uint8_t *)malloc((size_t)w * h * 4);
     p.nv12 = nv12 ? (uint8_t *)malloc((size_t)w * h * 3 / 2) : (uint8_t *)calloc(1, (size_t)w * h * 3 / 2);
     if (!p.nv12 || (!nv12 && !p.rgba)) {   /* (out of memory: this frame is dropped, not written through NULL; issue 342) */
@@ -658,7 +658,7 @@ static void dec_acquire(Ctx *c) {
         const size_t nv12_size = (size_t)o->w * o->h * 3 / 2, rgba_size = (size_t)o->w * o->h * 4;
         const int rgba = o->format != 0 && o->mem_size >= rgba_size;   /* (VideoDecoderOutputFormat 0: NV12) */
         const size_t need = rgba ? rgba_size : nv12_size;
-        void *to = hos_guest_range(o->mem, need);   /* (hookshot: only into guest memory) */
+        void *to = hos_guest_range(o->mem, need);   /* (longshot: only into guest memory) */
         if (o->mem_size >= need && ok && to && (rgba ? o->rgba != NULL : 1)) {
             if (rgba && o->rgba_stale) pool_rgba(o);
             memcpy(to, rgba ? o->rgba : o->nv12, need);

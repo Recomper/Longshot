@@ -111,7 +111,7 @@ int main() {
  return failures?1:0;
 }
 '''
-    with tempfile.TemporaryDirectory(prefix='hookshot-bank-reader-') as tmp:
+    with tempfile.TemporaryDirectory(prefix='longshot-bank-reader-') as tmp:
         src = Path(tmp) / 'check.cpp'
         exe = Path(tmp) / ('check.exe' if os.name == 'nt' else 'check')
         src.write_text(prelude + extracted + checks, encoding='utf-8')

@@ -98,7 +98,7 @@ static void WaitForSingleObject(HANDLE h, unsigned timeout) {
     require(h == &game_token && timeout == INFINITE, "changed game-thread wait");
     ++waited;
 }
-static void load_hookshot_env() {}
+static void load_longshot_env() {}
 
 #include "display_startup_actual.inc"
 

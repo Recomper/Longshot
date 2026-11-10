@@ -1,6 +1,6 @@
-"""The Python Hookshot Builder's download: one zip with python.org's own Python (python.exe and pythonw.exe, signed by the Python
+"""The Python Longshot Builder's download: one zip with python.org's own Python (python.exe and pythonw.exe, signed by the Python
 Software Foundation), Qt for Python's DLLs (signed by The Qt Company), the builder's code (builder/py) and the .bat that starts it.
-Nothing in it is an executable of Hookshot's own.
+Nothing in it is an executable of Longshot's own.
 
     python -I scripts/make_py_builder.py --python <python folder> --qt <PySide6 site folder> --tag <tag> <out zip>
 
@@ -12,15 +12,15 @@ import os
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TOP = "Hookshot Builder"
+TOP = "Longshot Builder"
 QT_KEEP_DLLS = ("Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Svg.dll", "pyside6.abi3.dll", "msvcp140.dll", "msvcp140_1.dll",
                 "msvcp140_2.dll", "vcruntime140.dll", "vcruntime140_1.dll", "concrt140.dll")
 QT_KEEP_PY = ("QtCore.pyd", "QtGui.pyd", "QtWidgets.pyd", "__init__.py", "_config.py", "_git_pyside_version.py")
 QT_PLUGINS = ("platforms/qwindows.dll", "imageformats/qico.dll", "imageformats/qjpeg.dll", "imageformats/qsvg.dll",
               "styles/qmodernwindowsstyle.dll")
 BAT = ('@echo off\r\n'
-       'rem Hookshot Builder: python.org\'s pythonw.exe runs the builder (app\\hookshot_builder_start.py) with no console window.\r\n'
-       'start "" "%~dp0python\\pythonw.exe" -I "%~dp0app\\hookshot_builder_start.py" %*\r\n')
+       'rem Longshot Builder: python.org\'s pythonw.exe runs the builder (app\\longshot_builder_start.py) with no console window.\r\n'
+       'start "" "%~dp0python\\pythonw.exe" -I "%~dp0app\\longshot_builder_start.py" %*\r\n')
 
 
 def add_tree(z, src, dst, keep=lambda rel: True):
@@ -56,7 +56,7 @@ def main():
         return rel.startswith("plugins/") and rel[len("plugins/"):] in QT_PLUGINS
 
     with zipfile.ZipFile(a.out + ".new", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        z.writestr("%s/Hookshot Builder.bat" % TOP, BAT)
+        z.writestr("%s/Longshot Builder.bat" % TOP, BAT)
         n = add_tree(z, a.python, "python")
         n += add_tree(z, pyside, "qt/PySide6", qt_keep)
         n += add_tree(z, shiboken, "qt/shiboken6")

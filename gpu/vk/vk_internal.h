@@ -13,12 +13,12 @@
 
 #if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
 #include <intrin.h>
-#define HOOKSHOT_RDTSC() ((uint64_t)__rdtsc())
-#define HOOKSHOT_PAUSE() _mm_pause()
+#define LONGSHOT_RDTSC() ((uint64_t)__rdtsc())
+#define LONGSHOT_PAUSE() _mm_pause()
 #elif defined(__x86_64__) || defined(__i386__)
 #include <x86intrin.h>
-#define HOOKSHOT_RDTSC() ((uint64_t)__rdtsc())
-#define HOOKSHOT_PAUSE() _mm_pause()
+#define LONGSHOT_RDTSC() ((uint64_t)__rdtsc())
+#define LONGSHOT_PAUSE() _mm_pause()
 #endif
 
 typedef struct VmaAllocation_T* VmaAllocation;   // (vk_mem_alloc.h's handle)
@@ -105,15 +105,15 @@ struct BufferRef {
     }
 };
 bool memory_init();                                   // vk_memory.cpp
-void memory_cpu_owned(uint64_t guest, uint64_t size);   // (hookshot: words the replay writes on the CPU, left out of write-backs)
+void memory_cpu_owned(uint64_t guest, uint64_t size);   // (longshot: words the replay writes on the CPU, left out of write-backs)
 // (hookshot) The replay's own CPU writes of guest memory, by GPU address: every one goes through guest_cpu_write (or, for a
 // write made in pieces, host->gpu_write and then guest_cpu_wrote over the whole range), so that the write-back diff's shadows
 // hear of it before this submission's write-back (vk_memory.cpp, "the write-back's diff"). tests/test_wb_diff_cpu_writes.py
 int guest_cpu_write(uint64_t gpu, const void* src, uint64_t n);
 void guest_cpu_wrote(uint64_t gpu, uint64_t n);
-void memory_table_begin();                         // (hookshot: a recording's page table changes held back for its upload commands)
+void memory_table_begin();                         // (longshot: a recording's page table changes held back for its upload commands)
 bool memory_table_flush();
-uint64_t memory_guest_pages();                        // (hookshot: the device address of guest memory's page table, 0: none)
+uint64_t memory_guest_pages();                        // (longshot: the device address of guest memory's page table, 0: none)
 void memory_sync();                                   // (at each submit: pools the game made or let go)
 BufferRef gpu_buffer(uint64_t gpu, uint64_t size);   // (empty when no pool holds the range)
 /// A range as a binding of the replay sees it: the pool's VRAM mirror when it has one (vk_memory.cpp), else the
@@ -133,8 +133,8 @@ uint64_t gpu_bind_stamp();
 /// Around each submission's recording: mirrors wanted since the last one are made (begin), what the GPU wrote into
 /// mirrors goes back to guest memory (end, outside any pass, before the closing barrier)
 void memory_begin_submission();
-void memory_sync_mirrors_before_segments();   // (hookshot: vk_memory.cpp)
-bool probe_on();                                // (hookshot: vk_draw.cpp, RX_VK_PROBE)
+void memory_sync_mirrors_before_segments();   // (longshot: vk_memory.cpp)
+bool probe_on();                                // (longshot: vk_draw.cpp, RX_VK_PROBE)
 bool probe_serial();
 void probe_dump_all(const char* why);
 void probe_log(uint64_t frame);
@@ -188,7 +188,7 @@ void memory_collect_written();
 void memory_capture_submit();
 /// The replay of the next submit: its capture (false: none, the pages are collected now as before)
 bool memory_take_capture(uint64_t value, uint64_t completed);
-bool memory_capture_now(uint64_t value, uint64_t completed);   // (hookshot: made and taken at once)
+bool memory_capture_now(uint64_t value, uint64_t completed);   // (longshot: made and taken at once)
 /// The submission the replay records next (bindings note it: a pool's mirror is in use until it is done)
 void memory_recording_value(uint64_t value, uint64_t completed);
 /// RX_VK_TEX_CAPTURE (on with the capture; =0 off): the storage of a texture uploaded from guest memory joins the
@@ -325,16 +325,16 @@ inline int64_t perf_ticks_to_ns(int64_t ticks, int64_t freq) {
 // A cheap nanosecond clock for the per-phase replay timers. Ten QueryPerformanceCounter reads a draw were ~4% of
 // the GPU thread (gpu/render/rx_internal.h). The hot path reads the invariant TSC; the counter calibrates the scale once.
 inline int64_t prof_now() {
-#if defined(HOOKSHOT_RDTSC)
+#if defined(LONGSHOT_RDTSC)
     struct Scale { double ns_per; bool ok; };
     static const Scale scale = [] {
         LARGE_INTEGER f, a, b;
         QueryPerformanceFrequency(&f);
-        const uint64_t c0 = HOOKSHOT_RDTSC();
+        const uint64_t c0 = LONGSHOT_RDTSC();
         QueryPerformanceCounter(&a);
         volatile int sink = 0;
-        for (int i = 0; i < 400000; i++) { HOOKSHOT_PAUSE(); sink += 1; }
-        const uint64_t c1 = HOOKSHOT_RDTSC();
+        for (int i = 0; i < 400000; i++) { LONGSHOT_PAUSE(); sink += 1; }
+        const uint64_t c1 = LONGSHOT_RDTSC();
         QueryPerformanceCounter(&b);
         const int64_t dns = perf_ticks_to_ns(b.QuadPart - a.QuadPart, f.QuadPart);
         Scale s;
@@ -342,7 +342,7 @@ inline int64_t prof_now() {
         s.ns_per = s.ok ? (double)dns / (double)(c1 - c0) : 0.0;
         return s;
     }();
-    if (scale.ok) return (int64_t)((double)HOOKSHOT_RDTSC() * scale.ns_per);
+    if (scale.ok) return (int64_t)((double)LONGSHOT_RDTSC() * scale.ns_per);
 #endif
     LARGE_INTEGER t;
     QueryPerformanceCounter(&t);

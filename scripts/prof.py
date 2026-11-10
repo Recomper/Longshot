@@ -1,6 +1,6 @@
 """Offline profile of a thread sampled with HOS_SAMPLE + HOS_SAMPLE_FILE (host/mkw_glue.c, mkw-recomp work/prof.py): each line is a stack of
-module+offset frames, leaf first. Frames in hookshot_vk.dll / hookshot.exe are named from the linker maps beside them;
-on Linux, frames in hookshot_vk.so / hookshot from the binaries' own symbols (nm). RX_MAPS=<folder>: another build's
+module+offset frames, leaf first. Frames in longshot_vk.dll / longshot.exe are named from the linker maps beside them;
+on Linux, frames in longshot_vk.so / longshot from the binaries' own symbols (nm). RX_MAPS=<folder>: another build's
 maps or binaries (on Linux, the game folder).
 
     python -I scripts/prof.py work/runs/<run>/stacks.txt [top] [skip] [only]
@@ -28,9 +28,9 @@ def load_map(path, base):
     return [a for a, _ in syms], [n for _, n in syms]
 
 
-# The modules whose frames are Hookshot's own code (the game and the runtime, the renderer): Windows, then Linux
-GAME_MODS = ("hookshot.exe", "hookshot")
-VK_MODS = ("hookshot_vk.dll", "hookshot_vk.so")
+# The modules whose frames are Longshot's own code (the game and the runtime, the renderer): Windows, then Linux
+GAME_MODS = ("longshot.exe", "longshot")
+VK_MODS = ("longshot_vk.dll", "longshot_vk.so")
 RUN_MODS = GAME_MODS + VK_MODS
 
 
@@ -53,11 +53,11 @@ def load_symbols(folder=None):
     Windows build, the binaries of the Linux one"""
     folder = folder or os.environ.get("RX_MAPS", BUILD)
     maps = {}
-    for mod in ("hookshot_vk.dll", "hookshot.exe"):
+    for mod in ("longshot_vk.dll", "longshot.exe"):
         mp = os.path.join(folder, mod[:-4] + ".map")
         if os.path.exists(mp):
             maps[mod] = load_map(mp, 0x180000000 if mod.endswith(".dll") else 0x140000000)
-    for mod in ("hookshot_vk.so", "hookshot"):
+    for mod in ("longshot_vk.so", "longshot"):
         b = os.path.join(folder, mod)
         if os.path.isfile(b):
             try:
@@ -68,7 +68,7 @@ def load_symbols(folder=None):
 
 
 def module_name(mod):
-    """hookshot_vk / hookshot, whichever system the sample came from"""
+    """longshot_vk / longshot, whichever system the sample came from"""
     return mod.split(".")[0]
 
 

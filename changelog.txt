@@ -5,7 +5,7 @@ Date: 07. 11. 2026
     - First release.
     - The game's AArch64 code is lifted to C and compiled natively on the player's PC from their own copy; no emulator is involved.
     - Horizon OS and NVN2 are implemented natively, and the GPU work is replayed on Vulkan.
-    - Hookshot Builder on Windows and the Linux AppImage build the game without Visual Studio.
+    - Longshot Builder on Windows and the Linux AppImage build the game without Visual Studio.
   Features:
     - Kokiri Forest: reaching gameplay and walking around.
     - Sound, controller, keyboard and saves.

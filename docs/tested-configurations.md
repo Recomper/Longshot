@@ -5,9 +5,9 @@ What has actually been run, where, and how it went: one row per test run, newest
 regression can be traced to a build and a driver, and so the next tester knows what is already covered.
 
 Add a row for your own runs (a PR, or paste it in an issue and a maintainer adds it). A run that worked is as useful as
-one that did not. Keep it to facts you saw: the build (`hookshot vX.Y.Z-N-gHASH` from the first line of
-`hookshot_log.txt`), the hardware and driver, the settings that matter, where in the game, and what you measured.
-Frame rates come from `hookshot_log.txt` ("N presents, X fps") at a named spot, standing still unless the row says
+one that did not. Keep it to facts you saw: the build (`longshot vX.Y.Z-N-gHASH` from the first line of
+`longshot_log.txt`), the hardware and driver, the settings that matter, where in the game, and what you measured.
+Frame rates come from `longshot_log.txt` ("N presents, X fps") at a named spot, standing still unless the row says
 otherwise.
 
 ## Runs

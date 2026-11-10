@@ -1,4 +1,4 @@
-// (bake-deepseek) Offline HKSEED01 -> SPIR-V -> hookshot_programs.bin, with no GPU, no game and no window.
+// (bake-deepseek) Offline HKSEED01 -> SPIR-V -> longshot_programs.bin, with no GPU, no game and no window.
 //
 // This is the CPU half of the bake: every stage the census enumerated is parsed exactly as the back end
 // parses it at run time (parse_code, gpu/vk/vk_shader.cpp:155), lowered with the same Ampere -> Maxwell
@@ -9,16 +9,16 @@
 //
 // Outputs, under <outdir>:
 //   spv/<program-key>.<nvn-stage>.spv   per stage
-//   hookshot_programs.bin               the back end's program cache format (kDiskMagic 0x31505348 + stamp +
+//   longshot_programs.bin               the back end's program cache format (kDiskMagic 0x31505348 + stamp +
 //                                       records exactly as program_cache_save writes them)
 //   bake_report.jsonl                   one line per program attempt: key, kind, stages, descriptors, status
 //   bake_manifest.json                  stamp inputs, counts, what was not translated and why
 //
-//   bake_ds translate --seed <hookshot_shaders.bin> --out <dir> [--stamp <hex16>] [--depth 0|1]
+//   bake_ds translate --seed <longshot_shaders.bin> --out <dir> [--stamp <hex16>] [--depth 0|1]
 //                     [--target plain|tensor|tensor-software|rdna2|gfx1201] [--feature <list>]
 //                     [--variants 0|1|2|all] [--variant-cap N] [--limit N] [--no-bank] [--program-size N]
 //                     [--ssbo-align N] [--spv-dir <dir>]
-//   bake_ds verify --bank <hookshot_programs.bin> [--target <name>] [--stamp <hex16>] [--depth 0|1]
+//   bake_ds verify --bank <longshot_programs.bin> [--target <name>] [--stamp <hex16>] [--depth 0|1]
 //
 // The bank's standing: the header stamp is what a build of the SAME compiler/library computes for its
 // Shader::Info/Program layout (disk_stamp, vk_shader.cpp:837). This tool computes it from its own layout, so a
@@ -929,11 +929,11 @@ constexpr uint32_t kVkMesh = 0x00000080;       // VK_SHADER_STAGE_MESH_BIT_EXT
 int usage() {
     std::fprintf(stderr,
                  "usage:\n"
-                 "  bake_ds translate --seed <hookshot_shaders.bin> --out <dir> [--stamp <hex16>] [--depth 0|1]\n"
+                 "  bake_ds translate --seed <longshot_shaders.bin> --out <dir> [--stamp <hex16>] [--depth 0|1]\n"
                  "                    [--target plain|tensor|tensor-software|rdna2|gfx1201] [--feature <list>]\n"
                  "                    [--variants 0|1|2|all] [--variant-cap N] [--limit N] [--no-bank] [--program-size N]\n"
                  "                    [--ssbo-align N] [--spv-dir <dir>]\n"
-                 "  bake_ds verify --bank <hookshot_programs.bin> [--target <name>] [--feature <list>] [--stamp <hex16>] [--depth 0|1]\n"
+                 "  bake_ds verify --bank <longshot_programs.bin> [--target <name>] [--feature <list>] [--stamp <hex16>] [--depth 0|1]\n"
                  "  bake_ds query                       (physical devices' properties/features: no logical device)\n"
                  "\n"
                  "  --target      the feature profile the bank is baked for; its switches enter the cache stamp, so a bank\n"
@@ -1089,7 +1089,7 @@ int run_translate(const Options& o) {
     const std::string spv_dir = o.spv_dir.empty() ? o.out + "/spv" : o.spv_dir;
     std::filesystem::create_directories(o.out, ec);
     std::filesystem::create_directories(spv_dir, ec);
-    // (HOOKSHOT_SHADER_STAMP is the translator half of the stamp; the tool's default 0 is for format tests.
+    // (LONGSHOT_SHADER_STAMP is the translator half of the stamp; the tool's default 0 is for format tests.
     // --stamp takes the value nx2/build.py computed and the game logged.)
     const uint64_t disk = disk_stamp(o.stamp == ~0ull ? 0 : o.stamp, o.depth);
     std::fprintf(stderr, "bake_ds: %zu programs, %zu stages; target %s (%s, integer variants %s); translator stamp %s -> "
@@ -1100,7 +1100,7 @@ int run_translate(const Options& o) {
                  sizeof(ProgramLayout));
     for (const std::string& kv : o.target.env) std::fprintf(stderr, "bake_ds: target requires %s in the game's environment\n", kv.c_str());
     FILE* bank = nullptr;
-    std::string bank_path = o.out + "/hookshot_programs.bin";
+    std::string bank_path = o.out + "/longshot_programs.bin";
     std::vector<uint8_t> bank_head;
     if (o.bank) {
         bank = std::fopen(bank_path.c_str(), "wb");
@@ -1586,7 +1586,7 @@ int run_translate(const Options& o) {
                      o.variant_cap, duplicate_variants, Shader::Backend::SPIRV::mma_software ? "true" : "false",
                      env_json.c_str(), hex64(disk).c_str(), hex64(o.stamp == ~0ull ? 0 : o.stamp).c_str(),
                      o.depth, sizeof(Shader::Info), sizeof(ProgramLayout), static_cast<unsigned long long>(g_ssbo_align),
-                     o.bank ? "\"hookshot_programs.bin\"" : "null");
+                     o.bank ? "\"longshot_programs.bin\"" : "null");
         std::fclose(mf);
     }
     std::fprintf(stderr, "bake_ds: %zu slots: %zu translated, %zu duplicate answer variants dropped, %zu failed, %zu programs skipped (unreadable/mesh)\n",

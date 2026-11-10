@@ -41,7 +41,7 @@ std::atomic<uint64_t> samp_gen{1};  // (bumped when a sampler registration's con
 // (and a version a slot: caches of what a slot resolves to check theirs, not every registration's)
 constexpr int kSlotVersions = 1 << 20;
 std::unique_ptr<std::atomic<uint32_t>[]> slot_versions{new std::atomic<uint32_t>[kSlotVersions]()};
-// (hookshot, RX_VK_SAMPLER_CACHE: the same for sampler ids, so what a sampler id resolves to can be cached and checked
+// (longshot, RX_VK_SAMPLER_CACHE: the same for sampler ids, so what a sampler id resolves to can be cached and checked
 // without taking reg_mu, and descriptor reuse can tell that a sampler was registered anew)
 constexpr int kSampVersions = 1 << 12;
 std::unique_ptr<std::atomic<uint32_t>[]> samp_versions{new std::atomic<uint32_t>[kSampVersions]()};
@@ -109,7 +109,7 @@ uint32_t compute_ssbo_table(const NvnState& s, uint32_t* count, uint32_t* layout
     return l.ssbo_at();
 }
 
-/// (hookshot, #940) For the seed's compute programs (vk_shader.cpp seed_compute), whether c0+offset holds a buffer's address in play:
+/// (longshot, #940) For the seed's compute programs (vk_shader.cpp seed_compute), whether c0+offset holds a buffer's address in play:
 /// the address word of an entry of the uniform or storage buffer table its control section lays out. Nothing is bound before the
 /// game, so the storage buffer pass's port (EDEN_NX2_GM_LEGACY=0), which binds an access to a pointer only when that pointer is
 /// mapped (Env::IsCbufStorageBufferPointer), found none and left every access to the run-time search, under the key play then used
@@ -201,7 +201,7 @@ void register_sampler_copy(int id, const nvn_samp_par& par) {
     samp_regs[id].p = *p;
     samp_regs[id].ok = true;
     if (!same) samp_gen.fetch_add(1, std::memory_order_acq_rel);
-    samp_versions[id].fetch_add(1, std::memory_order_acq_rel);   // (hookshot: caches of what an id resolves to check this)
+    samp_versions[id].fetch_add(1, std::memory_order_acq_rel);   // (longshot: caches of what an id resolves to check this)
 }
 uint32_t sampler_slot_version(int id) {
     return id >= 0 && id < kSampVersions ? samp_versions[id].load(std::memory_order_acquire) : 0;

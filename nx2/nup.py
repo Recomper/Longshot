@@ -454,7 +454,7 @@ class HeadSink:
 # The romfs .zs files of an extraction that do not start as zstd (damaged_game_files' answer, made while extracting), beside
 # the extracted romfs: its first line HEADS_MAGIC, then one path under romfs a line, with "/"
 HEADS_NAME = "romfs_zstd_heads.txt"
-HEADS_MAGIC = "hookshot romfs zstd heads 1"
+HEADS_MAGIC = "longshot romfs zstd heads 1"
 
 
 def file_system(path):

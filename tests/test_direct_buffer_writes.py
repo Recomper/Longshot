@@ -58,7 +58,7 @@ def main():
     flags = subprocess.CREATE_NO_WINDOW | subprocess.BELOW_NORMAL_PRIORITY_CLASS if os.name == "nt" else 0
     env = dict(os.environ)
     env["PATH"] = str(Path(cxx).parent) + os.pathsep + env.get("PATH", "")
-    with tempfile.TemporaryDirectory(prefix="hookshot-direct-writes-") as folder:
+    with tempfile.TemporaryDirectory(prefix="longshot-direct-writes-") as folder:
         tmp = Path(folder)
         (tmp / "direct_write_types.inc").write_text(types + "\n", encoding="utf-8")
         (tmp / "direct_write_actual.inc").write_text(actual + "\n", encoding="utf-8")

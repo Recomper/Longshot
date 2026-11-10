@@ -1,4 +1,4 @@
-"""The pipeline notes file (hookshot_pipelines.bin) and the pipeline state list are opened by the precompile, before play, with
+"""The pipeline notes file (longshot_pipelines.bin) and the pipeline state list are opened by the precompile, before play, with
 the notes it has just read, not at the first new pipeline in play.
 
 pipeline_note opened the notes file at the first new pipeline of a run and read its keys back with a seek and an 8-byte read

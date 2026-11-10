@@ -1,7 +1,7 @@
-# Hookshot (oot-recomp)
+# Longshot (oot-recomp)
 
-**Hookshot** is the port's name (as Skybound is TOTKPort's and BlueShell is mkw-recomp's); the maintainer's repository
-folder stays `oot-recomp`. The game builds as `hookshot.exe` + `hookshot_vk.dll` (`hookshot` + `hookshot_vk.so` on Linux).
+**Longshot** is the port's name (as Skybound is TOTKPort's and BlueShell is mkw-recomp's); the maintainer's repository
+folder stays `oot-recomp`. The game builds as `longshot.exe` + `longshot_vk.dll` (`longshot` + `longshot_vk.so` on Linux).
 
 A static recompilation of the Switch 2 *The Legend of Zelda: Ocarina of Time* remake to native x86-64 Windows and Linux:
 the game's code lifted to C (NotRexed's a64-kit, Rexcomp's AArch64 kit), the Horizon OS and NVN2 implemented
@@ -18,9 +18,9 @@ the lessons carried over from MKW: [design.md](design.md).
 
 Requirements: Python 3 with `pip install -r requirements.txt` (`lz4`, `numpy`, `capstone`, `unicorn` 2.1,
 `zstandard`, and the button-prompt packages); a compiler: on Windows llvm-mingw
-(`HOOKSHOT_MINGW`, or an `llvm-mingw` folder in the clone), else emsdk's clang at `C:\emsdk` (or `EMSDK`) with Visual
+(`LONGSHOT_MINGW`, or an `llvm-mingw` folder in the clone), else emsdk's clang at `C:\emsdk` (or `EMSDK`) with Visual
 Studio's C++ tools; on Linux clang and lld. For the Vulkan back end: distro Vulkan / SPIR-V / VMA headers under
-`/usr`, or `HOOKSHOT_VULKAN_HEADERS` / `HOOKSHOT_SPIRV_HEADERS` / `HOOKSHOT_VMA_HEADERS`, or a CPM package cache
+`/usr`, or `LONGSHOT_VULKAN_HEADERS` / `LONGSHOT_SPIRV_HEADERS` / `LONGSHOT_VMA_HEADERS`, or a CPM package cache
 (`RX_CPM`, else `cpm` in the clone, else the old caches in mkw-recomp's `work/eg` or `..\Eglantine\.cache\cpm`).
 Without those the standalone build stops. [CONTRIBUTING.md](../CONTRIBUTING.md#development-setup) has the rest.
 
@@ -34,7 +34,7 @@ Run everything with `python -I` from this folder.
 | `python -I nx2/census.py --nx2` | instruction census per module, after the Switch 2 forms |
 | `python -I nx2/test_insn.py [--per 6 --states 12]` | every instruction form the game uses, Unicorn vs lifted C |
 | `python -I nx2/test_leaf.py [--count 3000 --states 4] [--calls]` | random whole functions (or call trees), Unicorn vs recompiled native code on the real image |
-| `python -I nx2/lift.py --standalone --write` then `python -I nx2/build.py --standalone --jobs 4` | the standalone game: `work/sa/build/hookshot.exe` + `hookshot_vk.dll` |
+| `python -I nx2/lift.py --standalone --write` then `python -I nx2/build.py --standalone --jobs 4` | the standalone game: `work/sa/build/longshot.exe` + `longshot_vk.dll` |
 | `powershell -File scripts/run-vk.ps1 [-Window] [-Seconds 120] [-Name x]` | a muted test run on Vulkan, with screenshots in `work/runs/<name>/shots` |
 | `python -I scripts/prof.py <stacks file>` | a profile sampled with `HOS_PROFILE=<seconds>` + `HOS_SAMPLE=<thread>` + `HOS_SAMPLE_FILE=<stacks file>` (the sampler runs only with `HOS_PROFILE` set), named from the linker maps |
 
@@ -56,7 +56,7 @@ is not a focus override.
 
 ## Switches for testing and debugging
 
-The running game reads its switches from the environment or from `hookshot_env.txt` beside `image.bin` (one
+The running game reads its switches from the environment or from `longshot_env.txt` beside `image.bin` (one
 `NAME=VALUE` a line, `#` for notes; `HOS_ENV_FILE=<path>` reads that file instead). The build reads its own from the
 environment. The README has the ones players are asked to try (`RX_VK_ASTC_RGBA8`, `RX_VK_LOW_SPEC`,
 `RX_VK_MOVIE_UPSCALE`, `RX_VK_SKIP_CODE`, `HOS_OOT_CHEATS`). There are several hundred more, most of them one-off
@@ -85,9 +85,9 @@ screen. It costs some GPU time on cards that cull quickly, so it is off unless s
 | `HOS_DYNRES=0`, `HOS_REALTIME_STEP=0`, `HOS_TEXT_SPEED=<0..3>` | Over the options file: Resolution 100% (non-zero: Auto), Game speed Per frame (1: Real time), Text speed |
 | `RX_VK_FRAMEGEN=0`, `RX_VK_FRAMEGEN_MULT=<2..8>`, `RX_VK_PACE=0`, `RX_VK_UPSCALE=<0..2>` | No frame generation whatever the menu says; over the options file: its multiplier, frame pacing, the upscaling filter |
 | `RX_VK_DEVICE=<n>` | The graphics card listed as `vk: device <n>` in the log, over the menu's GPU device |
-| `HOOKSHOT_NO_UPDATE_CHECK=1` | No look for a newer release at the start |
+| `LONGSHOT_NO_UPDATE_CHECK=1` | No look for a newer release at the start |
 | `HOS_TRACE=1` | Every Horizon call logged, as `--trace` does |
-| `RX_BACKEND=<name>` | Unset or `vulkan`: `hookshot_vk.dll`; any other value but `eden`: the WebGPU renderer, when the exe was built with one |
+| `RX_BACKEND=<name>` | Unset or `vulkan`: `longshot_vk.dll`; any other value but `eden`: the WebGPU renderer, when the exe was built with one |
 
 ### Input for scripted runs
 
@@ -124,13 +124,13 @@ case-sensitive, and an unknown one is ignored.
 |---|---|
 | `HOS_PROFILE=<seconds>` | Every interval, the busiest threads in the log; it also starts the samplers below |
 | `HOS_SAMPLE=<thread>` + `HOS_SAMPLE_FILE=<file>` | One thread's stacks, sampled every millisecond (needs `HOS_PROFILE`); `python -I scripts/prof.py <file>` reads them |
-| `HOS_SAMPLE_ALL=<file>` | Every game and renderer thread every 2 ms while `<file>.go` exists (needs `HOS_PROFILE`); `scripts/crit.py`, `scripts/vkprof.py` and `scripts/hotlist.py` read it (on Linux with `RX_MAPS=<game folder>`: they name frames from its `hookshot` and `hookshot_vk.so`) |
+| `HOS_SAMPLE_ALL=<file>` | Every game and renderer thread every 2 ms while `<file>.go` exists (needs `HOS_PROFILE`); `scripts/crit.py`, `scripts/vkprof.py` and `scripts/hotlist.py` read it (on Linux with `RX_MAPS=<game folder>`: they name frames from its `longshot` and `longshot_vk.so`) |
 | `HOS_THREAD_TIMES=<seconds>` | Every interval, the threads that used over 5% of a core |
 | `HOS_FPS_LOG` (set), `HOS_PRESENT_TRACE=<csv>` | The game's frame limiter, VRR flags and nominal rate every 300 presents; a CSV line per game present |
 | `RX_VK_FRAME_LOG=<csv>` | A CSV line per present: frame, seconds, frame time in ms |
 | `RX_VK_PASS_TIMING=1` or `2` | GPU time per pass (2: per program too), logged every 600 presents |
 | `RX_VK_SLOW_LOG=<ms>` | The replay's times for each frame that took longer than this |
-| `HOS_PGO=<file>` | In a run of an `RX_PGO=gen` build: `<file>.reset` clears the counters, `<file>.dump` writes them to `<file>`. It is read before `hookshot_env.txt`, so set it in the environment |
+| `HOS_PGO=<file>` | In a run of an `RX_PGO=gen` build: `<file>.reset` clears the counters, `<file>.dump` writes them to `<file>`. It is read before `longshot_env.txt`, so set it in the environment |
 
 ### The GPU
 
@@ -143,7 +143,7 @@ case-sensitive, and an unknown one is ignored.
 | `RX_VK_SKIP_PROG=<prefix>,...` | Leaves out the draws of these programs (default `53509044401d78d2`; `-` leaves out none) |
 | `RX_VK_PIPE_SKIP=0` | A draw whose pipeline is not ready waits for it, instead of being left out when its targets hold an earlier frame |
 | `RX_VK_PRECOMPILE=0` or `1` | The shader preparation before the title off or on (on in builds made with `RX_RELEASE=1`, as the builders' are) |
-| `RX_VK_NO_PROGRAM_CACHE` (set) | Neither reads nor writes `hookshot_programs.bin` and the pipeline notes |
+| `RX_VK_NO_PROGRAM_CACHE` (set) | Neither reads nor writes `longshot_programs.bin` and the pipeline notes |
 | `RX_VK_UB_WORD_HASH=0` | A/B test: use the old low-address-bit index for cached uniform words (default: mix upper address bits to reduce aligned-buffer collisions) |
 | `RX_VK_MIRROR=0`, `RX_VK_MIRROR_MB=<MB>` | No VRAM mirrors of the game's memory pools (on for discrete cards); their budget |
 | `RX_VK_VRAM_MB=<MB>` | The texture cache's budget (default 70% of what the driver allows, at most 6 GB) |
@@ -151,7 +151,7 @@ case-sensitive, and an unknown one is ignored.
 | `RX_VK_NO_WRITEBACK` (set) | GPU writes to mirrored pools are not copied back to guest memory (an experiment, for A/B) |
 | `RX_VK_WB_DIFF=0` | Write-backs copy every byte again instead of only what changed against a VRAM shadow (the diff is on by default; v2.0.9 and v2.0.10 had it off, issue 1161) |
 | `RX_VK_DLSS=0/1/2`, `RX_VK_DLSS_PRESET=<letter>`, `RX_VK_DLSS_LOG=1`, `RX_VK_REFLEX`, `RX_VK_REFLEX_LOG=1`, `RX_VK_ANTILAG=0/1` | NVIDIA DLSS and Reflex, and AMD Anti-Lag 2, for one run (`=-` on Reflex or Anti-Lag 2: its extensions not even enabled): the readme's NVIDIA DLSS section. `RX_VK_DLSS_TRACE=<frames>` logs one frame's large draws every that many frames, `RX_VK_DLSS_DEBUG=motion` shows the motion vectors, `=alternate` the game's own upscale every other frame |
-| `RX_VK_FSR4=0/1/2`, `RX_VK_FSR_DIR=<folder>` | AMD FSR 4 for one run (0 never, 1 FSR 4, 2 its Native AA), and another folder for AMD's DLLs (not from `hookshot_env.txt`): the readme's AMD FSR 4 section. `RX_VK_FSR4=1/2` and `RX_VK_DLSS=1/2` go over the Upscaler row, a saved FSR 3.1 too where the engine they ask for runs; `RX_VK_FSR=1` goes over them (one upscaler at a time). The DLSS trace and debug switches above apply to FSR 4 too, on the frame chain they share |
+| `RX_VK_FSR4=0/1/2`, `RX_VK_FSR_DIR=<folder>` | AMD FSR 4 for one run (0 never, 1 FSR 4, 2 its Native AA), and another folder for AMD's DLLs (not from `longshot_env.txt`): the readme's AMD FSR 4 section. `RX_VK_FSR4=1/2` and `RX_VK_DLSS=1/2` go over the Upscaler row, a saved FSR 3.1 too where the engine they ask for runs; `RX_VK_FSR=1` goes over them (one upscaler at a time). The DLSS trace and debug switches above apply to FSR 4 too, on the frame chain they share |
 | `RX_VK_ASYNC=1` | The replay on a thread of its own instead of the game's submitting thread |
 | `HOS_VCORES=0`, `HOS_CORES=<1..8>`, `HOS_RESERVE_CORE=0` | No virtual cores; the cores the game sees (6); no core kept for the replay (one is, with 8 or more logical processors) |
 
@@ -162,12 +162,12 @@ A build reads and writes tens of gigabytes. When the game folder or the build fi
 
 | Switch | What it does |
 |---|---|
-| `HOOKSHOT_JOBS=<n>` (or `--jobs`) | Compilers at once (default one per CPU thread, each started when the free memory holds it; `HOOKSHOT_MEM_GATE=0` turns that check off) |
-| `HOOKSHOT_LIFT_JOBS=<n>` | Processes that write the lifted C (default the cores, at most 16) |
-| `HOOKSHOT_KEEP_BUILD_FILES=1` | Keeps the lifted C and the objects after a build, so that the next one compiles only what changed |
-| `HOOKSHOT_MINGW=<dir>`, `HOOKSHOT_MSVC=1` | The llvm-mingw to build with; the Visual Studio route instead |
+| `LONGSHOT_JOBS=<n>` (or `--jobs`) | Compilers at once (default one per CPU thread, each started when the free memory holds it; `LONGSHOT_MEM_GATE=0` turns that check off) |
+| `LONGSHOT_LIFT_JOBS=<n>` | Processes that write the lifted C (default the cores, at most 16) |
+| `LONGSHOT_KEEP_BUILD_FILES=1` | Keeps the lifted C and the objects after a build, so that the next one compiles only what changed |
+| `LONGSHOT_MINGW=<dir>`, `LONGSHOT_MSVC=1` | The llvm-mingw to build with; the Visual Studio route instead |
 | `RX_CPM=<dir>`, `WGPU_NATIVE=<dir>` | The CPM cache (Vulkan and SPIR-V headers, VMA, FFmpeg) and wgpu-native |
-| `RX_TARGET=windows` | On Linux: the Windows game, with llvm-mingw's Linux build in `HOOKSHOT_MINGW` |
+| `RX_TARGET=windows` | On Linux: the Windows game, with llvm-mingw's Linux build in `LONGSHOT_MINGW` |
 | `RX_RELEASE=1` | A release build (`make_game.py` sets it): no console window, the shaders prepared before the title |
 | `RX_PGO=gen` or `RX_PGO=<file>` | The hot code counting its branches for a profile, or built with one (`make_game.py` passes the shipped profile) |
 | `RX_MARCH=<level>` | The CPU level to build for (default this PC's: `x86-64-v3`, else `x86-64-v2`, else `x86-64`) |
@@ -180,7 +180,7 @@ A build reads and writes tens of gigabytes. When the game folder or the build fi
 pipelines) so that the repository's history stays small. Each record is a pipeline the game asked for: its shaders'
 hashes, the program variant's hash, and the target formats, vertex formats and draw state it was made with
 (`nx2/pipeline_states.py` has the layout). It holds no game code: a player's build turns the hashes back into shaders from
-their own `hookshot_shaders.bin`. `nx2/make_game.py` unpacks it beside the game as `hookshot_pipeline_states_shipped.bin`,
+their own `longshot_shaders.bin`. `nx2/make_game.py` unpacks it beside the game as `longshot_pipeline_states_shipped.bin`,
 and the first start's shader preparation builds those pipelines before the title. Without it a new install builds them in
 play, and draws left out while they compile wash the first field load white for seconds (v2.0.8 to v2.0.14 shipped none).
 `assets/pipeline_states.md`, beside it, records where its pipelines came from; note each merge there.
@@ -190,12 +190,12 @@ Every release carries it: the AppImage with `assets/` (`scripts/linux/appimage.s
 (`scripts/release_parts.py package` stops when it is missing or does not read). xz rather than zstd: the AppImage's
 Python is 3.12, whose standard library has `lzma` but not `compression.zstd`.
 
-A game run writes `hookshot_pipeline_states.bin` beside the executable, adding each pipeline it makes. To refresh the
+A game run writes `longshot_pipeline_states.bin` beside the executable, adding each pipeline it makes. To refresh the
 shipped list, play through on a build of the current source (the more of the game, the fuller the list) and merge that
 file into the current list, each pipeline once (an `--out` ending in `.xz` is written compressed):
 
 ```sh
-python -I nx2/pipeline_states.py --out assets/pipeline_states.bin.xz assets/pipeline_states.bin.xz <game folder>/hookshot_pipeline_states.bin ...
+python -I nx2/pipeline_states.py --out assets/pipeline_states.bin.xz assets/pipeline_states.bin.xz <game folder>/longshot_pipeline_states.bin ...
 python -I nx2/pipeline_states.py --check assets/pipeline_states.bin.xz    # what it holds, as the release checks read it
 ```
 
@@ -207,7 +207,7 @@ inputs.
 
 ## The options file
 
-`hookshot_options.ini`, in the game folder, holds the Insert menu's rows as `<key>=<number>`: the row's name in lower
+`longshot_options.ini`, in the game folder, holds the Insert menu's rows as `<key>=<number>`: the row's name in lower
 case with `_` for spaces (`frame_generation=2`, `invert_camera_x=1`), except Output resolution, which is `output_res`.
 `gpu/vk/vk_menu.cpp` writes the whole file at every change (`save`), with `options_version=4`,
 `microphone_device=<name>` when a microphone is chosen by name, and the controls (`pad_<button>` and `key_<button>`:
@@ -242,9 +242,9 @@ The other rows are 0 Off and 1 On. Some are read at the start, before the menu e
 | `docs/design.md` | why mkw-recomp's pipeline, the architecture, MKW's lessons as rules, stages, testing |
 | `nx2/` | the lift pipeline and its tests (mkw-recomp's, made game-neutral; `kit.py` has the paths), and `make_game.py`, which the builders run |
 | `host/` | the standalone Horizon runtime (TOTKPort's `hos/` as adapted by mkw-recomp), with the native NVN2 layer `nvn_native.c`; `host/posix` has the Win32 calls on Linux |
-| `gpu/vk/` | the Vulkan back end (`hookshot_vk.dll`, `hookshot_vk.so`), with Eden's shader recompiler and sirit |
+| `gpu/vk/` | the Vulkan back end (`longshot_vk.dll`, `longshot_vk.so`), with Eden's shader recompiler and sirit |
 | `gpu/render/`, `gpu/third_party/` | the WebGPU renderer the Windows exe falls back to when it was built with wgpu-native, its op stream (`rx_nvn.h`), suyu's decoders |
-| `builder/` | Hookshot Builder: the Windows app (.NET 8 WPF), its setup and MSI, and the Linux builder and launcher scripts |
+| `builder/` | Longshot Builder: the Windows app (.NET 8 WPF), its setup and MSI, and the Linux builder and launcher scripts |
 | `scripts/` | test runs, the profile and log readers, the save copier (`oot_saves.py`), release tooling, `scripts/linux` (dependencies, AppImage) |
 | `tests/` | the game-free checks, all run by `tests/run_all.py` |
 | `third_party/` | a64-kit (Hookshot's few changes marked `(hookshot)`), libopus, zbic (Atmosphere's zstd with ZBIC, for unpacking only), SDL2's licence, Dear ImGui and its Vulkan backend, zstd's decoder, the Libertinus fonts |

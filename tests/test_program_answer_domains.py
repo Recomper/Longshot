@@ -29,7 +29,7 @@ def block(text, marker):
 
 FIXTURE = r'''
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Real Hookshot Program/Stage and Eden descriptors; only resource-boundary values are stubbed.
+// Real Longshot Program/Stage and Eden descriptors; only resource-boundary values are stubbed.
 #include <array>
 #include <cstdio>
 #include <cstdlib>

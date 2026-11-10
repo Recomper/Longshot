@@ -2,7 +2,7 @@
 // Eglantine's recompiler, offline and CPU-only: every stage it can lower goes to SPIR-V, and every program key is
 // computed exactly as gpu/vk/vk_shader.cpp computes it. No Vulkan device: nothing here calls vkCreateShaderModule
 // or vkCreate*Pipeline, so the pass runs where no GPU is (nx2/bake_mimo.py builds and runs this).
-//   shaderbatch <hookshot_shaders.bin> <out_dir> [--limit N]
+//   shaderbatch <longshot_shaders.bin> <out_dir> [--limit N]
 // writes:
 //   <out_dir>/stages.tsv      one line per seed stage: its code_key, NVN stage, status, sizes, translation facts
 //   <out_dir>/programs.tsv    one line per program x input variant: the runtime's program key and what became of it
@@ -407,7 +407,7 @@ struct EmitOut {
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        std::fprintf(stderr, "usage: shaderbatch <hookshot_shaders.bin> <out_dir> [--limit N]\n");
+        std::fprintf(stderr, "usage: shaderbatch <longshot_shaders.bin> <out_dir> [--limit N]\n");
         return 2;
     }
     size_t limit = ~size_t{0};

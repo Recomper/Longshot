@@ -82,7 +82,7 @@ inline u32 RenameableFields(u32 opcode) {
                        family == 0x023 || family == 0x024 || family == 0x025 || family == 0x027;
     const bool two = family == 0x020 || family == 0x021 || family == 0x008 || family == 0x007 || family == 0x009 ||
                      family == 0x017;
-    // (hookshot: extended, form 6 too, a uniform register at 32 that is no GPR field: Rd, Ra and Rc are; OoT's mesh
+    // (longshot: extended, form 6 too, a uniform register at 32 that is no GPR field: Rd, Ra and Rc are; OoT's mesh
     // programs computed into R226 while UR10 lived there)
     if ((!three && !two) || form < 1 || form > (extended_renaming ? 6U : 5U)) return 0;
     u32 fields = 1 | 2;
@@ -90,7 +90,7 @@ inline u32 RenameableFields(u32 opcode) {
     if (three || form == 2 || form == 3) fields |= 8;     // Rc, or Rb at 64
     return fields;
 }
-// (hookshot, extended) How many GPRs a field names, where the opcode tells: the 32-bit ALU forms one each, IMAD.WIDE's
+// (longshot, extended) How many GPRs a field names, where the opcode tells: the 32-bit ALU forms one each, IMAD.WIDE's
 // Rd and Rc pairs, CS2R.64's pair; 0 where it does not (a pair or quad by the register's alignment, as before). A
 // 32-bit operand taken for a quad reached R239 or the scratch from R236 or R244 and failed whole mesh programs (OoT's
 // foliage).
@@ -124,7 +124,7 @@ struct LoweredProgram {
     u32 high_uniform_registers{};
     // (hookshot) the reserved numbers uniform_register gave, all instructions: what renamed registers' markers avoid
     std::array<bool, 256> used_reserved{};
-    u32 register_map_words{};   // (hookshot: the REGMAP_nx2 prefixes emitted)
+    u32 register_map_words{};   // (longshot: the REGMAP_nx2 prefixes emitted)
     u32 error_offset{};
     std::string_view error;
 
@@ -324,7 +324,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
         u32 uniform_output = 7; // ULOP3's UPn output: computed in P(6-n), then merged into R239
         if (opcode == 0x2a4 || opcode == 0x8a4 || opcode == 0x891 || opcode == 0x890 || opcode == 0x290 ||
             opcode == 0x292 || opcode == 0x892 || opcode == 0x291 || opcode == 0x896 || opcode == 0x8a5 ||
-            opcode == 0x4a4) {   // (hookshot: 0x4a4, UIMAD URd, URa, imm, URc, as IMAD 0x424)
+            opcode == 0x4a4) {   // (longshot: 0x4a4, UIMAD URd, URa, imm, URc, as IMAD 0x424)
             // (hookshot) a UPn guard on any of these that writes no predicate (no carry out: bits 81-83 and 84-86
             // PT), as ULOP3's: swapped into P(6-n) around the op (guarded_uniform below)
             // (ULEA, 0x291/0x891, has one carry out: its bits 84-86 are no predicate)
@@ -487,7 +487,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
             if (!shift_in_register && shift >= (wide ? 64U : 33U)) return false;
             const u64 amount = u64{shift} << 20, w39 = u64{wrap} << 39;
             if (right != hi_word) {
-                // (hookshot, from Lichii) an immediate's bits 20-38 are all the amount: the clamp at 37-38 made every shift 63
+                // (longshot, from Lichii) an immediate's bits 20-38 are all the amount: the clamp at 37-38 made every shift 63
                 if (!shift_in_register && wide && shift >= 32) {
                     emit((right ? 0x3828000000000000ULL : 0x3848000000000000ULL) | predicate | dst |
                          (u64{right ? hi : lo} << 8) | (u64{shift - 32} << 20) | (u64{right && sign} << 48));
@@ -948,7 +948,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
         }
         case 0x886: { // VOTEU ballot and independent uniform predicate output.
             const u32 output = insn.Bits(81, 3), target = insn.Bits(16, 8);
-            if ((target != 63 && uniform_register(target) == ~0U) || insn.words[1] ||   // (hookshot: any UR)
+            if ((target != 63 && uniform_register(target) == ~0U) || insn.words[1] ||   // (longshot: any UR)
                 insn.Bits(72, 2) > 2 || native_predicate != 7)
                 return fail(index, "native uniform vote mode");
             const u32 temporary = output == 7 ? 7 : 6 - output;
@@ -1040,7 +1040,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
             }
             break;
         }
-        case 0x882: { // UMOV immediate. (hookshot: any UR, through uniform_register)
+        case 0x882: { // UMOV immediate. (longshot: any UR, through uniform_register)
             const u32 d = uniform_register(dest);
             if (d == ~0U || insn.words[2]) return fail(index, "native uniform immediate move mode");
             if (d != 255) mov_imm(d, insn.words[1]);
@@ -1048,7 +1048,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
         }
         case 0xc82: { // UMOV UR, UR (or URZ), including uniform execution predicates.
             const u32 source = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;
-            const u32 d = uniform_register(dest);   // (hookshot: any UR)
+            const u32 d = uniform_register(dest);   // (longshot: any UR)
             if (d == ~0U || d == 255 || source == ~0U || insn.words[2] != 0x08000000)
                 return fail(index, "native uniform move mode");
             emit(0x5c98000000000000ULL | predicate | d |
@@ -1112,7 +1112,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                 const u32 lo_r = low == 63 ? 255U : low_reg, hi_r = high == 63 ? 255U : high_reg;
                 const bool lo_valid = low == 63 || low_ok, hi_valid = high == 63 || high_ok;
                 if (lo_valid && hi_valid && shift < (wide ? 64U : 33U)) {
-                    const u64 max_shift = 0;   // (hookshot, from Lichii: not with an immediate, as in funnel)
+                    const u64 max_shift = 0;   // (longshot, from Lichii: not with an immediate, as in funnel)
                     if (wide && shift >= 32 && right != hi) {
                         emit((right ? 0x3828000000000000ULL : 0x3848000000000000ULL) | predicate | dst_reg |
                              (u64{right ? hi_r : lo_r} << 8) | (u64{shift - 32} << 20) | (u64{right && sign} << 48));
@@ -1262,21 +1262,21 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                 (u64{insn.Bits(24, 8)} << 8) | (u64{insn.Bits(87, 3)} << 23) | (u64{1} << 48));
             break;
         }
-        case 0x2bd: { // UFLO.U32, the highest set-bit index (.SH, bit 74: its shift amount). (hookshot: any UR)
+        case 0x2bd: { // UFLO.U32, the highest set-bit index (.SH, bit 74: its shift amount). (longshot: any UR)
             const u32 d = uniform_register(dest), a = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;
             if (d == ~0U || d == 255 || a == ~0U || (insn.words[2] & ~0x400U) != 0x080e0000 || native_predicate != 7)
                 return fail(index, "native uniform leading bit mode");
             emit(0x5c30000000000000ULL | predicate | d | (u64{a} << 20) | (u64{insn.Bits(74, 1)} << 41));
             break;
         }
-        case 0x2be: { // UBREV, as a bit-reversing zero shift like BREV (hookshot: any UR, through uniform_register)
+        case 0x2be: { // UBREV, as a bit-reversing zero shift like BREV (longshot: any UR, through uniform_register)
             const u32 d = uniform_register(dest), a = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;
             if (d == ~0U || d == 255 || a == ~0U || insn.words[2] != 0x08000000 || native_predicate != 7)
                 return fail(index, "native uniform bit reverse mode");
             emit(0x3828000000000000ULL | predicate | d | (u64{a} << 8) | (u64{1} << 39) | (u64{1} << 40));
             break;
         }
-        case 0x2bf: { // UPOPC, as POPC of the uniform's register (hookshot: any UR)
+        case 0x2bf: { // UPOPC, as POPC of the uniform's register (longshot: any UR)
             const u32 d = uniform_register(dest), a = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;
             if (d == ~0U || d == 255 || a == ~0U || insn.words[2] != 0x08000000 || native_predicate != 7)
                 return fail(index, "native uniform population count mode");
@@ -1829,7 +1829,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                 return fail(index, "native uniform comparison mode");
             const u32 temporary = 6 - output, mask = (1U << temporary) | (acc_slot < 7 ? 1U << acc_slot : 0U);
             if (guarded_compare) emit(0x5c98000000070000ULL | 249 | (u64{239} << 20) | (u64{15} << 39));
-            if (opcode == 0x88c) emit(0x0100000000000000ULL | (u64{7} << 16) | 252 | (u64{15} << 12) | (u64{insn.words[1]} << 20));   // (hookshot, from Lichii: unguarded, its guard is a uniform predicate)
+            if (opcode == 0x88c) emit(0x0100000000000000ULL | (u64{7} << 16) | 252 | (u64{15} << 12) | (u64{insn.words[1]} << 20));   // (longshot, from Lichii: unguarded, its guard is a uniform predicate)
             emit(0x38e8000000070000ULL | 253 | (u64{255} << 8) | (u64{mask} << 20));
             if (acc_slot < 7) emit(0x38f0000000070000ULL | (u64{239} << 8) | (u64{1U << acc_slot} << 20));
             emit(0x5b60000000070000ULL | 7 | (u64{temporary} << 3) |
@@ -1882,7 +1882,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                      (u64{insn.words[1]} << 20) | (u64{7} << 39));
                 break;
             }
-            if (opcode == 0x887) emit(0x0100000000000000ULL | (u64{7} << 16) | 252 | (u64{15} << 12) | (u64{insn.words[1]} << 20));   // (hookshot, from Lichii)
+            if (opcode == 0x887) emit(0x0100000000000000ULL | (u64{7} << 16) | 252 | (u64{15} << 12) | (u64{insn.words[1]} << 20));   // (longshot, from Lichii)
             const u32 temporary = 6 - condition, mask = 1U << temporary;
             emit(0x38e8000000070000ULL | 253 | (u64{255} << 8) | (u64{mask} << 20));
             emit(0x38f0000000070000ULL | (u64{239} << 8) | (u64{mask} << 20));
@@ -2449,7 +2449,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                         if (target == 255) return;
                         emit(0x5ca8000000000000ULL | predicate | 246 | (u64{1} << 8) | (u64{2} << 10) | (u64{low} << 20));
                         emit(0x5ca8000000000000ULL | predicate | 247 | (u64{1} << 8) | (u64{2} << 10) | (u64{high} << 20));
-                        // (hookshot: Rd = (Ra << 16) + Rb: the second of the pair, R247, is Ra. These two were the other
+                        // (longshot: Rd = (Ra << 16) + Rb: the second of the pair, R247, is Ra. These two were the other
                         // way round, swapping every pair: red and green, and blue in the high half with the low one
                         // empty, which lost the blue of OoT's upscaler networks: the yellow cast. As Lichii has it)
                         emit(0x5c18000000000000ULL | predicate | target | (u64{247} << 8) | (u64{246} << 20) | (u64{16} << 39));
@@ -2640,7 +2640,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                 result.instructions.push_back(base(0x0100000000000000ULL) | (u64{15} << 12) |
                     (u64{insn.words[1]} << 20));
             } else if (opcode == 0xc02) {
-                const u32 src = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;   // (hookshot: any UR)
+                const u32 src = insn.words[1] < 64 ? uniform_register(insn.words[1]) : ~0U;   // (longshot: any UR)
                 if (src == ~0U || insn.words[2] != 0x08000f00) return fail(index, "native uniform move source");
                 emit(base(0x5c98000000000000ULL) | (u64{15} << 39) | (u64{src} << 20));
             } else if (opcode == 0x202) {
@@ -2820,7 +2820,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
             const u32 form16 = insn.words[2] & ~(opcode == 0xd06 ? 0x08000400U : 0x400U);
             if (form16 == 0x00101000 && !(insn.words[1] & 0xcfffff00U) && source != ~0U) {
                 // I2F.U16 / S16 Rd, Rs(.H1): Maxwell's 16-bit source format, byte selector 0 or 2, bit 74: signed
-                // (hookshot: S16 and the uniform form stopped 240 of the game's programs, models and skinned meshes among them,
+                // (longshot: S16 and the uniform form stopped 240 of the game's programs, models and skinned meshes among them,
                 // from translating at all).
                 emit(base(0x5cb8000000000000ULL) | (u64{2} << 8) | (u64{1} << 10) | (u64{insn.Bits(74, 1)} << 13) | (u64{source} << 20) |
                      (u64{insn.Bits(60, 2) * 2} << 41));
@@ -2842,7 +2842,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
                  (u64{insn.Bits(78, 2)} << 39));
             break;
         }
-        case 0x207: case 0x807: case 0xa07: case 0xc07:   // (hookshot: 0xc07/0xc08, a uniform b)
+        case 0x207: case 0x807: case 0xa07: case 0xc07:   // (longshot: 0xc07/0xc08, a uniform b)
         case 0x208: case 0x808: case 0xa08: case 0xc08: { // Bitwise SEL / FSEL
             // FSEL applies the floating operand modifiers (negate/absolute) before selecting.
             const bool floating = (opcode & 0x1ff) == 0x008;
@@ -3322,7 +3322,7 @@ inline LoweredProgram LowerToMaxwellWith(std::span<const Instruction> code, u32 
             }
             // (hookshot) the link's MOV (the return PC into Rlink) up to sixteen instructions back, those between
             // writing other registers and not branching (OoT's mesh programs set it ten instructions before)
-            // (hookshot: up to 48: OoT's foliage mesh programs set it eighteen instructions before)
+            // (longshot: up to 48: OoT's foliage mesh programs set it eighteen instructions before)
             u32 setup = index;
             for (u32 back = 1; back <= 48 && back <= index; ++back) {
                 const Instruction& prior = code[index - back];

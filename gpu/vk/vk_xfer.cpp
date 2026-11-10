@@ -81,7 +81,7 @@ bool resolve(const nvn_tex* t, const nvn_view* v, bool has_v, const NVNcopyRegio
                  s.tex->astc ? " ASTC" : "", s.tex->skip);
         return false;
     }
-    if (!s.down && view_level(view) >= s.tex->skip + s.tex->levels) {   // (hookshot-amd: a level the image left out at its end)
+    if (!s.down && view_level(view) >= s.tex->skip + s.tex->levels) {   // (longshot-amd: a level the image left out at its end)
         static int logged;
         if (logged++ < 20)
             logf("vk: copy with level %u of texture %#llx %ux%u, %u levels (its last levels left out): skipped",
@@ -96,7 +96,7 @@ bool resolve(const nvn_tex* t, const nvn_view* v, bool has_v, const NVNcopyRegio
     s.x = r.xoffset, s.y = r.yoffset;
     s.w = r.width > 0 ? (uint32_t)r.width : (s.x >= 0 && (uint32_t)s.x < lw ? lw - (uint32_t)s.x : 0);
     s.h = r.height > 0 ? (uint32_t)r.height : (s.y >= 0 && (uint32_t)s.y < lh ? lh - (uint32_t)s.y : 0);
-    // (hookshot: 64-bit, so a layer range near 2^32 does not wrap around past the clamp below)
+    // (longshot: 64-bit, so a layer range near 2^32 does not wrap around past the clamp below)
     const uint64_t first = (uint64_t)view_layer(view) + (uint64_t)std::max(0, r.zoffset);
     const uint32_t count = (uint32_t)std::max(1, r.depth);
     if (s.tex->type == VK_IMAGE_TYPE_3D) {
@@ -138,7 +138,7 @@ bool buffer_side(const NvnState& st, const Sub& s, uint64_t addr, uint64_t& size
         return false;
     }
     // The last row ends at its last block: its trailing stride padding is not accessed by Vulkan.
-    // (hookshot: overflow-checked; the stride is the game's 64-bit value, and a wrapped size checked one row of many)
+    // (longshot: overflow-checked; the stride is the game's 64-bit value, and a wrapped size checked one row of many)
     uint64_t rows = 0, body = 0;
     if (__builtin_mul_overflow((uint64_t)hb * s.layers, (uint64_t)s.d, &rows) || __builtin_mul_overflow(row, rows - 1, &body) ||
         __builtin_add_overflow(body, (uint64_t)wb * s.bpb, &size)) {
@@ -178,7 +178,7 @@ void copy_b2t(VkCommandBuffer cmd, NvnState& st, const nvn_p_copy_bt& p, bool to
                          view_layer(p.has_view ? &p.view : nullptr) + (uint32_t)std::max(0, p.r.zoffset), p.r.xoffset,
                          p.r.yoffset, (uint32_t)std::max(0, p.r.width), (uint32_t)std::max(0, p.r.height), p.buf);
     }
-    {   // (hookshot, RX_VK_LOG_B2T=1) the first 60 copies into textures 960 wide or more: where they read, and what
+    {   // (longshot, RX_VK_LOG_B2T=1) the first 60 copies into textures 960 wide or more: where they read, and what
         static const bool on = getenv("RX_VK_LOG_B2T") != nullptr;
         static std::atomic<int> n{0};
         if (on && to_image && p.tex && p.r.width >= 960 && n.fetch_add(1) < 60) {
@@ -271,7 +271,7 @@ void copy_t2t(VkCommandBuffer cmd, NvnState& st, const nvn_p_copy_tt& p) {
         if (d.tex->bc && same_size) {
             done = texture_copy_into_bc(cmd, s.tex, s.level, s.layer, s.x, s.y, d.tex, d.level, d.layer, d.x, d.y, s.w, s.h,
                                         s.layers);
-        } else if (s.tex->bc && !d.tex->bc && s.tex->bc_resized) {   // (hookshot-amd: its texels are not the game's)
+        } else if (s.tex->bc && !d.tex->bc && s.tex->bc_resized) {   // (longshot-amd: its texels are not the game's)
             static int logged;
             if (logged++ < 8)
                 logf("vk: a copy out of resized BC3 texture %#llx left out", (unsigned long long)s.tex->gpu);

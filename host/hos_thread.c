@@ -768,7 +768,7 @@ uint64_t hos_reserved_cpus(void) {
 void hos_thread_pin(void *h, const char *name) {
     const uint64_t reserved = hos_reserved_cpus();
 #if defined(_WIN32)
-    const uint64_t cache = hos_cache_cpus();   /* (hookshot: the cores of the largest L3, when the CPU's differ) */
+    const uint64_t cache = hos_cache_cpus();   /* (longshot: the cores of the largest L3, when the CPU's differ) */
 #else
     const uint64_t cache = 0;
 #endif
@@ -900,7 +900,7 @@ HLE(_ZN2nn2os12CreateThreadEPNS0_10ThreadTypeEPFvPvES3_S3_mi) {
 }
 
 /* nn::os::CreateThread(ThreadType*, void (*)(void*), void* arg, void* stack, unsigned long size, int prio,
-   int idealCore) (hookshot: OoT's Porter thread pool uses this overload; left to the guest SDK it reached
+   int idealCore) (longshot: OoT's Porter thread pool uses this overload; left to the guest SDK it reached
    ThreadManagerImplByHorizon::MapAliasStack, which needs svcMapMemory, and aborted) */
 HLE(_ZN2nn2os12CreateThreadEPNS0_10ThreadTypeEPFvPvES3_S3_mii) {
     HOS_TRACE_CALL("CreateThread");
@@ -1035,7 +1035,7 @@ static int present_poll(Ctx *c, int64_t ns) {
 }
 HLE(_ZN2nn2os11SleepThreadENS_8TimeSpanE) {
     if (present_poll(c, (int64_t)ARG(0))) return;
-    if (c->x[30] == 0x80590520 && getenv("HOS_SLEEP_LOG")) {   /* (hookshot, diagnostic: OoT's present poll) */
+    if (c->x[30] == 0x80590520 && getenv("HOS_SLEEP_LOG")) {   /* (longshot, diagnostic: OoT's present poll) */
         static int logged;
         if (logged++ < 3) {
             const char *hos_hostcall_name(uint64_t addr);
@@ -1122,7 +1122,7 @@ HLE(_ZN2nn2os17ConvertToTimeSpanENS0_4TickE) {
     RET(t * (int64_t)(1000000000ULL / HOS_TICK_HZ));
 }
 
-/* ---- fibers (hookshot: nn::async's FiberTaskCoordinator, on OoT's nn.npln threads) ----------------------------
+/* ---- fibers (longshot: nn::async's FiberTaskCoordinator, on OoT's nn.npln threads) ----------------------------
    A guest fiber is a Win32 fiber with its own guest context: the lifted frames on its host stack keep using that
    context wherever it runs, so a fiber may resume on another thread. Switching in, it takes the running thread's
    identity (TLS registers, host thread object); the thread's own context stays in HosThread.ctx. The fiber function

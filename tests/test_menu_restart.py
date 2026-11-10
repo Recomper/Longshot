@@ -32,12 +32,12 @@ int main(int argc, char **argv) {
     char a[1024], e[1024];
     snprintf(a, sizeof a, "%s/cmdline", dir), snprintf(e, sizeof e, "%s/environ", dir);
     /* (an empty argument kept, the last string ended by its NUL or not) */
-    static const char args[] = "./bin/hookshot\0--user\0\0last";
+    static const char args[] = "./bin/longshot\0--user\0\0last";
     static const char env[] = "WAYLAND_DISPLAY=wayland-1\0XDG_DATA_HOME=/tmp/x\0";
     write_file(a, args, sizeof args - 1), write_file(e, env, sizeof env - 1);
     HosRelaunch r;
     assert(hos_relaunch_command(a, e, &r));
-    assert(r.argc == 4 && !strcmp(r.argv[0], "./bin/hookshot") && !strcmp(r.argv[1], "--user") && !strcmp(r.argv[2], "") &&
+    assert(r.argc == 4 && !strcmp(r.argv[0], "./bin/longshot") && !strcmp(r.argv[1], "--user") && !strcmp(r.argv[2], "") &&
            !strcmp(r.argv[3], "last") && !r.argv[4]);
     assert(r.envc == 2 && !strcmp(r.envp[0], "WAYLAND_DISPLAY=wayland-1") && !strcmp(r.envp[1], "XDG_DATA_HOME=/tmp/x") &&
            !r.envp[2]);

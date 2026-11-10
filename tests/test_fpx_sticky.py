@@ -41,7 +41,7 @@ It has teeth (each by hand, then restored):
     python -I -B tests/test_fpx_sticky.py [--cc clang] [--cxx clang++]
 
 Skipped (exit 0) on a host that is not x86-64 or has no C/C++ compiler (PATH, $CC/$CXX, or the build's own emsdk /
-HOOKSHOT_MINGW toolchain), or on a CPU without x86-64-v2; the v3 build alone is skipped on a CPU without x86-64-v3.
+LONGSHOT_MINGW toolchain), or on a CPU without x86-64-v2; the v3 build alone is skipped on a CPU without x86-64-v3.
 """
 import argparse
 import os
@@ -69,7 +69,7 @@ def skip(why):
 
 
 def compiler(given, env, names, build_name):
-    """--cc/--cxx, else $CC/$CXX, else HOOKSHOT_MINGW's when it is set (target_flags gives its target and runtime, which
+    """--cc/--cxx, else $CC/$CXX, else LONGSHOT_MINGW's when it is set (target_flags gives its target and runtime, which
     another clang on PATH cannot use), else PATH, else the toolchain the build itself uses (emsdk)"""
     for c in (given, os.environ.get(env)):
         if c:
@@ -185,7 +185,7 @@ def main():
         skip("no C compiler" if not cc else "no C++ compiler")
     t0 = time.time()
     failed, ran = [], []
-    with tempfile.TemporaryDirectory(prefix="hookshot-fpx-sticky-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="longshot-fpx-sticky-") as tmp:
         generate(cxx, tmp, target_flags(cxx, tmp))
         for march, fma in BUILDS:
             exe = os.path.join(tmp, "fpx_sticky_test_%s.exe" % march)

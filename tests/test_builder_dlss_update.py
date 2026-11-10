@@ -19,7 +19,7 @@ def main():
     dotnet = shutil.which(a.dotnet)
     if not dotnet:
         p.error(".NET 8 SDK is required for the Windows Builder update fixture")
-    source = (a.source / "builder/HookshotBuilder/MainWindow.xaml.cs").read_text(encoding="utf-8")
+    source = (a.source / "builder/LongshotBuilder/MainWindow.xaml.cs").read_text(encoding="utf-8")
     start = source.index("    internal void UpdateBuild(")
     end = source.index("    // ================= the window", start)
     fixture = (ROOT / "tests/builder_dlss_update_test.cs").read_text(encoding="utf-8")
@@ -27,7 +27,7 @@ def main():
         root = Path(folder)
         (root / "Program.cs").write_text(fixture.replace("/* ACTUAL_UPDATE */", source[start:end]), encoding="utf-8")
         for name in ("BuilderSettings.cs", "ShaderStep.cs"):
-            shutil.copyfile(a.source / "builder/HookshotBuilder" / name, root / name)
+            shutil.copyfile(a.source / "builder/LongshotBuilder" / name, root / name)
         (root / "NuGet.Config").write_text("<configuration><packageSources><clear/></packageSources></configuration>", encoding="utf-8")
         (root / "Fixture.csproj").write_text('''<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup>
 <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings>

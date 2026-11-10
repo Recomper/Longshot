@@ -200,7 +200,7 @@ static Obj *obj(uint64_t key, int kind) {
    while the lock is held, and a thread that holds a core can then block on that lock (wait_any's scan under mw_lock vs
    poke_multiwait: a stall until the 250 ms vcore escape) */
 static Obj *obj_nockpt(uint64_t key, int kind) {
-    /* (hookshot: 128 still missed: obj_lookup was the busiest leaf in dense Kokiri, 3.2% of all samples, 4.3% of the instants when one
+    /* (longshot: 128 still missed: obj_lookup was the busiest leaf in dense Kokiri, 3.2% of all samples, 4.3% of the instants when one
        thread alone ran; each actor has its own mutexes) */
     static _Thread_local struct { uint64_t key; Obj *o; } cache[1024];
     static int off = -1;
@@ -919,7 +919,7 @@ static void queue_init(uint64_t key, int capacity) {
     Obj *q = fresh(key, K_QUEUE);
     q->qcap = capacity > 0 ? capacity : 1;
     q->q = (uint64_t *)calloc(q->qcap, 8);
-    if (!q->q) hos_fatal(NULL, "os: message queue of %d entries", q->qcap);   /* (hookshot: was written through NULL) */
+    if (!q->q) hos_fatal(NULL, "os: message queue of %d entries", q->qcap);   /* (longshot: was written through NULL) */
 }
 /* (mkw-recomp) HOS_QUEUE_TRACE=1: the first 400 puts (thread, queue, value) */
 static void queue_trace(Obj *q, uint64_t v, const char *what) {

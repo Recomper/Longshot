@@ -27,7 +27,7 @@ mkw-recomp's changes:
   loop header too (`mkw_glue.c` `a64_poll`), and equal-priority holders yield after a 2 ms slice.
 - **Left out:** files bound to TOTK or its Maxwell GPU: `gpu.c`, `nvn_trace.c`, `hos_prof.c`, `mods.c`, `movie*.c`,
   `nn_image_debug.c`, `totk_*.c`. `mkw_glue.c` stands in for the hooks the taken files call into them. `mods.c`
-  came back later as Hookshot's `host/mods.c`: the RomFS part of Skybound's loader (`NotRexed/SkyboundTotk`, MIT).
+  came back later as Longshot's `host/mods.c`: the RomFS part of Skybound's loader (`NotRexed/SkyboundTotk`, MIT).
 
 Licensing follows a64-kit: GPL, through suyu's translator in the lifted code (see
 `third_party/a64-kit/NOTICE.TOTKPort.md`).

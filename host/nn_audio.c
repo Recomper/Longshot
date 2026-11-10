@@ -33,7 +33,7 @@
 #else
 #include "hos_sdl.h"
 #endif
-#include "hos_paths.h"   /* (the game folder: hookshot_options.ini, au_menu_output) */
+#include "hos_paths.h"   /* (the game folder: longshot_options.ini, au_menu_output) */
 
 void hos_system_event_init(uint64_t key, int autoclear);
 void hos_system_event_signal(uint64_t key);
@@ -642,7 +642,7 @@ static int au_device_channels(void) {
 #else
 static int au_device_channels(void) { return hos_sdl_audio_channels(); }
 #endif
-/* (hookshot) The Insert menu's Audio output (gpu/vk/vk_menu.cpp): audio_output= in hookshot_options.ini beside the game,
+/* (hookshot) The Insert menu's Audio output (gpu/vk/vk_menu.cpp): audio_output= in longshot_options.ini beside the game,
    0 Auto, 1 Stereo, 2 5.1 (a number past them is the nearest, as the menu reads it). Read from the file, as
    host/nn_applet.c reads the Handheld profile: the game asks for its speakers only once, at its start */
 static int au_menu_output(void) {
@@ -650,7 +650,7 @@ static int au_menu_output(void) {
     const DWORD len = hos_game_path_a(path, MAX_PATH);
     char *slash = len ? (strrchr(path, 92) ? strrchr(path, 92) : strrchr(path, 47)) : NULL;   /* (linux: '/') */
     if (!slash) return 0;
-    snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "hookshot_options.ini");
+    snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "longshot_options.ini");
     FILE *f = fopen(path, "r");
     if (!f) return 0;
     char line[80];

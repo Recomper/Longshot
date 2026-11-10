@@ -115,13 +115,13 @@ jobs:
           dotnet run --project tests/builder_workers/BuilderWorkersTests.csproj --configuration Release --no-restore -- (Get-Command python).Source
       - name: Compile Windows Builder
         if: ${{ !cancelled() && runner.os == 'Windows' }}
-        run: dotnet build builder/HookshotBuilder/HookshotBuilder.csproj --configuration Debug -p:NuGetAudit=false
+        run: dotnet build builder/LongshotBuilder/LongshotBuilder.csproj --configuration Debug -p:NuGetAudit=false
       # (--strict: a check whose compiler, headers or package is missing here fails instead of being skipped)
       - name: Every test
         if: ${{ !cancelled() }}
         env:
-          HOOKSHOT_SPIRV_HEADERS: ${{ github.workspace }}/_deps/spirv-headers/include
-          HOOKSHOT_VULKAN_HEADERS: ${{ github.workspace }}/_deps/vulkan-headers/include
+          LONGSHOT_SPIRV_HEADERS: ${{ github.workspace }}/_deps/spirv-headers/include
+          LONGSHOT_VULKAN_HEADERS: ${{ github.workspace }}/_deps/vulkan-headers/include
         run: python -I -B tests/run_all.py --strict
 
   spirv-global16:

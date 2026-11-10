@@ -22,7 +22,7 @@ HARNESS = r"""
 #include <string>
 #include <vector>
 
-#define HOS_APP_ID "io.github.NotRexed.Hookshot"
+#define HOS_APP_ID "io.github.Recomper.Longshot"
 enum { HOS_SDL_VIDEO = 0x20, HOS_SDL_EVENTS = 0x4000 };
 static int version;
 static std::vector<std::string> hints;
@@ -84,7 +84,7 @@ def main():
     env.pop("HOS_HEADLESS", None)
     for name in ("SDL_VIDEODRIVER", "SDL_VIDEO_DRIVER", "XDG_CURRENT_DESKTOP", HINT):
         env.pop(name, None)
-    with tempfile.TemporaryDirectory(prefix="hookshot-libdecor-hint-") as folder:
+    with tempfile.TemporaryDirectory(prefix="longshot-libdecor-hint-") as folder:
         tmp = Path(folder)
         (tmp / "display_init_actual.inc").write_text(actual + "\n", encoding="utf-8")
         (tmp / "harness.cpp").write_text(HARNESS, encoding="utf-8")

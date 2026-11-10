@@ -265,8 +265,8 @@ static const MkwVkRenderer *load_vulkan(const char *dll) {
 int rx_start(void *hwnd) {
     const char *b = getenv("RX_BACKEND");
     const int eden = b && !_stricmp(b, "eden");
-    if (!b || !_stricmp(b, "vulkan") || eden) {   /* (hookshot: Vulkan unless told otherwise; a started game has no RX_BACKEND) */
-        const char *dll = eden ? "mkw_eden.dll" : "hookshot_vk.dll";
+    if (!b || !_stricmp(b, "vulkan") || eden) {   /* (longshot: Vulkan unless told otherwise; a started game has no RX_BACKEND) */
+        const char *dll = eden ? "mkw_eden.dll" : "longshot_vk.dll";
         const MkwVkRenderer *r = load_vulkan(dll);
         if (r && r->start(hwnd)) {
             vk = r;
@@ -280,10 +280,10 @@ int rx_start(void *hwnd) {
     flush_early();
     return ok;
 }
-/* (hookshot) hookshot --prepare-shaders: the Vulkan back end started with no window and no game, which prepares
+/* (hookshot) longshot --prepare-shaders: the Vulkan back end started with no window and no game, which prepares
    every shader in its start (gpu/vk/vk_main.cpp started_up) and is then let go. 0 when there is no usable Vulkan */
 int rx_prepare_shaders(void) {
-    const MkwVkRenderer *r = load_vulkan("hookshot_vk.dll");
+    const MkwVkRenderer *r = load_vulkan("longshot_vk.dll");
     return r && r->start(NULL);
 }
 /* (hookshot) the window is being closed: a back end still preparing its shaders stops and keeps what it made first (a few
@@ -319,7 +319,7 @@ void rx_nvn_present(const nvn_tex *t, const int crop[4]) {
     InterlockedIncrement(&presents);
     vk ? vk->nvn_present(t, crop) : wgr_nvn_present(t, crop);
 }
-/* (hookshot, nx2/oot_jitter.py) the temporal upscaler's camera jitter (NVIDIA DLSS, AMD FSR 4: gpu/vk/vk_temporal.cpp): this frame's sub-pixel offset of the scene's projection, in clip
+/* (longshot, nx2/oot_jitter.py) the temporal upscaler's camera jitter (NVIDIA DLSS, AMD FSR 4: gpu/vk/vk_temporal.cpp): this frame's sub-pixel offset of the scene's projection, in clip
    space (what P[0][2] and P[1][2] get), into out, for the projection matrix at guest address projection (row major, as the
    game fills its views' uniform buffers from it); 0 when there is none: DLSS and FSR off (or a renderer without them: rx_option
    HOS_OPT_DLSS_JITTER_W and _H, the scene's size in pixels, are 0), or a projection that is not one of the picture's

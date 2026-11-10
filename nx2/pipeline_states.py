@@ -1,6 +1,6 @@
-"""The pipeline state lists (gpu/vk/vk_draw.cpp: hookshot_pipeline_states.bin, written as the game is played): show one, or merge
+"""The pipeline state lists (gpu/vk/vk_draw.cpp: longshot_pipeline_states.bin, written as the game is played): show one, or merge
 several into the list a release ships (assets/pipeline_states.bin.xz, unpacked by nx2/make_game.py beside the game as
-hookshot_pipeline_states_shipped.bin, whose pipelines the first start's shader preparation builds before the title).
+longshot_pipeline_states_shipped.bin, whose pipelines the first start's shader preparation builds before the title).
 
     python -I nx2/pipeline_states.py <list>...                    what they hold
     python -I nx2/pipeline_states.py --out assets/pipeline_states.bin.xz assets/pipeline_states.bin.xz <list>...
@@ -10,7 +10,7 @@ A list may be xz-compressed (read by its magic; written so when --out ends in .x
 repository's history stays small. xz, not zstd: the AppImage's Python (3.12) has lzma but not compression.zstd.
 
 A list holds no game code: each record is a pipeline's stage code keys (hashes of the game's shaders, which the player's own
-hookshot_shaders.bin turns back into the shaders), the program variant's hash, and the formats and draw state baked into the pipeline.
+longshot_shaders.bin turns back into the shaders), the program variant's hash, and the formats and draw state baked into the pipeline.
 
     <list>: "HKSTATE1", u32 record size (528), then the records:
             u64 code[4] (vertex or mesh, fragment, task, the header-only stage), u64 variant,

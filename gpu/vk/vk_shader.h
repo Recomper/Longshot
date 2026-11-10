@@ -45,7 +45,7 @@ struct Program {
     VkPipeline compute_pipeline = VK_NULL_HANDLE;
     // (the compute pipeline's build: 0 not started, 1 on a worker, 2 done (compute_pipeline made, or failed): vk_draw.cpp dispatch)
     std::atomic<int> compute_state{0};
-    mutable std::atomic<bool> dispatched{false};   // (hookshot) noted in hookshot_computes.bin (vk_draw.cpp compute_note)
+    mutable std::atomic<bool> dispatched{false};   // (hookshot) noted in longshot_computes.bin (vk_draw.cpp compute_note)
     bool push = false;             // its set is pushed (VK_KHR_push_descriptor)
     VkShaderStageFlags push_stages = 0;
     bool uses_render_area = false;
@@ -70,7 +70,7 @@ struct Program {
     };
     std::vector<Answer> answers;
     uint64_t variant = 0;   // (a hash of the answers: key alone names all the variants of these stages)
-    mutable std::atomic<int64_t> wm_sig{-1};   // (hookshot: what its write masks are made from, vk_draw.cpp program_wm_sig; -1: not asked yet)
+    mutable std::atomic<int64_t> wm_sig{-1};   // (longshot: what its write masks are made from, vk_draw.cpp program_wm_sig; -1: not asked yet)
     // (hookshot) the translation's texture questions as answered, in the order asked: what makes this variant again with nothing
     // bound (the pipeline state list, vk_draw.cpp)
     std::vector<uint8_t> questions;
@@ -84,28 +84,28 @@ enum class ProgramKind { Graphics, Compute, Mesh };
 /// Graphics programs may come back not ready yet (translation queued): the draw leaves itself out or program_wait()s.
 const Program* program_for(const NvnState& s, ProgramKind kind, const uint8_t color_types[8]);
 uint64_t compute_code_key(const NvnState& s);   // (hookshot) the bound compute program's code key, 0: none
-std::string program_textures(const NvnState& s, const Program& p);   // (hookshot, for logs)
+std::string program_textures(const NvnState& s, const Program& p);   // (longshot, for logs)
 std::string program_code_keys(const NvnState& s);   // (hookshot) " stage:key" for each of the bound program's codes
 const Program* program_pick(const NvnState& s, ProgramKind kind, const uint8_t color_types[8]);   // (program_for without its cache)
 void program_wait(const Program* p);
 uint64_t program_cache_stamp();   // (what the kept programs and pipelines are good for)
 size_t program_cache_load_some(const std::unordered_set<uint64_t>& wanted, const std::function<void(Program&)>& fn,
                                bool computes = true, bool fallbacks = false);   // (computes: and every kept compute program)
-/// The precompile of every shader of the game (hookshot_shaders.bin, from nx2/shader_census.py): how many programs it names, 0: none
+/// The precompile of every shader of the game (longshot_shaders.bin, from nx2/shader_census.py): how many programs it names, 0: none
 size_t seed_open();
-std::string seed_path();   // (hookshot_shaders.bin, beside the game)
+std::string seed_path();   // (longshot_shaders.bin, beside the game)
 void seed_close();
 /// Program i of the seed, translated and kept for the default state (null: kept already, or it does not translate); its modules are yours
 std::unique_ptr<Program> seed_program(size_t i, int inputs = 0);
 bool seed_is_compute(size_t i);
-/// (hookshot) Seed program i, a compute program, kept in hookshot_programs.bin with every texture variant its questions can make (up
+/// (hookshot) Seed program i, a compute program, kept in longshot_programs.bin with every texture variant its questions can make (up
 /// to cap variants); made is given each variant not kept before
 struct SeedVariants {
     size_t variants = 0, questions = 0;
     bool kept = false, failed = false, capped = false;
 };
 SeedVariants seed_compute(size_t i, size_t cap, const std::function<void(Program&)>& made);
-/// (hookshot, the prediction: vk_predict.cpp) a kept graphics program variant as hookshot_programs.bin has it: each stage's SPIR-V
+/// (longshot, the prediction: vk_predict.cpp) a kept graphics program variant as longshot_programs.bin has it: each stage's SPIR-V
 struct KeptProgram {
     uint64_t key = 0, variant = 0;
     bool mesh = false;

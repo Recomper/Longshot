@@ -334,7 +334,7 @@ bool test_multiply() {
 namespace {
 /// Without cooperative matrices (a GTX 1650, an RTX 2060 on some drivers, AMD and Intel cards): the same multiplies in a shader function on
 /// subgroup shuffles. The lowering refuses a matrix multiply it has no way to run, and the game's upscaling networks were then left out:
-/// the 3D scene came out black or as coloured noise, with the HUD over it (Hookshot issues 10 and 14)
+/// the 3D scene came out black or as coloured noise, with the HUD over it (Longshot issues 10 and 14)
 void software_multiplies(const char* why) {
     Shader::Backend::SPIRV::mma_software = true;
     dev.native_mma = true;
@@ -384,7 +384,7 @@ void coopmat_init() {
         return;
     }
     bool ok = measure_order() && test_multiply();
-    // (hookshot, diagnosis) RX_VK_MMA_A_ORDER / _B_ORDER / _C_ORDER=<n,n,...>: the element orders given instead of the
+    // (longshot, diagnosis) RX_VK_MMA_A_ORDER / _B_ORDER / _C_ORDER=<n,n,...>: the element orders given instead of the
     // measured ones (as if the console's fragments were laid out otherwise)
     const auto override_order = [&](const char* name, auto& order) {
         const char* e = std::getenv(name);

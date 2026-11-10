@@ -2,7 +2,7 @@
    once. Buttons map by position (the Xbox bottom face button is the Switch's bottom one, B).
 
    (hookshot) What presses each button, on a gamepad and on the keyboard, is the player's: the Insert menu's Controls
-   page (gpu/vk/vk_menu.cpp) changes it, kept in hookshot_options.ini (binds_load). The defaults:
+   page (gpu/vk/vk_menu.cpp) changes it, kept in longshot_options.ini (binds_load). The defaults:
    Keyboard (totk-pc-recomp's layout): WASD left stick, arrows or IJKL right stick (camera), Space X (jump), E A
    (action), Shift B (run/cancel), Q L (abilities), R R, Z ZL, X or F ZR (bow), Ctrl left-stick click (crouch), C
    right-stick click (first person), Tab or Enter Plus, M Minus (map), 1 2 3 4 d-pad left, up, right, down. Only
@@ -485,7 +485,7 @@ static void stick_max(int32_t stick[4], const int32_t v[4]) {
 }
 
 /* ---- (hookshot) the controls: the gamepad input (by position) and the keys that press each Switch button, from
-   hookshot_options.ini beside the executable when it has them: pad_<button>=<HOS_PAD_* position, -1 none> and
+   longshot_options.ini beside the executable when it has them: pad_<button>=<HOS_PAD_* position, -1 none> and
    key_<button>=<key code>,<key code> (Windows key codes, 0 none), <button> one of bind_names. Read once, at the
    first use; what the file leaves out keeps its default. Keys only, after the Switch's buttons (HOS_KEY_*): the left
    stick's and the camera's directions. A key can be a mouse button (1 2 4 5 6: left, right, middle, 4, 5), which counts
@@ -527,7 +527,7 @@ static void binds_load(void) {
     char *slash = len ? (strrchr(path, 92) ? strrchr(path, 92) : strrchr(path, 47)) : NULL;   /* (linux: '/') */
     FILE *f = NULL;
     if (slash) {
-        snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "hookshot_options.ini");
+        snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "longshot_options.ini");
         f = fopen(path, "r");
     }
     int changed = 0;
@@ -568,7 +568,7 @@ static void binds_load(void) {
             }
         }
     }
-    if (changed) hos_log("hid: %d controls from hookshot_options.ini", changed);
+    if (changed) hos_log("hid: %d controls from longshot_options.ini", changed);
     InterlockedExchange(&state, 2);
 }
 int hos_binding(int set, int button, int slot) {
@@ -649,7 +649,7 @@ static void pads_read(uint64_t *buttons, int32_t stick[4]) {
             static int64_t load_retry;
             if (now >= load_retry) {
                 load_retry = now + 5000000000LL;
-#ifdef _WIN32   /* (hookshot: System32's, not one beside the game, in the current folder or on PATH) */
+#ifdef _WIN32   /* (longshot: System32's, not one beside the game, in the current folder or on PATH) */
                 HMODULE x = LoadLibraryExA("xinput1_4.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
                 if (!x) x = LoadLibraryExA("xinput9_1_0.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 #else
@@ -798,7 +798,7 @@ static void read_input(uint64_t *buttons, int32_t stick[4]) {
     if (exclusive < 0) exclusive = getenv("HOS_INPUT_EXCLUSIVE") != NULL;
     if (exclusive && npresses > 0 && script_elapsed_ms(hos_now_ns()) < script_end_ms + 5000)
         return;
-    /* (hookshot, issue 389) A scripted press (HOS_INPUT_SCRIPT, HOS_INPUT_LIVE) is the test's own, not the
+    /* (longshot, issue 389) A scripted press (HOS_INPUT_SCRIPT, HOS_INPUT_LIVE) is the test's own, not the
        player's: it counts with the game's window behind another one, so a test run can drive the game on one
        monitor while the player works in the front window. HOS_INPUT_BACKGROUND still decides the pads. */
     static int scripted_background = -1;
@@ -829,7 +829,7 @@ static void read_input(uint64_t *buttons, int32_t stick[4]) {
             ps[3] > 12000 || ps[3] < -12000)
             player_used();
     }
-    binds_load();   /* (the keys: key_default's, or hookshot_options.ini's; the mouse's buttons once its capture is known) */
+    binds_load();   /* (the keys: key_default's, or longshot_options.ini's; the mouse's buttons once its capture is known) */
     for (int i = 0; i < HOS_SW_N; i++)
         if (bound_down(i, 0)) *buttons |= 1ULL << i, player_used();
     int32_t mouse[4] = {0};
@@ -1071,7 +1071,7 @@ static void vibration_send(uint64_t handle, uint64_t value) {
     memcpy(v, GP(value), sizeof v);
     const int dev = (G32(handle) >> 16) & 1;
     rumble_map(v, amp[dev]);
-    {   /* (hookshot, issue 263) what the game asks for: the first values, then a count now and then */
+    {   /* (longshot, issue 263) what the game asks for: the first values, then a count now and then */
         static long long n, strong;
         static float peak;
         if (v[0] > peak) peak = v[0];

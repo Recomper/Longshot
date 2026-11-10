@@ -1,8 +1,8 @@
 """Linux builder updates, the same way Windows installs (builder/setup/setup.c, scripts/make_setup_parts.py).
 
-A release publishes hookshot-linux.txt. Each part is a zip named by its SHA-256 and kept on the linux-parts release, so a
+A release publishes longshot-linux.txt. Each part is a zip named by its SHA-256 and kept on the linux-parts release, so a
 part whose files did not change is not downloaded again. The player's copy lives at
-$XDG_DATA_HOME/hookshot/builder/versions/<tag> (AppRun at its root, the same layout as the AppImage). An unchanged part
+$XDG_DATA_HOME/longshot/builder/versions/<tag> (AppRun at its root, the same layout as the AppImage). An unchanged part
 is copied from the builder that is running now (the mounted AppImage, or the version installed last time).
 
     tag <tag>
@@ -22,9 +22,9 @@ import zipfile
 
 from part_links import SYSROOT_PART, is_absolute_link, relative_sysroot_link
 
-LIST_NAME = "hookshot-linux.txt"
-LATEST_LIST = "https://github.com/NotRexed/Hookshot/releases/latest/download/" + LIST_NAME
-LATEST_API = "https://api.github.com/repos/NotRexed/Hookshot/releases/latest"
+LIST_NAME = "longshot-linux.txt"
+LATEST_LIST = "https://github.com/Recomper/Longshot/releases/latest/download/" + LIST_NAME
+LATEST_API = "https://api.github.com/repos/Recomper/Longshot/releases/latest"
 
 
 class Part(object):
@@ -47,13 +47,13 @@ class Manifest(object):
 
 
 def data_root():
-    base = os.environ.get("HOOKSHOT_BUILDER_HOME") or os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-    return os.path.join(base, "hookshot", "builder")
+    base = os.environ.get("LONGSHOT_BUILDER_HOME") or os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return os.path.join(base, "longshot", "builder")
 
 
 def parse_list(text, local=True):
     """The setup list. A part owns the following tree line, or the file lines, until the next part. local: a list from
-    this PC (the tools' own, HOOKSHOT_LINUX_LIST), whose parts may be file:// links; a downloaded one's are https"""
+    this PC (the tools' own, LONGSHOT_LINUX_LIST), whose parts may be file:// links; a downloaded one's are https"""
     tag, parts, cur = "", [], None
     for raw in text.splitlines():
         line = raw.strip()
@@ -135,7 +135,7 @@ def tools_tag(root):
     """The release these tools are, from the file a package writes (VERSION, or version.txt). A source checkout has neither."""
     if not root:
         return ""
-    for rel in ("usr/share/hookshot/VERSION", "usr/share/hookshot/version.txt", "VERSION", "version.txt"):
+    for rel in ("usr/share/longshot/VERSION", "usr/share/longshot/version.txt", "VERSION", "version.txt"):
         path = os.path.join(root, rel)
         try:
             with open(path, encoding="utf-8") as f:
@@ -152,9 +152,9 @@ def running_root():
     appdir = os.environ.get("APPDIR")
     if appdir and os.path.isfile(os.path.join(appdir, "AppRun")):
         return appdir
-    tools = os.environ.get("HOOKSHOT_TOOLS")
+    tools = os.environ.get("LONGSHOT_TOOLS")
     if tools:
-        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(tools))))   # (<root>/usr/share/hookshot)
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(tools))))   # (<root>/usr/share/longshot)
         if os.path.isfile(os.path.join(root, "AppRun")):
             return root
     return None
@@ -173,10 +173,10 @@ def game_version(folder):
     """The release a folder was built with, when it still has the game files an update builds from."""
     if not folder:
         return None, False
-    kept = os.path.isdir(os.path.join(folder, ".hookshot_exefs")) and os.path.isdir(os.path.join(folder, "romfs"))
+    kept = os.path.isdir(os.path.join(folder, ".longshot_exefs")) and os.path.isdir(os.path.join(folder, "romfs"))
     version = None
     try:
-        with open(os.path.join(folder, "hookshot_version.txt"), encoding="utf-8") as f:
+        with open(os.path.join(folder, "longshot_version.txt"), encoding="utf-8") as f:
             for line in f:
                 if line.startswith("version="):
                     version = line[8:].strip() or None
@@ -187,13 +187,13 @@ def game_version(folder):
 
 
 def game_exe(folder):
-    """bin/hookshot under the launcher, or hookshot in a folder built before the launcher."""
+    """bin/longshot under the launcher, or longshot in a folder built before the launcher."""
     if not folder:
         return None
-    nested = os.path.join(folder, "bin", "hookshot")
+    nested = os.path.join(folder, "bin", "longshot")
     if os.path.isfile(nested) and os.path.isfile(os.path.join(folder, "image.bin")):
         return nested
-    flat = os.path.join(folder, "hookshot")
+    flat = os.path.join(folder, "longshot")
     if os.path.isfile(flat) and os.path.isfile(os.path.join(folder, "image.bin")):
         return flat
     return None
@@ -218,7 +218,7 @@ def _https(url):
 
 def _request(url, timeout, limit=MAX_DOWNLOAD):
     # (no second argument: Request's second is the POST body, and a str body failed every download before connecting)
-    req = urllib.request.Request(_https(url), headers={"User-Agent": "Hookshot", "Accept": "application/vnd.github+json"})
+    req = urllib.request.Request(_https(url), headers={"User-Agent": "Longshot", "Accept": "application/vnd.github+json"})
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return _read_at_most(response, limit)
 
@@ -238,7 +238,7 @@ def _api_download(url):
     for asset in json.loads(info.decode("utf-8")).get("assets", []):
         if asset.get("name") == name:
             req = urllib.request.Request(_https(asset.get("url")), headers={
-                "User-Agent": "Hookshot", "Accept": "application/octet-stream"})
+                "User-Agent": "Longshot", "Accept": "application/octet-stream"})
             with urllib.request.urlopen(req, timeout=120) as response:
                 return _read_at_most(response, MAX_DOWNLOAD)
     return None
@@ -455,19 +455,19 @@ def _check_links_inside(dest):
 def _finish_tree(dest):
     """AppRun at the root, from the tools just installed, so this folder starts the way the AppImage does."""
     _check_links_inside(dest)
-    for name in ("AppRun", "hookshot.png", "hookshot-builder.desktop"):
+    for name in ("AppRun", "longshot.png", "longshot-builder.desktop"):
         if os.path.islink(os.path.join(dest, name)):   # (written below: never through a link a part made)
             raise ValueError("the update has a link where %s goes" % name)
-    tools = os.path.join(dest, "usr", "share", "hookshot")
+    tools = os.path.join(dest, "usr", "share", "longshot")
     apprun = os.path.join(dest, "AppRun")
     shutil.copyfile(os.path.join(tools, "builder", "linux", "AppRun"), apprun)
     os.chmod(apprun, 0o755)   # (rwxr-xr-x: the launcher must run; only its owner may change it)
-    icon = os.path.join(tools, "assets", "hookshot.png")
+    icon = os.path.join(tools, "assets", "longshot.png")
     if os.path.isfile(icon):
-        shutil.copyfile(icon, os.path.join(dest, "hookshot.png"))
-    desktop = os.path.join(tools, "builder", "linux", "hookshot-builder.desktop")
+        shutil.copyfile(icon, os.path.join(dest, "longshot.png"))
+    desktop = os.path.join(tools, "builder", "linux", "longshot-builder.desktop")
     if os.path.isfile(desktop):
-        shutil.copyfile(desktop, os.path.join(dest, "hookshot-builder.desktop"))
+        shutil.copyfile(desktop, os.path.join(dest, "longshot-builder.desktop"))
     return apprun
 
 
@@ -525,7 +525,7 @@ def installed_apprun():
 
 def fetch_manifest(get=None):
     get = get or (lambda url: fetch_bytes(url, 30))
-    override = os.environ.get("HOOKSHOT_LINUX_LIST")
+    override = os.environ.get("LONGSHOT_LINUX_LIST")
     if override:
         with open(override, encoding="utf-8") as handle:
             return parse_list(handle.read())
@@ -537,9 +537,9 @@ def startup_manifest(root, get=None):
     that is that same release and no older than it (a self-contained -rc or Actions tab AppImage). Reinstalling an
     older release's parts over those tools replaces files the working tools had (issue 990: a -rc shipped
     gpu/vk/oot_cheat_items.h, the release's zip did not, and every launch lost it). The comparison is update_target's:
-    a builder that is not an older release still updates. A HOOKSHOT_LINUX_LIST is a deliberate override: it wins."""
+    a builder that is not an older release still updates. A LONGSHOT_LINUX_LIST is a deliberate override: it wins."""
     latest = fetch_manifest(get)
-    if not os.environ.get("HOOKSHOT_LINUX_LIST"):
+    if not os.environ.get("LONGSHOT_LINUX_LIST"):
         own = read_manifest(root)
         if own and own.tag == tools_tag(root) and update_target(latest.tag, own.tag) == own.tag:
             return own

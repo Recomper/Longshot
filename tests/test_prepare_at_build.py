@@ -1,4 +1,4 @@
-"""make_game.py's last step, hookshot --prepare-shaders, run against stub games: its stage and progress lines go on to the builder,
+"""make_game.py's last step, longshot --prepare-shaders, run against stub games: its stage and progress lines go on to the builder,
 its own @@done and @@error don't (the builders read those as the build's end or failure), a failure or a silent hang leaves the work
 to the first start (never a failed build), and the game runs in its own environment, as the builders' Play starts it.
 
@@ -24,11 +24,11 @@ SOURCE = ROOT / "nx2" / "make_game.py"
 spec = importlib.util.spec_from_file_location("make_game_prepare", SOURCE)
 make_game = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(make_game)
-BUILDER = ROOT / "builder" / "linux" / "hookshot_builder.py"
+BUILDER = ROOT / "builder" / "linux" / "longshot_builder.py"
 
 
 def stub(code):
-    """A stand-in for hookshot --prepare-shaders: authored Python, no game, no GPU"""
+    """A stand-in for longshot --prepare-shaders: authored Python, no game, no GPU"""
     return [sys.executable, "-I", "-c", code]
 
 
@@ -45,10 +45,10 @@ def not_prepared(lines):
 
 class PrepareShadersTests(unittest.TestCase):
     def test_progress_goes_on_and_the_games_done_does_not(self):
-        code, lines = prepared(stub("print('hookshot v'); print('@@stage shaders Preparing shaders'); print('@@progress 0.500');"
+        code, lines = prepared(stub("print('longshot v'); print('@@stage shaders Preparing shaders'); print('@@progress 0.500');"
                                     "print('@@done shaders')"))
         self.assertEqual(code, 0)
-        self.assertEqual(lines, ["hookshot v", "@@stage shaders Preparing shaders", "@@progress 0.500", "done shaders"])
+        self.assertEqual(lines, ["longshot v", "@@stage shaders Preparing shaders", "@@progress 0.500", "done shaders"])
 
     def test_no_vulkan_leaves_them_to_the_first_start(self):
         code, lines = prepared(stub("import sys; print('@@error no usable Vulkan here'); sys.exit(3)"))
@@ -80,32 +80,32 @@ class PrepareShadersTests(unittest.TestCase):
         self.assertEqual(not_prepared(lines), [])
 
     def test_missing_game_is_not_a_failed_build(self):
-        code, lines = prepared([str(ROOT / "no-such-folder" / "hookshot.exe"), "--prepare-shaders"])
+        code, lines = prepared([str(ROOT / "no-such-folder" / "longshot.exe"), "--prepare-shaders"])
         self.assertEqual(code, 1)
         self.assertEqual(len(not_prepared(lines)), 1)
         self.assertFalse(any(l.startswith("@@") for l in lines))
 
     def test_the_game_runs_in_its_folder_without_the_tools_environment(self):
-        dropped = dict(HOOKSHOT_TOOLS="/builder/tools", HOOKSHOT_NO_PREPARE="0", PYTHONPATH="/builder/python",
-                       PYTHONHOME="/builder", APPDIR="/appdir", APPIMAGE="/tmp/Hookshot.AppImage", ARGV0="Hookshot", OWD="/old",
+        dropped = dict(LONGSHOT_TOOLS="/builder/tools", LONGSHOT_NO_PREPARE="0", PYTHONPATH="/builder/python",
+                       PYTHONHOME="/builder", APPDIR="/appdir", APPIMAGE="/tmp/Longshot.AppImage", ARGV0="Longshot", OWD="/old",
                        LD_LIBRARY_PATH="/builder/lib")
-        with tempfile.TemporaryDirectory(prefix="hookshot-prepare-") as folder, \
-                mock.patch.dict(os.environ, dict(dropped, HOOKSHOT_TEST_KEPT_NOT="x", KEPT_FOR_THE_GAME="yes")):
+        with tempfile.TemporaryDirectory(prefix="longshot-prepare-") as folder, \
+                mock.patch.dict(os.environ, dict(dropped, LONGSHOT_TEST_KEPT_NOT="x", KEPT_FOR_THE_GAME="yes")):
             code, lines = prepared(stub("import json, os; print(json.dumps({'cwd': os.getcwd(), 'env': dict(os.environ)}))"),
                                    folder=folder)
             seen = json.loads(lines[0])
             self.assertEqual(code, 0)
             self.assertEqual(os.path.normcase(os.path.realpath(seen["cwd"])), os.path.normcase(os.path.realpath(folder)))
-        for name in list(dropped) + ["HOOKSHOT_TEST_KEPT_NOT"]:
+        for name in list(dropped) + ["LONGSHOT_TEST_KEPT_NOT"]:
             self.assertNotIn(name, seen["env"], name)
         self.assertEqual(seen["env"]["KEPT_FOR_THE_GAME"], "yes")
 
     def test_game_env_is_the_play_buttons(self):
-        env = make_game.game_env({"HOOKSHOT_X": "1", "PYTHONPATH": "p", "APPIMAGE": "a", "APPDIR": "d", "ARGV0": "0", "OWD": "o",
+        env = make_game.game_env({"LONGSHOT_X": "1", "PYTHONPATH": "p", "APPIMAGE": "a", "APPDIR": "d", "ARGV0": "0", "OWD": "o",
                                   "LD_LIBRARY_PATH": "l", "PATH": "/usr/bin", "HOME": "/home/p"})
         self.assertEqual(env, {"PATH": "/usr/bin", "HOME": "/home/p"})
         # (the shell launcher can't import it: the same names there)
-        launch = (ROOT / "builder" / "linux" / "hookshot-launch").read_text(encoding="utf-8")
+        launch = (ROOT / "builder" / "linux" / "longshot-launch").read_text(encoding="utf-8")
         names = re.search(r"\$1 ~ /\^\(([A-Z_|0-9]+)\)/ \|\| \$1 == \"LD_LIBRARY_PATH\"", launch).group(1).split("|")
         self.assertEqual(tuple(names), make_game.GAME_ENV_DROP)
 
@@ -139,10 +139,10 @@ class SkipTests(unittest.TestCase):
     def test_the_unticked_box(self):
         self.assertIn("unticked", self.skipped({}, flag=True))
 
-    def test_hookshot_no_prepare_as_the_game_reads_its_switches(self):
-        self.assertIsNone(self.skipped({"HOOKSHOT_NO_PREPARE": "0"}))
-        self.assertIsNotNone(self.skipped({"HOOKSHOT_NO_PREPARE": "1"}))
-        self.assertIsNotNone(self.skipped({"HOOKSHOT_NO_PREPARE": ""}))   # (set, as the game's getenv && strcmp(.., "0"))
+    def test_longshot_no_prepare_as_the_game_reads_its_switches(self):
+        self.assertIsNone(self.skipped({"LONGSHOT_NO_PREPARE": "0"}))
+        self.assertIsNotNone(self.skipped({"LONGSHOT_NO_PREPARE": "1"}))
+        self.assertIsNotNone(self.skipped({"LONGSHOT_NO_PREPARE": ""}))   # (set, as the game's getenv && strcmp(.., "0"))
 
     def test_a_windows_game_built_on_linux(self):
         self.assertIn("Windows game built on Linux", self.skipped({}, cross=True))

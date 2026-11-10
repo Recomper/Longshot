@@ -292,7 +292,7 @@ bool make_pipeline(Pipeline& p, const PassInfo& info) {
     ci.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, nullptr, 0, VK_SHADER_STAGE_COMPUTE_BIT, m, "main",
                 nullptr};
     ci.layout = p.layout;
-    // (hookshot, a stutter: through the pipeline cache kept across runs. Made with none, FSR 3.1's dozen passes were compiled
+    // (longshot, a stutter: through the pipeline cache kept across runs. Made with none, FSR 3.1's dozen passes were compiled
     // again at every start, inside the first upscaled frame: a 2.7 s first frame of play against 1.0 s without FSR, 2026-11-10)
     const VkResult made = shared_compute_pipeline(&ci, &p.pipeline);
     vkDestroyShaderModule(dev.device, m, nullptr);

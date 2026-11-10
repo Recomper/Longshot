@@ -73,7 +73,7 @@ static uint64_t level_offset(const nvn_texdesc *d, unsigned level, unsigned dpl,
                              unsigned tileH, unsigned tileD, fmt_t t) {
     uint32_t sx, sy; samples_xy(d->samples, &sx, &sy);
     uint64_t off = 0;
-    if (level > 32) level = 32;   /* (hookshot: past 32 every level is 1x1; a level count from the game looped for minutes) */
+    if (level > 32) level = 32;   /* (longshot: past 32 every level is 1x1; a level count from the game looped for minutes) */
     for (unsigned i = 0; i < level; i++) {
         uint64_t lw = blk(mip((uint64_t)w * sx, i), t.bw);
         uint64_t lh = dpl >= 2 ? blk(mip((uint64_t)h * sy, i), t.bh) : 1;

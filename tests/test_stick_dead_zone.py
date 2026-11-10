@@ -1,5 +1,5 @@
 """The sticks' dead zone is the player's: the Insert menu's "Stick dead zone" row (stick_dead_zone in
-hookshot_options.ini), issue 752.
+longshot_options.ini), issue 752.
 
 Both pad paths, SDL (host/pad_sdl.c) and XInput (host/nn_hid.c), cut each axis at XInput's 7849 (~24%), a lot on a
 worn or a precise stick. They now cut through one function, host/nn_hid.c's hos_stick_axis, whose threshold is the

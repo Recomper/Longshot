@@ -1,6 +1,6 @@
 """The Linux builder's "N GB free" line must measure the disk the game folder is on, also when the field holds ~/...
 
-The field takes a path such as ~/Games/Hookshot (build() and apply_mode() expand the ~), but free_gb walked up the
+The field takes a path such as ~/Games/Longshot (build() and apply_mode() expand the ~), but free_gb walked up the
 unexpanded text, never found a folder, and reported the free space of / instead.
 
 python -I -B tests/test_builder_free_space.py
@@ -26,7 +26,7 @@ def load_builder():
     tk.filedialog = sys.modules["tkinter.filedialog"]
     tk.messagebox = sys.modules["tkinter.messagebox"]
     tk.ttk = sys.modules["tkinter.ttk"]
-    spec = importlib.util.spec_from_file_location("hookshot_builder_free_space", ROOT / "builder" / "linux" / "hookshot_builder.py")
+    spec = importlib.util.spec_from_file_location("longshot_builder_free_space", ROOT / "builder" / "linux" / "longshot_builder.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -50,13 +50,13 @@ def measured(path, home):
 
 class FreeSpaceTests(unittest.TestCase):
     def test_a_tilde_path_is_measured_under_the_home_folder(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-free-") as home:
-            gb, asked = measured("~/Games/Hookshot", home)
+        with tempfile.TemporaryDirectory(prefix="longshot-free-") as home:
+            gb, asked = measured("~/Games/Longshot", home)
             self.assertEqual(gb, 1.0)
             self.assertEqual(asked, [home])    # (the nearest folder that exists, not "/")
 
     def test_a_path_that_exists_is_measured_as_it_is(self):
-        with tempfile.TemporaryDirectory(prefix="hookshot-free-") as home:
+        with tempfile.TemporaryDirectory(prefix="longshot-free-") as home:
             gb, asked = measured(home, home)
             self.assertEqual(asked, [home])
 

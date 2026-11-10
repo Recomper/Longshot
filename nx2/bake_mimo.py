@@ -22,8 +22,8 @@ Three stages, each usable alone (the stop-lines are in BAKE.md §3):
              did. This is the offline half of prepare_run (gpu/vk/vk_draw.cpp:5423): translation only, no
              VkShaderModule, no pipeline.
 
-  bank       puts the two together: bank/bank.json (counts + HOOKSHOT_SHADER_STAMP, computed exactly as
-             nx2/build.py:691-699, so a Vulkan machine can check its hookshot_programs.bin is still good),
+  bank       puts the two together: bank/bank.json (counts + LONGSHOT_SHADER_STAMP, computed exactly as
+             nx2/build.py:691-699, so a Vulkan machine can check its longshot_programs.bin is still good),
              bank/stages.jsonl, bank/programs.jsonl and bank/spv/. Every pipeline in it is PENDING_GPU:
              building VkPipelines is the one part of the bake this pass does not do.
 
@@ -179,7 +179,7 @@ def enumerate_romfs(romfs, out_dir, limit=0):
     counters["stages"] = len(stage_list)
 
     os.makedirs(out_dir, exist_ok=True)
-    seed = os.path.join(out_dir, "hookshot_shaders.bin")
+    seed = os.path.join(out_dir, "longshot_shaders.bin")
     with open(seed, "wb") as f:
         f.write(SEED_MAGIC + struct.pack("<II", len(programs), len(stage_list)))
         for st in stage_list:   # (the stage key the runtime recomputes anyway, seed_open :1872: this is it already)
@@ -230,9 +230,9 @@ def enumerate_romfs(romfs, out_dir, limit=0):
 
 
 def spirv_headers():
-    """The SPIR-V headers the recompiler's sirit needs: HOOKSHOT_SPIRV_HEADERS, else a CPM cache."""
-    if os.environ.get("HOOKSHOT_SPIRV_HEADERS"):
-        return os.environ["HOOKSHOT_SPIRV_HEADERS"]
+    """The SPIR-V headers the recompiler's sirit needs: LONGSHOT_SPIRV_HEADERS, else a CPM cache."""
+    if os.environ.get("LONGSHOT_SPIRV_HEADERS"):
+        return os.environ["LONGSHOT_SPIRV_HEADERS"]
     probe = os.path.join("spirv", "unified1", "spirv.hpp11")
     for cpm in (os.environ.get("RX_CPM"), os.path.join(ROOT, "buildext", "cpm"),
                 os.path.join(ROOT, "build-linux", "deps", "cpm"),
@@ -282,7 +282,7 @@ def work_dir(out=None):
 
 
 def translator_stamp():
-    """nx2/build.py:691-699 HOOKSHOT_SHADER_STAMP, byte for byte: what makes hookshot_programs.bin valid."""
+    """nx2/build.py:691-699 LONGSHOT_SHADER_STAMP, byte for byte: what makes longshot_programs.bin valid."""
     vk = os.path.join(ROOT, "gpu", "vk")
     stamp = hashlib.sha1()
     translator = [os.path.join(d, f) for top in ("eden", "sirit", "compat")
@@ -299,7 +299,7 @@ def build_tool(out_dir, jobs=0):
     """gpu/shaderbatch.cpp + the vendored recompiler -> <out>/shaderbatch (objects cached under work)."""
     inc = spirv_headers()
     if not inc:
-        raise SystemExit("no SPIR-V headers: set HOOKSHOT_SPIRV_HEADERS or RX_CPM (sirit needs "
+        raise SystemExit("no SPIR-V headers: set LONGSHOT_SPIRV_HEADERS or RX_CPM (sirit needs "
                          "spirv/unified1/spirv.hpp11)")
     compiler = cxx()
     std = cxx_std(compiler)
@@ -360,7 +360,7 @@ def build_tool(out_dir, jobs=0):
 
 def run_tool(out_dir, seed=None, limit=0, jobs=0):
     """Build and run the translator over the seed; returns the translate output directory."""
-    seed = seed or os.path.join(out_dir, "hookshot_shaders.bin")
+    seed = seed or os.path.join(out_dir, "longshot_shaders.bin")
     if not os.path.isfile(seed):
         raise SystemExit("%s: no seed: run enumerate first" % seed)
     exe = build_tool(out_dir, jobs)
@@ -454,8 +454,8 @@ def make_bank(out_dir, manifest_path=None):
         "format": "HKBANK01",
         "created": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "generator": "nx2/bake_mimo.py",
-        "translator_stamp": stamp,   # (== HOOKSHOT_SHADER_STAMP of nx2/build.py:691-699 when this tree is that tree)
-        "seed": manifest["seed"] if manifest else "hookshot_shaders.bin",
+        "translator_stamp": stamp,   # (== LONGSHOT_SHADER_STAMP of nx2/build.py:691-699 when this tree is that tree)
+        "seed": manifest["seed"] if manifest else "longshot_shaders.bin",
         "enumerate": manifest["counters"] if manifest else None,
         "translate": {"translated": translated, "rows": len(programs_rows),
                       "stages": {s: sum(1 for r in stage_rows if r["status"] == s)

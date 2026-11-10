@@ -198,7 +198,7 @@ struct State {
     std::atomic<bool> holding{false};   // (an engine's state, images or frees still to do: temporal_idle has something to let go)
 };
 State& st() {
-    // (never destroyed: Hookshot leaves through ExitProcess / exit() with the device alive, and `dead` may still hold an
+    // (never destroyed: Longshot leaves through ExitProcess / exit() with the device alive, and `dead` may still hold an
     // engine's state then (an FSR context), whose destructor would call into a library already gone)
     static State& s = *new State;
     return s;
@@ -714,7 +714,7 @@ void temporal_idle() {
     std::lock_guard lk(s.mu);
     const uint64_t now = texture_frame_no();
     if (now - s.asked <= 120) return;   // (in use, or off for under 120 frames (2 s): kept, a row stepped through comes back at once)
-    // (hookshot, a stutter: kept too while DLSS or FSR 4 is still the Upscaler's choice. Each area change's loading screen has no
+    // (longshot, a stutter: kept too while DLSS or FSR 4 is still the Upscaler's choice. Each area change's loading screen has no
     // gameplay upscale for 2 s and more, and DLSS's feature let go then was made again at the next area's first frame: 44-78 ms
     // of the replay thread at every area entry (12 times in a 15-minute walk, 2026-11-10, #1520). Let go once the row leaves them.
     // RX_VK_DLSS_IDLE_RELEASE=1: let go after 120 frames unused, as before)

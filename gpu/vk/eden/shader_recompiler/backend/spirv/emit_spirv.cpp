@@ -274,7 +274,7 @@ spv::ExecutionMode ExecutionMode(TessSpacing spacing) {
 void DefineEntryPoint(const IR::Program& program, EmitContext& ctx, Id main) {
     const std::span interfaces(ctx.interfaces.data(), ctx.interfaces.size());
     if (ctx.mesh_fallback && (program.stage == Stage::Task || program.stage == Stage::Mesh)) {
-        // (hookshot, issue 640: on a GPU without mesh shaders, a task or mesh program is a compute shader)
+        // (longshot, issue 640: on a GPU without mesh shaders, a task or mesh program is a compute shader)
         ctx.AddExecutionMode(main, spv::ExecutionMode::LocalSize, program.workgroup_size[0], 1U, 1U);
         ctx.AddEntryPoint(spv::ExecutionModel::GLCompute, main, "main", interfaces);
         return;
@@ -521,7 +521,7 @@ void SetupCapabilities(const Profile& profile, const Info& info, EmitContext& ct
         ctx.AddCapability(spv::Capability::VulkanMemoryModelDeviceScope);
         ctx.SetMemoryModel(spv::MemoryModel::VulkanKHR);
     }
-    if (info.uses_cooperative_matrix && mma_software) {   // (hookshot: DefineSoftwareMatrixFunction's)
+    if (info.uses_cooperative_matrix && mma_software) {   // (longshot: DefineSoftwareMatrixFunction's)
         ctx.AddCapability(spv::Capability::GroupNonUniform);
         ctx.AddCapability(spv::Capability::GroupNonUniformShuffle);
     }
@@ -676,7 +676,7 @@ std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_in
     EmitContext ctx{profile, runtime_info, program, bindings};
     if (program.info.uses_cooperative_matrix && mma_software) DefineSoftwareMatrixFunction(ctx);
     Id main{};
-    if (runtime_info.mesh_fallback_vertex) {   // (hookshot: the fallback's generated vertex stage, which reads the records)
+    if (runtime_info.mesh_fallback_vertex) {   // (longshot: the fallback's generated vertex stage, which reads the records)
         const Id void_function{ctx.TypeFunction(ctx.void_id)};
         main = ctx.OpFunction(ctx.void_id, spv::FunctionControlMask::MaskNone, void_function);
         ctx.AddLabel();

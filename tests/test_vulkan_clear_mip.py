@@ -103,7 +103,7 @@ int main() {
     std::puts("PASS: 6 partial/whole clear scenarios, mip mapping and independent array layers");
 }
 '''
-    with tempfile.TemporaryDirectory(prefix="hookshot-clear-mip-") as directory:
+    with tempfile.TemporaryDirectory(prefix="longshot-clear-mip-") as directory:
         cpp, exe = Path(directory) / "test.cpp", Path(directory) / "test.exe"
         cpp.write_text(fixture, encoding="utf-8")
         flags = ["-fsanitize=address,undefined", "-fno-sanitize-recover=all"] if args.sanitize else []

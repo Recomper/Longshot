@@ -353,7 +353,7 @@ void a64_svc(Ctx *c, uint32_t imm) {
     hos_vcore_checkpoint();
     switch (imm) {
     case 0x01: { /* SetHeapSize(-, size) -> (result, heap address) */
-        int hos_heap_size_fits(uint64_t size);   /* (hookshot, hos_mem.c: the heap stays in the guest window) */
+        int hos_heap_size_fits(uint64_t size);   /* (longshot, hos_mem.c: the heap stays in the guest window) */
         if (!hos_heap_size_fits(c->x[1])) {
             c->x[0] = 0xCA01;   /* svc::ResultOutOfMemory */
             return;
@@ -468,7 +468,7 @@ void a64_svc(Ctx *c, uint32_t imm) {
         c->x[0] = R_OK;
         return;
     case 0x2D:   /* UnmapPhysicalMemory(address, size): the pages read as zero if mapped again */
-        if (!hos_guest_range(c->x[0], c->x[1])) {   /* (hookshot: guest pages only) */
+        if (!hos_guest_range(c->x[0], c->x[1])) {   /* (longshot: guest pages only) */
             c->x[0] = 0xCA01;
             return;
         }

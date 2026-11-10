@@ -13,7 +13,7 @@ import unittest
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "builder" / "linux" / "hookshot_builder.py"
+SOURCE = ROOT / "builder" / "linux" / "longshot_builder.py"
 spec = importlib.util.spec_from_file_location("make_game_jobs", ROOT / "nx2" / "make_game.py")
 make_game = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(make_game)
@@ -77,7 +77,7 @@ class BuildHarness:
 
 class BuilderBuildJobsTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="hookshot-builder-jobs-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="longshot-builder-jobs-")
         self.addCleanup(self.temporary.cleanup)
         self.folder = Path(self.temporary.name)
 
@@ -97,11 +97,11 @@ class BuilderBuildJobsTests(unittest.TestCase):
                                                   prepare="1"))
         self.assertEqual(harness.events[3][1], dict(target=gui.read, args=(gui.proc,), daemon=True))
 
-    def test_positive_hookshot_jobs_is_passed_on(self):
-        harness = BuildHarness(self.folder, {"HOOKSHOT_JOBS": "4", "RX_JOBS": "2"})
+    def test_positive_longshot_jobs_is_passed_on(self):
+        harness = BuildHarness(self.folder, {"LONGSHOT_JOBS": "4", "RX_JOBS": "2"})
         harness.run()
         self.assert_started(harness, 4)
-        self.assertEqual(harness.environ, {"HOOKSHOT_JOBS": "4", "RX_JOBS": "2"})
+        self.assertEqual(harness.environ, {"LONGSHOT_JOBS": "4", "RX_JOBS": "2"})
 
     def test_unticked_prepare_leaves_the_shaders_to_the_first_start(self):
         harness = BuildHarness(self.folder, {})
@@ -112,10 +112,10 @@ class BuilderBuildJobsTests(unittest.TestCase):
         self.assertEqual(harness.events[0][1]["prepare"], "0")
 
     def test_zero_falls_back_to_rx_jobs_for_extracted_folders(self):
-        harness = BuildHarness(self.folder, {"HOOKSHOT_JOBS": "0", "RX_JOBS": "2"}, kind="folders")
+        harness = BuildHarness(self.folder, {"LONGSHOT_JOBS": "0", "RX_JOBS": "2"}, kind="folders")
         harness.run()
         self.assert_started(harness, 2)
-        self.assertEqual(harness.environ, {"HOOKSHOT_JOBS": "0", "RX_JOBS": "2"})
+        self.assertEqual(harness.environ, {"LONGSHOT_JOBS": "0", "RX_JOBS": "2"})
 
     def test_unset_falls_back_to_rx_jobs(self):
         harness = BuildHarness(self.folder, {"RX_JOBS": "2"})
@@ -124,14 +124,14 @@ class BuilderBuildJobsTests(unittest.TestCase):
         self.assertEqual(harness.environ, {"RX_JOBS": "2"})
 
     def test_empty_falls_back_to_rx_jobs_without_changing_inherited_environment(self):
-        harness = BuildHarness(self.folder, {"HOOKSHOT_JOBS": "", "RX_JOBS": "2"})
+        harness = BuildHarness(self.folder, {"LONGSHOT_JOBS": "", "RX_JOBS": "2"})
         harness.run()
         self.assert_started(harness, 2)
-        self.assertEqual(harness.environ, {"HOOKSHOT_JOBS": "", "RX_JOBS": "2"})
+        self.assertEqual(harness.environ, {"LONGSHOT_JOBS": "", "RX_JOBS": "2"})
 
     # (issue 531) Neither set: no --jobs, so make_game chooses (one per CPU thread, the memory gate deciding), as on Windows
     def test_no_override_leaves_the_choice_to_make_game(self):
-        for environ in ({}, {"HOOKSHOT_JOBS": "0"}, {"HOOKSHOT_JOBS": "", "RX_JOBS": ""}):
+        for environ in ({}, {"LONGSHOT_JOBS": "0"}, {"LONGSHOT_JOBS": "", "RX_JOBS": ""}):
             with self.subTest(environ=environ):
                 harness = BuildHarness(self.folder, environ)
                 harness.run()
@@ -145,7 +145,7 @@ class BuilderBuildJobsTests(unittest.TestCase):
         self.assertEqual([event[0] for event in harness.events], ["error"])
 
     def assert_invalid(self, raw):
-        harness = BuildHarness(self.folder, {"HOOKSHOT_JOBS": raw, "RX_JOBS": "2"})
+        harness = BuildHarness(self.folder, {"LONGSHOT_JOBS": raw, "RX_JOBS": "2"})
         harness.run()
         self.assertEqual(harness.gui.cfg, {"previous": "kept"})
         self.assertEqual(harness.processes, [])
@@ -153,10 +153,10 @@ class BuilderBuildJobsTests(unittest.TestCase):
         self.assertFalse(hasattr(harness.gui, "proc"))
         self.assertEqual(len(harness.events), 1)
         kind, title, message = harness.events[0]
-        self.assertEqual((kind, title), ("error", "Hookshot"))
-        self.assertIn("HOOKSHOT_JOBS", message)
+        self.assertEqual((kind, title), ("error", "Longshot"))
+        self.assertIn("LONGSHOT_JOBS", message)
         self.assertIn("0 for automatic", message)
-        self.assertEqual(harness.environ, {"HOOKSHOT_JOBS": raw, "RX_JOBS": "2"})
+        self.assertEqual(harness.environ, {"LONGSHOT_JOBS": raw, "RX_JOBS": "2"})
 
     def test_negative_override_stops_before_build_side_effects(self):
         self.assert_invalid("-1")
@@ -197,17 +197,17 @@ class MakeGameJobsTests(unittest.TestCase):
 
     def test_jobs_given_wins_and_nothing_is_worked_out(self):
         # (the "compilers at once" line was printed even when --jobs was given, with a number the build did not use)
-        self.assertEqual(self.chosen(5, {"HOOKSHOT_JOBS": "3"}), (5, []))
+        self.assertEqual(self.chosen(5, {"LONGSHOT_JOBS": "3"}), (5, []))
 
-    def test_hookshot_jobs_then_automatic(self):
-        self.assertEqual(self.chosen(0, {"HOOKSHOT_JOBS": "3"}), (3, []))
-        self.assertEqual(self.chosen(0, {"HOOKSHOT_JOBS": "0"}), (9, [1]))
-        self.assertEqual(self.chosen(0, {"HOOKSHOT_JOBS": ""}), (9, [1]))
+    def test_longshot_jobs_then_automatic(self):
+        self.assertEqual(self.chosen(0, {"LONGSHOT_JOBS": "3"}), (3, []))
+        self.assertEqual(self.chosen(0, {"LONGSHOT_JOBS": "0"}), (9, [1]))
+        self.assertEqual(self.chosen(0, {"LONGSHOT_JOBS": ""}), (9, [1]))
         self.assertEqual(self.chosen(0, {}), (9, [1]))
 
-    def test_invalid_hookshot_jobs_stops_with_its_message(self):
+    def test_invalid_longshot_jobs_stops_with_its_message(self):
         with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit):
-            self.chosen(0, {"HOOKSHOT_JOBS": "n"})
+            self.chosen(0, {"LONGSHOT_JOBS": "n"})
 
 
 if __name__ == "__main__":

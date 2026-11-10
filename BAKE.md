@@ -3,7 +3,7 @@
 Branch `bake-merge` from `main` 15ec28d. Merges the four `bake-*` race
 entries into one shippable, CPU-only, repo-only toolset: ROM/container
 enumeration → offline seed-to-SPIR-V translation (no Vulkan device) → bank
-emission (portable manifest **and** the live `hookshot_programs.bin` format)
+emission (portable manifest **and** the live `longshot_programs.bin` format)
 → read-back verify. No game files, no GPU, no pushes; outputs stay in
 `work/` (gitignored) beside the repo, never committed.
 
@@ -16,7 +16,7 @@ Status: **working end-to-end, all tests pass** (results in §7).
 | `gpu/shaderbatch.cpp` | bake-mimo c60fd1d (verbatim) | offline translator: seed → SPIR-V + exact runtime program keys (graphics/compute/task/mesh), no Vulkan device |
 | `nx2/bake_mimo.py` | bake-mimo c60fd1d (+1 probe path, see below) | driver: `enumerate` / `translate` / `bank` / `all`; builds shaderbatch against the vendored recompiler, objects cached under the output dir |
 | `nx2/bake.py` | bake-spark (manifest + `verify` + stamp-trap tests) | `bake` (seed → combo manifest `bake_bank.json`, resume cursor), `translate` (shaderbatch wrapper merging exact keys into the manifest), `verify` (portable read-back), `stamp`, `census` argv printer |
-| `nx2/bake_ds/` (`romenum.py`, `bake_ds.cpp`, `build.sh`, `bake_all.py`, `fixture.py`) | bake-deepseek 6db36ff (verified per MiMo Appendix B, see §5.4) | container enumeration incl. zstd+dictionaries via libzstd; offline translator + **live-bank writer** (`hookshot_programs.bin` with full `disk_stamp`) + `verify` (a copy of the game's `program_cache_load` reader); end-to-end `bake_all.py` with `--target` feature profiles |
+| `nx2/bake_ds/` (`romenum.py`, `bake_ds.cpp`, `build.sh`, `bake_all.py`, `fixture.py`) | bake-deepseek 6db36ff (verified per MiMo Appendix B, see §5.4) | container enumeration incl. zstd+dictionaries via libzstd; offline translator + **live-bank writer** (`longshot_programs.bin` with full `disk_stamp`) + `verify` (a copy of the game's `program_cache_load` reader); end-to-end `bake_all.py` with `--target` feature profiles |
 | `nx2/bake_glm/lower_probe.cpp` | bake-glm | Ampere encoding probe: hand-built EXIT / MOV.imm through the real `LowerToMaxwell` |
 | `tests/test_bake_skeleton.py` | bake-spark | manifest determinism/dedupe/resume, exact-key translate + SPIR-V, stamp-trap, portable verify |
 | `tests/test_bake_mimo.py` | bake-mimo c60fd1d | fixture archives → enumerate → translate → bank, FNV round-trip, `spirv-val` on every module |
@@ -40,7 +40,7 @@ builder's seed today.
 Three ordered steps already run inside `started_up()`
 (`gpu/vk/vk_draw.cpp:520-543`): `prepare_run` (translate every seed program,
 `:5423`), `predict_run` (`:5653`), `precompile_run` (`:5537`). The seed is
-`hookshot_shaders.bin` (`HKSEED01`, `nx2/shader_census.py:19-21,289-294`),
+`longshot_shaders.bin` (`HKSEED01`, `nx2/shader_census.py:19-21,289-294`),
 read by `seed_open` (`vk_shader.cpp:1844`) and translated by `seed_program`
 (`:1893`) with a **blank `NvnState`** — the translator is already driven with
 no game state along this path, so the offline tools mirror it exactly.
@@ -74,14 +74,14 @@ python3 -I nx2/bake_mimo.py translate --out work/bake [--limit N]
 python3 -I nx2/bake_mimo.py bank --out work/bake
 
 # Spark manifest driver: seed -> combos -> portable manifest -> verify
-python3 nx2/bake.py bake --seed <hookshot_shaders.bin> --bank <dir> [--resume]
-python3 nx2/bake.py translate --seed <hookshot_shaders.bin> --bank <dir>
+python3 nx2/bake.py bake --seed <longshot_shaders.bin> --bank <dir> [--resume]
+python3 nx2/bake.py translate --seed <longshot_shaders.bin> --bank <dir>
 python3 nx2/bake.py verify --bank <dir>
 python3 nx2/bake.py stamp
 
 # DeepSeek driver: tree -> seed -> live bank -> verify (needs build.sh first)
-nx2/bake_ds/build.sh                       # -> ${TMPDIR:-/tmp}/hookshot-ds/bake_ds
-python3 nx2/bake_ds/bake_all.py all --romfs <dir> --out <dir> --tool ${TMPDIR:-/tmp}/hookshot-ds/bake_ds [--target plain|tensor|tensor-software|rdna2|gfx1201|query]
+nx2/bake_ds/build.sh                       # -> ${TMPDIR:-/tmp}/longshot-ds/bake_ds
+python3 nx2/bake_ds/bake_all.py all --romfs <dir> --out <dir> --tool ${TMPDIR:-/tmp}/longshot-ds/bake_ds [--target plain|tensor|tensor-software|rdna2|gfx1201|query]
 python3 nx2/bake_ds/bake_all.py verify --romfs <seed-dir> --out <bank-dir> --tool <tool> [--target <profile>]
 
 # Ampere encoding probe (needs a C++23 compiler + SPIR-V headers; cf. bake_mimo)
@@ -89,7 +89,7 @@ python3 nx2/bake_ds/bake_all.py verify --romfs <seed-dir> --out <bank-dir> --too
 ```
 
 Toolchains: shaderbatch needs a C++23 compiler (`g++`/`clang++`, `-std=c++23`
-or `-std=c++2b`) and the SPIR-V headers (`HOOKSHOT_SPIRV_HEADERS`, else the
+or `-std=c++2b`) and the SPIR-V headers (`LONGSHOT_SPIRV_HEADERS`, else the
 `buildext/cpm` cache). bake_ds additionally needs the Vulkan headers plus
 boost/fmt (same CPM externals the game build uses; `EXT=...` overrides).
 
@@ -130,13 +130,13 @@ packed from the control sections (`mesh_registers_of`, mirror of
 `translation.by_program` merging the exact runtime keys where translation ran.
 
 **Bank, live** (`bake_ds translate`): the back end's own
-`hookshot_programs.bin` (`kDiskMagic`, full `disk_stamp` incl.
+`longshot_programs.bin` (`kDiskMagic`, full `disk_stamp` incl.
 `sizeof(Shader::Info)`/`sizeof(Program)`, stdlib marker, depth bit and env)
 plus `bake_report.jsonl` (per-stage descriptor plans, workgroup/shared,
 question counts, compute `CsLayout`) and `bake_manifest.json`. `bake_ds
 verify` re-reads the file through a copy of `program_cache_load`'s
 `Reader`/`get_info` and requires 0 bad records; it verifies *any*
-`hookshot_programs.bin`, including one the game wrote.
+`longshot_programs.bin`, including one the game wrote.
 
 **Verify, portable** (`bake.verify_bank`): seed sha round-trip, stamp
 currency, SPIR-V magic + `spirv-val --target-env vulkan1.3` over every merged
@@ -267,7 +267,7 @@ python3 -I -B tests/run_all.py bake .... 3 passed, 0 failed, 0 skipped in 22 s
 `MeshShadingEXT`/`TaskEXT` entry points present on the mesh pair;
 `spirv-dis` shows `LocalSize 8 1 1` from the control section's workgroup.
 `bake_ds` was rebuilt standalone from the committed tree
-(`OUT=${TMPDIR:-/tmp}/hookshot-ds-merge nx2/bake_ds/build.sh` → 163 recompiler
+(`OUT=${TMPDIR:-/tmp}/longshot-ds-merge nx2/bake_ds/build.sh` → 163 recompiler
 sources, `built .../bake_ds`) and `tests/test_bake_ds.py` passes against
 that fresh binary as well as the prebuilt one. The repo runner's bake scope
 (`tests/run_all.py bake`: each `test_bake_*.py` in its own process) passes
@@ -331,7 +331,7 @@ and the runtime treat a missing program exactly like a no-bank run:
   `program_find` null → `if (p)` guard (`gpu/vk/vk_draw.cpp:5605-5607`);
   the pipeline is then built at first draw by the normal worker path.
 - `prepare_run` tolerates failures by counting, not stopping: `st_failed`
-  is logged and `hookshot_prepared.bin` is still stamped
+  is logged and `longshot_prepared.bin` is still stamped
   (`gpu/vk/vk_draw.cpp:5526-5533`); a driver that faults mid-warmup is
   handled the same way (`:5442-5455` warming guard).
 - Stamp mismatch refuses the whole bank safely (`vk_shader.cpp:896-927`

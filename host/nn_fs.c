@@ -12,7 +12,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-/* (hookshot, #1468) A game folder whose deepest file passes 260 characters (MAX_PATH: "E:\Games\...\romfs\Event\EventSetting\
+/* (longshot, #1468) A game folder whose deepest file passes 260 characters (MAX_PATH: "E:\Games\...\romfs\Event\EventSetting\
    Ev..." at 262) is read too. The host paths here are up to HOS_FS_PATH bytes, and on Windows each file call goes through
    its wide function: the path converted from the game's UTF-8 strings and, when it is
    long and absolute, given the extended-length prefix \\?\ (with its / made \), which Windows takes without its long-paths
@@ -96,7 +96,7 @@ static int mount(const char *name, const char *root, int writable) {   /* 0: the
     AcquireSRWLockExclusive(&mount_lock);
     int i;
     for (i = 0; i < nmounts && strcmp(mounts[i].name, name); i++) {}
-    if (i == nmounts) {   /* (hookshot: a 17th name was written past the table) */
+    if (i == nmounts) {   /* (longshot: a 17th name was written past the table) */
         if (nmounts == 16) {
             ReleaseSRWLockExclusive(&mount_lock);
             hos_log("fs: %s: not mounted (16 mounts already)", name);
@@ -377,7 +377,7 @@ HLE(_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci) {
 static uint64_t read_at(Ctx *c, uint64_t id, int64_t off, uint64_t buf, uint64_t size) {
     Handle *fh = get_handle(c, id);
     uint64_t done = 0;
-    if (!hos_guest_range(buf, size)) return 0;   /* (hookshot: the file's bytes go into guest memory only) */
+    if (!hos_guest_range(buf, size)) return 0;   /* (longshot: the file's bytes go into guest memory only) */
     static int64_t delay_ns = -1, delay_after_ns;   /* HOS_FS_DELAY_MS=<ms>[,<after s>] (experiment): slower reads */
     if (delay_ns < 0) {
         const char *e = getenv("HOS_FS_DELAY_MS");
@@ -428,7 +428,7 @@ HLE(_ZN2nn2fs8ReadFileEPmNS0_10FileHandleElPvmRKNS0_10ReadOptionE) {
 }
 /* GetFileSize(long*, FileHandle) */
 HLE(_ZN2nn2fs11GetFileSizeEPlNS0_10FileHandleE) {
-    LARGE_INTEGER sz = {0};   /* (hookshot: a folder's handle has no size: 0, not the host stack's bytes) */
+    LARGE_INTEGER sz = {0};   /* (longshot: a folder's handle has no size: 0, not the host stack's bytes) */
     GetFileSizeEx(get_handle(c, ARG(1))->h, &sz);
     G64(ARG(0)) = (uint64_t)sz.QuadPart;
     RET(0);

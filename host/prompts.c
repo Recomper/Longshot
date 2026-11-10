@@ -4,7 +4,7 @@
    the pad input bound to it (host/nn_hid.c's controls, the menu's Layout preset and Controls page). So the icons say which
    button to press on this pad, custom controls too.
 
-   The face: hookshot_options.ini's button_prompts (the menu's Button prompts row): 0 Auto, from the first controller's name
+   The face: longshot_options.ini's button_prompts (the menu's Button prompts row): 0 Auto, from the first controller's name
    (SDL), else 1 Switch, 2 Xbox, 3 PlayStation 4, 4 PlayStation 5, 5 Steam Deck. The game reads the font once, at its start:
    a new face or new controls show at the next start.
 
@@ -61,7 +61,7 @@ static int contains(const char *text, const char *word) {   /* (any case) */
 static int choose_face(const char *dir) {
     char path[MAX_PATH], line[80];
     int choice = 0;
-    snprintf(path, sizeof path, "%shookshot_options.ini", dir);
+    snprintf(path, sizeof path, "%slongshot_options.ini", dir);
     FILE *f = fopen(path, "r");
     if (f) {
         while (fgets(line, sizeof line, f))

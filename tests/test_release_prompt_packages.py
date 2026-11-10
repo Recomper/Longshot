@@ -17,7 +17,7 @@ spec.loader.exec_module(release_parts)
 
 class PromptPackages(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="hookshot-prompt-packages-")
+        temporary = tempfile.TemporaryDirectory(prefix="longshot-prompt-packages-")
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         self.part = self.root / "authored-python.zip"
@@ -27,7 +27,7 @@ class PromptPackages(unittest.TestCase):
 
     def python_part(self, pins):
         with zipfile.ZipFile(self.part, "w") as archive:
-            prefix = "HookshotBuilder/tools/python/"
+            prefix = "LongshotBuilder/tools/python/"
             # A marker only, never loaded: the filename tells the packager the target Python version.
             archive.writestr(prefix + "python314.dll", b"authored version marker")
             for pin in pins:

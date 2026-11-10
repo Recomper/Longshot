@@ -44,7 +44,7 @@ WIDE = 1.6   # (how much wider than the game's icon a wide Kenney icon may be)
 # the HOS_PAD_* inputs (gpu/vk/vk_api.h), in order
 PADS = ["south", "east", "west", "north", "back", "guide", "start", "lstick", "rstick", "lshoulder", "rshoulder", "up", "down", "left",
         "right", "ltrigger", "rtrigger"]
-# the Switch buttons' code points, in HOS_SW_* order (A B X Y LS RS L R ZL ZR Plus Minus Left Up Right Down), and hookshot's
+# the Switch buttons' code points, in HOS_SW_* order (A B X Y LS RS L R ZL ZR Plus Minus Left Up Right Down), and longshot's
 # default controls for them (host/nn_hid.c pad_default: by position, A the right face button)
 SWITCH = [0xE040, 0xE041, 0xE042, 0xE043, 0xE056, 0xE057, 0xE044, 0xE045, 0xE046, 0xE047, 0xE04B, 0xE04C, 0xE062, 0xE060, 0xE063,
           0xE061]
@@ -698,7 +698,7 @@ def guide_layers(game, face):
                 frames.update((p, im) for p in group)
         lines = {pad: frames.get(pad) or (frames["south"] if end == GUIDE_FACE and "south" in frames else
                                           guide_line(size, bar, row, where, pad, stays)) for pad in PADS if pad in where}
-        if face == "switch":   # (the game's own line where the pad input's is hookshot's default's: taken out of what stays)
+        if face == "switch":   # (the game's own line where the pad input's is longshot's default's: taken out of what stays)
             own = lines[DEFAULT[SW[end]]]
             around = Image.new("L", size, 0)
             grown = own.filter(ImageFilter.MaxFilter(25 if DEFAULT[SW[end]] in sum(GUIDE_GROUPS, ()) else 15))

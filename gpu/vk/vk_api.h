@@ -36,7 +36,7 @@ enum { HOS_OPT_HDR_NATIVE = 40, HOS_OPT_HDR_PEAK, HOS_OPT_HDR_WHITE, HOS_OPT_DIS
    44 is reserved for HOS_OPT_SKIP_TITLE) */
 enum { HOS_OPT_DISABLE_CAMERA_CENTERING = 45 };
 
-/* (hookshot) the controls' names (host/nn_hid.c, host/pad_sdl.c, the pad_ and key_ lines of hookshot_options.ini):
+/* (hookshot) the controls' names (host/nn_hid.c, host/pad_sdl.c, the pad_ and key_ lines of longshot_options.ini):
    the Switch's buttons in nn::hid's bit order, and a gamepad's inputs by position, SDL's order (the bottom face
    button first: A on an Xbox pad, cross on a DualSense) */
 enum { HOS_SW_A, HOS_SW_B, HOS_SW_X, HOS_SW_Y, HOS_SW_LS, HOS_SW_RS, HOS_SW_L, HOS_SW_R, HOS_SW_ZL, HOS_SW_ZR,
@@ -188,7 +188,7 @@ typedef struct MkwVkRenderer {
     void (*nvn_texture_created)(const nvn_tex *t);
     /* the CPU set an event's value: in order with the submits (the GPU's waits on it) */
     void (*nvn_event_signal)(uint64_t gpu, uint32_t value);
-    int (*option)(int id);   /* (hookshot, the Insert menu) 0: game time follows the clock, 1: the menu is open, 2: dynamic resolution, 3: its fixed scale in percent, 4: the controllers count behind other windows, 5: text speed (0 normal to 3 instant), 6: native mouse look (host/mouse_native.c),
+    int (*option)(int id);   /* (longshot, the Insert menu) 0: game time follows the clock, 1: the menu is open, 2: dynamic resolution, 3: its fixed scale in percent, 4: the controllers count behind other windows, 5: text speed (0 normal to 3 instant), 6: native mouse look (host/mouse_native.c),
                                 7: the mouse's sensitivity in percent, 8: its up and down swapped (host/nn_hid.c),
                                 18 to 23: the Motion page (HOS_OPT_GYRO*: motion controls from a pad's gyroscope, host/pad_sdl.c;
                                 the horizontal and vertical sensitivity in percent, each turned around, the deadzone),
@@ -197,7 +197,7 @@ typedef struct MkwVkRenderer {
     void (*nvn_submit_q)(const uint64_t *handles, int n, uint64_t queue);
     /* (hookshot) a fence of one queue: the value its own last submission signals (nvnQueueFenceSync) */
     uint64_t (*nvn_fence_q)(uint64_t queue);
-    /* (hookshot, the Insert menu) a setting changed from the game's side, kept in the options file: 7 the mouse's sensitivity
+    /* (longshot, the Insert menu) a setting changed from the game's side, kept in the options file: 7 the mouse's sensitivity
        in percent (the - and = keys, host/nn_hid.c) */
     void (*option_set)(int id, int value);
     /* (version 14) one coherent camera-jitter sample, without per-axis queries */

@@ -17,7 +17,7 @@ def main():
     dotnet = shutil.which(args.dotnet)
     if not dotnet:
         parser.error(".NET 8 SDK is required")
-    source = (args.source / "builder/HookshotBuilder/Updater.cs").read_text(encoding="utf-8")
+    source = (args.source / "builder/LongshotBuilder/Updater.cs").read_text(encoding="utf-8")
     # Compile the entire real class. Aliases replace only external boundaries, never its control flow or validation.
     aliases = """using HttpClient = DigestFixture.FakeHttpClient;
 using Process = DigestFixture.FakeProcess;

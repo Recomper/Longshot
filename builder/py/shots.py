@@ -5,7 +5,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-qt = os.environ.get("HOOKSHOT_QT")
+qt = os.environ.get("LONGSHOT_QT")
 if qt:
     sys.path.insert(0, qt)
     os.add_dll_directory(os.path.join(qt, "PySide6"))
@@ -17,7 +17,7 @@ from PySide6.QtCore import QTimer  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 app = QApplication(sys.argv[:1])
-from hookshot_builder import theme, window  # noqa: E402
+from longshot_builder import theme, window  # noqa: E402
 
 theme.load_fonts()
 
@@ -41,9 +41,9 @@ def next_page():
     name = pages[state["i"]]
     state["i"] += 1
     if name not in ("files", "splash"):
-        os.environ["HOOKSHOT_UI_PREVIEW"] = name
+        os.environ["LONGSHOT_UI_PREVIEW"] = name
     else:
-        os.environ.pop("HOOKSHOT_UI_PREVIEW", None)
+        os.environ.pop("LONGSHOT_UI_PREVIEW", None)
     w = window.Window(Args())
     if name == "splash":
         w.start = lambda: None

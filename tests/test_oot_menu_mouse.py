@@ -306,7 +306,7 @@ class OotMenuMouseTests(unittest.TestCase):
         compiler = shutil.which("gcc") or shutil.which("clang")
         if not compiler:
             self.skipTest("no C compiler")
-        with tempfile.TemporaryDirectory(prefix="hookshot-oot-menu-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-oot-menu-") as tmp:
             tmp = Path(tmp)
             (tmp / "host").mkdir()
             (tmp / "gpu" / "vk").mkdir(parents=True)

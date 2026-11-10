@@ -62,7 +62,7 @@ void release(Buffer b){vkDestroyBuffer(device,b.object,nullptr);vkFreeMemory(dev
 void release(Image i){vkDestroyImage(device,i.object,nullptr);vkFreeMemory(device,i.memory,nullptr);}
 struct Case { const char* name;uint32_t width,height;float aspect;PresentRect expected;bool padded; };
 int main() {
-    VkApplicationInfo app{};app.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;app.pApplicationName="Hookshot F01 synthetic presentation";
+    VkApplicationInfo app{};app.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;app.pApplicationName="Longshot F01 synthetic presentation";
     app.apiVersion=VK_API_VERSION_1_3;
     VkInstanceCreateInfo ici{};ici.sType=VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;ici.pApplicationInfo=&app;
     VkInstance instance{};OK(vkCreateInstance(&ici,nullptr,&instance));

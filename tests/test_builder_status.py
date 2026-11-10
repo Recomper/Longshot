@@ -28,19 +28,19 @@ class BuilderStatusTests(unittest.TestCase):
         self.assertEqual(make_game.reported("@@error no output"), "no output")
 
     def test_check_keeps_the_sentence_after_ok_or_bad(self):
-        ok = "@@check ok This is the version Hookshot supports (build e0f3ccfa)."
-        bad = "@@check bad This is build abcdef01. Hookshot supports build e0f3ccfa."
-        self.assertEqual(make_game.reported(ok), "This is the version Hookshot supports (build e0f3ccfa).")
-        self.assertEqual(make_game.reported(bad), "This is build abcdef01. Hookshot supports build e0f3ccfa.")
+        ok = "@@check ok This is the version Longshot supports (build e0f3ccfa)."
+        bad = "@@check bad This is build abcdef01. Longshot supports build e0f3ccfa."
+        self.assertEqual(make_game.reported(ok), "This is the version Longshot supports (build e0f3ccfa).")
+        self.assertEqual(make_game.reported(bad), "This is build abcdef01. Longshot supports build e0f3ccfa.")
         self.assertEqual(old_split(ok), make_game.reported(ok))
 
     def test_other_lines_are_not_status(self):
         self.assertIsNone(make_game.reported("@@stage compile Compiling"))
-        self.assertIsNone(make_game.reported("@@done /tmp/Hookshot"))
+        self.assertIsNone(make_game.reported("@@done /tmp/Longshot"))
         self.assertIsNone(make_game.reported("compiled in 10s"))
 
     def test_the_builder_asks_make_game(self):
-        source = (ROOT / "builder" / "linux" / "hookshot_builder.py").read_text(encoding="utf-8")
+        source = (ROOT / "builder" / "linux" / "longshot_builder.py").read_text(encoding="utf-8")
         start = source.index("def check_version")
         body = source[start:source.index("\n    def ", start + 1)]
         self.assertIn("make_game.reported", body)

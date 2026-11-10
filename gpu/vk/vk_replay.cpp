@@ -871,7 +871,7 @@ void replay(VkCommandBuffer& cmd, NvnState& s, const uint8_t* p, const uint8_t* 
             if (in_stream && !worker) {
                 uint32_t words[64];
                 for (auto& w : words) w = c0.value;
-                guest_cpu_write(c0.dst, words, std::min<uint64_t>(c0.size, sizeof words));   // (hookshot: not past words)
+                guest_cpu_write(c0.dst, words, std::min<uint64_t>(c0.size, sizeof words));   // (longshot: not past words)
             }
             if (dry) break;
             ParLock lk;
@@ -1231,7 +1231,7 @@ void replay(VkCommandBuffer& cmd, NvnState& s, const uint8_t* p, const uint8_t* 
                 // (DrawMeshTasks(first, count): the count of task workgroups, as Eden draws NVN2's mesh draws; a
                 // first task other than 0 has no Vulkan counterpart)
                 da.groups[0] = d.y, da.groups[1] = 1, da.groups[2] = 1;
-                if (d.kind == 0) da.first_task = d.x;   // (hookshot: the task programs add it, vk_draw.cpp's mesh_args)
+                if (d.kind == 0) da.first_task = d.x;   // (longshot: the task programs add it, vk_draw.cpp's mesh_args)
                 da.indirect = d.indirect, da.count_addr = d.count_addr, da.max = d.max, da.stride = d.stride;
                 draw(cmd, s, da);
             }
@@ -2394,7 +2394,7 @@ uint32_t shot_dimension(const char* text, uint32_t fallback) {
 const uint32_t kShotW = shot_dimension(getenv("RX_VK_SHOT_W"), 1280),
                kShotH = shot_dimension(getenv("RX_VK_SHOT_H"), 720);
 VkImage shot_image = VK_NULL_HANDLE;
-VkImageView shot_view = VK_NULL_HANDLE;   // (hookshot: RX_VK_SHOT_MENU's menu draws through it)
+VkImageView shot_view = VK_NULL_HANDLE;   // (longshot: RX_VK_SHOT_MENU's menu draws through it)
 VkBuffer made_buf = VK_NULL_HANDLE;   // (RX_VK_SHOT_MADE: a made frame's readback)
 VmaAllocation made_buf_alloc = nullptr;
 void* made_map = nullptr;
@@ -2469,7 +2469,7 @@ bool offscreen_init() {
     ci.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     bool ok = create_image(ci, next_off, next_off_alloc);
     ci.extent = {kShotW, kShotH, 1};
-    ci.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;   // (hookshot: RX_VK_SHOT_MENU draws the menu over it, vk_menu.cpp)
+    ci.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;   // (longshot: RX_VK_SHOT_MENU draws the menu over it, vk_menu.cpp)
     ok = ok && create_image(ci, next_shot, next_shot_alloc);
     VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     vi.image = next_shot;
@@ -2798,7 +2798,7 @@ void log_frame_stats() {
              (st_ub_overlays - l_ubo) / 120.0, (st_wait_ns - l_wait) / 120.0 / 1e6, (long long)pl, pms,
              (long long)tr, (long long)fl, texture_count(), (unsigned long long)(texture_bytes() >> 20));
         draw_skip_report(120.0);
-        {   // (hookshot: the full barriers recorded and the ones left out as the second of two in a row, RX_VK_BARRIER_DEDUPE_OFF=1)
+        {   // (longshot: the full barriers recorded and the ones left out as the second of two in a row, RX_VK_BARRIER_DEDUPE_OFF=1)
             static int64_t l_made, l_left;
             int64_t made = 0, left = 0;
             barrier_stats(&made, &left);
@@ -2856,7 +2856,7 @@ void status_tick() {
     static int64_t last_ns = 0, slowest_ns = 0;
     const int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     if (last_ns) slowest_ns = std::max(slowest_ns, now_ns - last_ns);
-    // (RX_VK_FRAME_TRACE=1: every frame a line of hookshot_frames.csv beside the game, present to present and what the frame did,
+    // (RX_VK_FRAME_TRACE=1: every frame a line of longshot_frames.csv beside the game, present to present and what the frame did,
     // so that each stutter can be matched to its cause: waits for shaders or pipelines, translation, uploads, the memory sync,
     // pipeline compiles, the GPU behind. RX_VK_FRAME_LOG has the frame times alone)
     static FILE* trace = [] {
@@ -2864,7 +2864,7 @@ void status_tick() {
         char exe[MAX_PATH];
         const DWORD n = game_module_path(exe, MAX_PATH);
         std::string dir(exe, n);
-        FILE* f = fopen((dir.substr(0, dir.find_last_of("\\/") + 1) + "hookshot_frames.csv").c_str(), "w");
+        FILE* f = fopen((dir.substr(0, dir.find_last_of("\\/") + 1) + "longshot_frames.csv").c_str(), "w");
         if (f) fprintf(f, "frame,ms,pipe_waits,pipe_wait_ms,left_out,translate_ms,uploads,upload_mb,textures,memsync_ms,pipelines_ms,"
                           "uploads_ms,programs_ms,slot_wait_ms,gpu_behind_ms,draw_ms,desc_ms,cmds_ms,tex_lookup_ms,textures_gone\n");
         return f;
@@ -2939,7 +2939,7 @@ void do_present(const nvn_tex* t, const int crop[4]) {
     status_tick();   // (the status line, and the video-memory warning)
     reflex_present_begins();
     struct ReflexSleep { ~ReflexSleep() { reflex_sleep(); antilag_input(); } } reflex_sleep_after;
-    {   // (hookshot, RX_VK_PASS_TRACE_AT=<frames>: the passes of the frames around these frame numbers, for finding what a frame is made of)
+    {   // (longshot, RX_VK_PASS_TRACE_AT=<frames>: the passes of the frames around these frame numbers, for finding what a frame is made of)
         static std::atomic<int64_t> seen{0};
         static const int64_t at = getenv("RX_VK_PASS_TRACE_AT") ? atoll(getenv("RX_VK_PASS_TRACE_AT")) : 0;
         if (at && ++seen % at == 0) pass_traces_log(texture_frame_no() - 1, texture_frame_no());
@@ -3154,7 +3154,7 @@ void do_present(const nvn_tex* t, const int crop[4]) {
                     sum += q[0] + q[1] + q[2];
                     ch[0] += q[0], ch[1] += q[1], ch[2] += q[2];
                 }
-                // (hookshot: a picture blown out to white, the HUD on it: written as white_<present>.png, 40 of them)
+                // (longshot: a picture blown out to white, the HUD on it: written as white_<present>.png, 40 of them)
                 static int white_left = 40;
                 if (at_present > 600 && white * 100 > n * 40 && white_left > 0) {
                     white_left--;
@@ -3849,7 +3849,7 @@ int presents_ahead() {   // (RX_VK_PRESENTS_AHEAD=<n>: how many presents the gam
 }
 
 bool async_on() {
-    // (hookshot: off by default. OoT rewrites double-buffered data right after a submit with no fence, which lands
+    // (longshot: off by default. OoT rewrites double-buffered data right after a submit with no fence, which lands
     // inside a replay running behind (TotK Recomp's reason to replay on the submitting thread): whole-screen white or
     // black frames, 28 per 1000 gameplay frames, against 1.3 synchronous, at the same frame rate. RX_VK_ASYNC=1: on)
     static const bool on = getenv("RX_VK_ASYNC") && atoi(getenv("RX_VK_ASYNC")) != 0;

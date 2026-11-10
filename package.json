@@ -1,11 +1,11 @@
 {
-  "name": "hookshot-release",
+  "name": "longshot-release",
   "version": "0.0.0-development",
   "private": true,
-  "description": "Release tooling only. Hookshot itself is built with Python and CMake; this package is never published.",
+  "description": "Release tooling only. Longshot itself is built with Python and CMake; this package is never published.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NotRexed/Hookshot.git"
+    "url": "https://github.com/Recomper/Longshot.git"
   },
   "scripts": {
     "release": "semantic-release"

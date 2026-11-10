@@ -50,7 +50,7 @@ def main():
     flags = subprocess.CREATE_NO_WINDOW | subprocess.BELOW_NORMAL_PRIORITY_CLASS if os.name == "nt" else 0
     env = dict(os.environ)
     env["PATH"] = str(Path(cxx).parent) + os.pathsep + env.get("PATH", "")
-    with tempfile.TemporaryDirectory(prefix="hookshot-display-start-") as folder:
+    with tempfile.TemporaryDirectory(prefix="longshot-display-start-") as folder:
         tmp = Path(folder)
         (tmp / "display_startup_actual.inc").write_text(actual + "\n", encoding="utf-8")
         exe = tmp / ("display_start.exe" if os.name == "nt" else "display_start")

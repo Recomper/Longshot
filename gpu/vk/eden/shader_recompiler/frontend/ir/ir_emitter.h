@@ -162,7 +162,7 @@ public:
                                const Value& false_value);
 
     void Barrier();
-    void SubgroupBarrier();   // (hookshot: the warp's lanes meet, their shared memory accesses ordered: Ampere LDSM)
+    void SubgroupBarrier();   // (longshot: the warp's lanes meet, their shared memory accesses ordered: Ampere LDSM)
     void WorkgroupMemoryBarrier();
     void DeviceMemoryBarrier();
 

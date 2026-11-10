@@ -1,9 +1,9 @@
-"""What the release workflows need from earlier releases, and the Hookshot Builder package folder made in CI
+"""What the release workflows need from earlier releases, and the Longshot Builder package folder made in CI
 (.github/workflows/windows-builder.yml, linux-appimage.yml). No game data is involved: the parts hold the builder, its tools
 and the play profile (addresses and counts made on the development PC).
 
     python -I scripts/release_parts.py previous <out list> --repo <owner/name> [--repo ...] [--skip-tag <tag>]
-        the newest stable release's hookshot-setup.txt (of the first repository that has one; not --skip-tag's, the release
+        the newest stable release's longshot-setup.txt (of the first repository that has one; not --skip-tag's, the release
         being made); prints that release's tag. Exits 1 when no repository has one.
     python -I scripts/release_parts.py profile <setup list> <work folder>
         the play profile (tools/work of the list's app part) into <work folder>
@@ -47,7 +47,7 @@ PREBUILT_EXT = (".dll", ".lib", ".exe", ".sha1")
 def get(url, api=False, tries=5):
     if not url.startswith("https://"):   # (only https: the token is never sent over plain http, nor a file: link read)
         raise ValueError("not an https link: " + url)
-    headers = {"User-Agent": "hookshot-ci"}
+    headers = {"User-Agent": "longshot-ci"}
     token = None
     if api:
         headers["Accept"] = "application/vnd.github+json"
@@ -79,13 +79,13 @@ def previous(a):
         for r in releases:
             if r["draft"] or r["prerelease"] or r["tag_name"] == a.skip_tag:
                 continue
-            url = next((x["browser_download_url"] for x in r["assets"] if x["name"] == "hookshot-setup.txt"), None)
+            url = next((x["browser_download_url"] for x in r["assets"] if x["name"] == "longshot-setup.txt"), None)
             if url:
                 with open(a.out, "wb") as f:
                     f.write(get(url))
                 print(r["tag_name"])
                 return 0
-    print("no release with a hookshot-setup.txt in %s" % ", ".join(a.repo), file=sys.stderr)
+    print("no release with a longshot-setup.txt in %s" % ", ".join(a.repo), file=sys.stderr)
     return 1
 
 
@@ -119,13 +119,13 @@ def sha256(path):
 
 def named_part(list_path, name):
     for w in part_lines(list_path):
-        if w[6].rsplit("/", 1)[-1].startswith("HookshotBuilder-%s-" % name):
+        if w[6].rsplit("/", 1)[-1].startswith("LongshotBuilder-%s-" % name):
             return fetch_part(w[1], int(w[2]), w[6])
     return None
 
 
 def extract(zip_path, prefix, dest, keep=lambda rel: True):
-    """The zip's members under prefix (HookshotBuilder/...), into dest without that prefix; how many"""
+    """The zip's members under prefix (LongshotBuilder/...), into dest without that prefix; how many"""
     n = 0
     with zipfile.ZipFile(zip_path) as z:
         for m in z.infolist():
@@ -150,7 +150,7 @@ def profile(a):
     app = named_part(a.list, "app")
     if not app:
         sys.exit("no app part in %s" % a.list)
-    n = extract(app, "HookshotBuilder/tools/work/", a.work)
+    n = extract(app, "LongshotBuilder/tools/work/", a.work)
     print("%d profile files into %s" % (n, a.work))
     return 0
 
@@ -191,7 +191,7 @@ def package(a):
     if os.path.exists(out):
         shutil.rmtree(out)
     shutil.copytree(a.publish, out)
-    copy(a.setup, os.path.join(out, "HookshotBuilder-Setup.exe"))   # (the builder's Repair runs it)
+    copy(a.setup, os.path.join(out, "LongshotBuilder-Setup.exe"))   # (the builder's Repair runs it)
     copy(os.path.join(ROOT, "LICENSE"), os.path.join(out, "LICENSE"))
     tools = os.path.join(out, "tools")
     for f in tracked("gpu", "host", "nx2", "scripts", "third_party"):
@@ -203,7 +203,7 @@ def package(a):
         if tp:
             known = set(tracked("third_party"))
             prebuilt = lambda rel: rel.startswith("third_party/") and rel not in known and rel.lower().endswith(PREBUILT_EXT)
-            n = extract(tp, "HookshotBuilder/tools/", tools, keep=prebuilt)
+            n = extract(tp, "LongshotBuilder/tools/", tools, keep=prebuilt)
             print("%d prebuilt third_party files from %s" % (n, os.path.basename(tp)))
         if a.python_packages and python_packages(a.list, a.python_packages, tools) != 0:
             return 1
@@ -248,13 +248,13 @@ def python_packages(list_path, requirements, tools):
     if not missing:
         print("the Python part has %s" % ", ".join(pins))
         return 0
-    dll = [m[-1] for m in names if m[:-1] == ["HookshotBuilder", "tools", "python"] and m[-1].lower().startswith("python3")
+    dll = [m[-1] for m in names if m[:-1] == ["LongshotBuilder", "tools", "python"] and m[-1].lower().startswith("python3")
            and m[-1][7:-4].isdigit()]
     if len(dll) != 1:
         sys.exit("%s: no pythonXY.dll to give the version" % os.path.basename(part))
     version = "3." + dll[0][7:-4]
     py = os.path.join(tools, "python")
-    n = extract(part, "HookshotBuilder/tools/python/", py)
+    n = extract(part, "LongshotBuilder/tools/python/", py)
     print("%d files of %s (Python %s) into %s, with %s" % (n, os.path.basename(part), version, py, ", ".join(missing)))
     subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps", "--only-binary", ":all:", "--no-compile", "--no-cache-dir",
                     "--disable-pip-version-check", "-q", "--platform", "win_amd64", "--python-version", version,

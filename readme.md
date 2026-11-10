@@ -1,11 +1,11 @@
 <h1 align="center">
   <br>
   <a>
-  <img src="assets/hookshot.png" alt="Hookshot" width="200">
+  <img src="assets/longshot.png" alt="Longshot" width="200">
 </a>
 
   <br>
-  <b>Hookshot</b>
+  <b>Longshot</b>
   <br>
 </h1>
 
@@ -25,9 +25,11 @@
   <a href="#license">License</a>
 </p>
 
-Hookshot is a static recompilation. The game's code is translated to C and compiled into a Windows or Linux program,
+Longshot is a static recompilation. The game's code is translated to C and compiled into a Windows or Linux program,
 the console's system software is reimplemented, and the Switch 2 graphics are rebuilt on Vulkan. All of this happens
 **on your PC, from your own copy of the game**.
+
+Longshot is a fork of [Hookshot](https://github.com/NotRexed/Hookshot) by NotRexed: see [Credits](#credits).
 <br>
 
 > [!WARNING]
@@ -39,7 +41,7 @@ Discord: https://discord.gg/DVQQJphbBf
 
 > [!IMPORTANT]
 > This repository **does not contain the game, keys or an executable**, and it does not explain how to get them. You
-> need your own copy. Everything the build creates (`hookshot.exe`, the generated code, the shader caches and your
+> need your own copy. Everything the build creates (`longshot.exe`, the generated code, the shader caches and your
 > saves) comes from your game and stays on your PC. Never share those files.
 
 ## Project status
@@ -67,7 +69,7 @@ the table says what works and what does not yet.
 
 ## Install and play
 
-The game does not come ready-made: Hookshot Builder builds it on your PC from your copy. You do this once. After that
+The game does not come ready-made: Longshot Builder builds it on your PC from your copy. You do this once. After that
 you start the game from its launcher, which also updates it.
 
 ### What you need
@@ -88,38 +90,38 @@ you start the game from its launcher, which also updates it.
 
 ### On Windows
 
-1. Open the [latest release](https://github.com/NotRexed/Hookshot/releases/latest) and download `HookshotBuilder.exe`.
-2. Run it. It downloads the rest of Hookshot Builder (about 500 MB), checks it, and opens it.
+1. Open the [latest release](https://github.com/Recomper/Longshot/releases/latest) and download `LongshotBuilder.exe`.
+2. Run it. It downloads the rest of Longshot Builder (about 500 MB), checks it, and opens it.
 3. Pick your game. The builder looks for `.nup` files in your Downloads, Desktop and Documents folders and lists them
    under **Found on this PC**. Not listed? Press **Browse…**, drop the file on the window, or choose
    **romfs and exefs folders**. The builder checks that it is the right version.
-4. Under **Install the game to**, keep the folder (`Games\Hookshot` in your user folder) or press **Change**. Choose
+4. Under **Install the game to**, keep the folder (`Games\Longshot` in your user folder) or press **Change**. Choose
    the **Game language**.
 5. Press **Build the game**. It takes about 10 to 45 minutes, depending on your CPU and memory. You can use your PC in
    the meantime.
 6. When it says **Your game is ready**, press **Play**. The **Desktop shortcut** and **Start menu entry** boxes are
    ticked: untick them if you don't want them.
 
-Next time, start the game from the Hookshot shortcut, or `hookshot.exe` in the game folder. That is the launcher: it
+Next time, start the game from the Longshot shortcut, or `longshot.exe` in the game folder. That is the launcher: it
 has **Play**, and **Update** when a newer release is out.
 
 The first start prepares the game's shaders, which takes a while. Later starts are faster.
 
 ### On Linux
 
-1. Open the [latest release](https://github.com/NotRexed/Hookshot/releases/latest) and download
-   `Hookshot-<version>-x86_64.AppImage`. It is Hookshot Builder with everything it needs inside.
+1. Open the [latest release](https://github.com/Recomper/Longshot/releases/latest) and download
+   `Longshot-<version>-x86_64.AppImage`. It is Longshot Builder with everything it needs inside.
 2. Allow it to run as a program. In most file managers: right-click it, open **Properties**, and turn on
    "Allow executing file as program" (the words differ between desktops). Or in a terminal:
-   `chmod +x Hookshot-*-x86_64.AppImage`.
-3. Double-click it. The Hookshot Builder window opens.
+   `chmod +x Longshot-*-x86_64.AppImage`.
+3. Double-click it. The Longshot Builder window opens.
 4. Under **Game files**, choose **.nup file** or **romfs and exefs**, then press **Browse** to pick them. The builder
    checks the version.
-5. Under **Save the game to**, keep `~/Games/Hookshot` or choose another folder. Choose a **Language**.
+5. Under **Save the game to**, keep `~/Games/Longshot` or choose another folder. Choose a **Language**.
 6. Press **Build**. It takes about 10 to 45 minutes, depending on your CPU and memory.
 7. When it says "Your game is ready", press **Play**.
 
-The game is also added to your applications menu as "Hookshot". That entry, and `hookshot` in the game folder, open the
+The game is also added to your applications menu as "Longshot". That entry, and `longshot` in the game folder, open the
 launcher: **Play**, and **Update** when a newer release is out. Keep the AppImage where it is: the launcher uses it to
 update.
 
@@ -128,23 +130,23 @@ script: see [Linux, the AppImage from the command line](#build-from-source).
 
 ### Updating
 
-When a new release is out, the launcher says "Update available". Press **Update**: in `hookshot.exe` on Windows, or in
-`hookshot` (or the AppImage) on Linux. It downloads only the parts that changed and builds the game again in the same
+When a new release is out, the launcher says "Update available". Press **Update**: in `longshot.exe` on Windows, or in
+`longshot` (or the AppImage) on Linux. It downloads only the parts that changed and builds the game again in the same
 folder. The build files of the last build are gone by then (see [Where the files go](#where-the-files-go)), so an
 update takes about as long as the first build. Your saves and settings are kept. What changed is on the
-[Releases page](https://github.com/NotRexed/Hookshot/releases).
+[Releases page](https://github.com/Recomper/Longshot/releases).
 
 <details>
 <summary>What an update keeps and replaces, and updating from the command line</summary>
 
 To be safe, copy your saves somewhere first: the `user` folder in the game folder on Windows, or
-`~/.local/share/hookshot` on Linux.
+`~/.local/share/longshot` on Linux.
 
 | Kept | Replaced |
 |---|---|
-| Your saves (`user`, or `~/.local/share/hookshot` on Linux) | The game in `bin` and its files |
-| `hookshot_options.ini`, the in-game menu's choices and your controls | `image.bin` and the shader list |
-| `hookshot_env.txt` | `language.txt`, written again with the game's language |
+| Your saves (`user`, or `~/.local/share/longshot` on Linux) | The game in `bin` and its files |
+| `longshot_options.ini`, the in-game menu's choices and your controls | `image.bin` and the shader list |
+| `longshot_env.txt` | `language.txt`, written again with the game's language |
 | `mods` | |
 
 The game files the first build read are kept in the game folder, so an update does not need your `.nup` again.
@@ -157,13 +159,13 @@ with `--update <game folder>`.
 ### Where the files go
 
 - The build reads your game and never changes it. It writes to the folder you choose and to the builder's own folder:
-  `%LOCALAPPDATA%\HookshotBuilder` on Windows, `~/.cache/hookshot-builder` on Linux.
+  `%LOCALAPPDATA%\LongshotBuilder` on Windows, `~/.cache/longshot-builder` on Linux.
 - The romfs is hard-linked instead of copied where the disk allows it.
 - The build files (about 4 GB: the translated code and the compiled objects) are deleted once the game is ready. None
   of them are needed to play. To keep them, so that an update compiles only what changed, set the environment variable
-  `HOOKSHOT_KEEP_BUILD_FILES=1` for the builder; on Windows, **Free up space** on the "Your game is ready" page then
+  `LONGSHOT_KEEP_BUILD_FILES=1` for the builder; on Windows, **Free up space** on the "Your game is ready" page then
   deletes them when you want. The build files folder can be moved before a build (**Change**, **Default**).
-- Saves: the `user` folder in the game folder on Windows, `~/.local/share/hookshot` on Linux (a `user` folder from an
+- Saves: the `user` folder in the game folder on Windows, `~/.local/share/longshot` on Linux (a `user` folder from an
   earlier Linux build is moved there once). `--user <folder>` puts them somewhere else ([command line
   arguments](#running-the-game-from-the-command-line)).
   To carry on with a save from an emulator (Lichii, Eglantine, Orchid, ...) or NX2navi, or to take yours there, see
@@ -174,19 +176,19 @@ with `--update <game folder>`.
 
 | Problem | What to do |
 |---|---|
-| Where is the log? | `hookshot_log.txt` in the game folder holds the last run. The four runs before are `hookshot_log.1.txt` (the last) to `.4.txt`. Started from a terminal, the game prints there instead. Every 600 frames it has a `vk: status:` line: the video memory in use of what the driver allows, and DLSS's details while it draws; `vk: over the driver's video-memory allowance` says when the game passed it |
-| "Hookshot supports build e0f3ccfa" or "This version isn't supported" | Check that you chose the right game with its update installed |
+| Where is the log? | `longshot_log.txt` in the game folder holds the last run. The four runs before are `longshot_log.1.txt` (the last) to `.4.txt`. Started from a terminal, the game prints there instead. Every 600 frames it has a `vk: status:` line: the video memory in use of what the driver allows, and DLSS's details while it draws; `vk: over the driver's video-memory allowance` says when the game passed it |
+| "Longshot supports build e0f3ccfa" or "This version isn't supported" | Check that you chose the right game with its update installed |
 | The game opens and closes, or the log says "device lost" | Update your graphics driver. On AMD cards there are known crashes ([#708](https://github.com/NotRexed/Hookshot/issues/708), [#614](https://github.com/NotRexed/Hookshot/issues/614)) |
 | Parts of the picture are missing, or a message says your card has no mesh shader support | The card or its driver has no mesh shaders. Update the driver; older cards are not supported ([#640](https://github.com/NotRexed/Hookshot/issues/640)) |
 | AMD: blocky textures, solid rectangles in the sky or unusually dark courtyard surfaces | Try the [RGBA8 texture workaround](#amd-texture-workaround). It uses more graphics memory |
 | Linux: the game does not start or the picture is broken | The game needs a Vulkan 1.3 driver with mesh shaders. Check with `vulkaninfo \| grep mesh`: it should list `VK_EXT_mesh_shader`. Update Mesa or the NVIDIA driver |
-| Steam Deck: the game freezes and closes in Kokiri Forest or the Great Deku Tree (`gfx_0.0.0 timeout` in `journalctl -k`) | `RX_VK_MESH_NOCULL=2c56dc1006942f74` in `hookshot_env.txt` gets past it with every model drawn (the culling pass that runs for seconds is turned off). `RX_VK_SKIP_CODE=2c56dc1006942f74` also gets past it, but the models those draws make go missing (see the [development guide](docs/development.md#switches-for-testing-and-debugging), [#817](https://github.com/NotRexed/Hookshot/issues/817)) |
-| "Your antivirus removed part of the build tools" | A false alarm on unsigned programs. Restore the files from Windows Security's Protection history, or add `%LOCALAPPDATA%\HookshotBuilder` to its exclusions, then press **Repair** |
+| Steam Deck: the game freezes and closes in Kokiri Forest or the Great Deku Tree (`gfx_0.0.0 timeout` in `journalctl -k`) | `RX_VK_MESH_NOCULL=2c56dc1006942f74` in `longshot_env.txt` gets past it with every model drawn (the culling pass that runs for seconds is turned off). `RX_VK_SKIP_CODE=2c56dc1006942f74` also gets past it, but the models those draws make go missing (see the [development guide](docs/development.md#switches-for-testing-and-debugging), [#817](https://github.com/NotRexed/Hookshot/issues/817)) |
+| "Your antivirus removed part of the build tools" | A false alarm on unsigned programs. Restore the files from Windows Security's Protection history, or add `%LOCALAPPDATA%\LongshotBuilder` to its exclusions, then press **Repair** |
 | Stutter the first time you see something | Normal for now: shaders are being prepared. It gets better when you pass through the same place again |
 | The game is in the wrong language | Change the code in `language.txt` in the game folder. The file lists them all |
 
-If the problem continues, [report it](https://github.com/NotRexed/Hookshot/issues/new/choose) with the version, where
-you were in the game, your graphics card, `hookshot_log.txt` and a screenshot or video. Never send game files.
+If the problem continues, [report it](https://github.com/Recomper/Longshot/issues/new/choose) with the version, where
+you were in the game, your graphics card, `longshot_log.txt` and a screenshot or video. Never send game files.
 
 #### Low FPS or stutter
 
@@ -200,7 +202,7 @@ keep the lines around the drop that show `presents`, `GPU time`, `waits for shad
 `memory heaps`. Compare total and per-heap memory use with the driver's allowances. The texture cache has a
 separate budget on the `VRAM:` line.
 
-If the GPU time stays high, a separate run with `RX_VK_PASS_TIMING=1` in `hookshot_env.txt` reports which GPU
+If the GPU time stays high, a separate run with `RX_VK_PASS_TIMING=1` in `longshot_env.txt` reports which GPU
 passes take the time every 600 presents. Keep the unprofiled log for the FPS comparison since the timing itself
 adds work. Remove the switch after collecting the log. The [development guide](docs/development.md#time-and-profiles)
 has more switches.
@@ -209,7 +211,7 @@ has more switches.
 
 For these AMD texture artifacts, try keeping decoded ASTC textures as RGBA8 instead of re-encoding them to BC3
 ([#57](https://github.com/NotRexed/Hookshot/issues/57), [#1006](https://github.com/NotRexed/Hookshot/issues/1006)).
-Close the game, then create or edit `hookshot_env.txt` in the built game folder, beside `image.bin`, and add:
+Close the game, then create or edit `longshot_env.txt` in the built game folder, beside `image.bin`, and add:
 
 ```ini
 RX_VK_ASTC_RGBA8=1
@@ -234,12 +236,12 @@ Controls, the Teleport list, the inventory), and B goes back or closes the menu:
 on (with the Nintendo layout, A is the right face button). The mouse is free while the menu is open: click a tab, click a row's name to choose it (its
 value stays), click the left or right half of a value to lower or raise it, drag a slider, turn the wheel to scroll the rows (it never changes a value), and right-click to go back. The
 button prompts at the bottom show the keys or the controller's buttons, whichever you used last. Your choices are saved
-in `hookshot_options.ini` in the game folder.
+in `longshot_options.ini` in the game folder.
 
 The menu, the FPS counter and the start-up screen are drawn in the style of the game's own menus. They use the game's
 own menu font, read into memory from your game files (the romfs folder the game runs from) the first time one of them is
-drawn. It is never copied anywhere, and Hookshot does not include it. Without it, or if it has no Latin letters, they use
-Libertinus, which Hookshot includes.
+drawn. It is never copied anywhere, and Longshot does not include it. Without it, or if it has no Latin letters, they use
+Libertinus, which Longshot includes.
 
 The rows marked "after a restart" below are read when the game starts. While one is changed, it is tagged "After
 restart" and the help on the Graphics tab lists it; closing the menu then asks whether to restart now. **Later** keeps
@@ -304,7 +306,7 @@ HDR peak brightness show only while HDR is on.
   screen of 1080 lines or more while you use a controller (a TV across the room), else Medium.
 - **GPU device** matters on a PC with more than one graphics card (a laptop's integrated and dedicated GPUs, or a
   second card for Lossless Scaling). Auto prefers a dedicated one, and only cards with Vulkan 1.3 are listed.
-  `hookshot_log.txt` lists every card as `vk: device <n>`; `RX_VK_DEVICE=<n>` chooses one for a single run and wins
+  `longshot_log.txt` lists every card as `vk: device <n>`; `RX_VK_DEVICE=<n>` chooses one for a single run and wins
   over the menu.
 - **Frame generation** makes extra frames between the game's own. It adds a little input delay, and fast motion can
   show artifacts. The renderer's own interpolation makes the frames; at 2x, AMD FSR 3.1's frame interpolation can make
@@ -329,7 +331,7 @@ HDR peak brightness show only while HDR is on.
   monitor, 5120x1440 gives a native frame with a sharp HUD. Set **Ultrawide** to Monitor's shape with it: it widens the
   cameras to the frame's shape and keeps the HUD and movies in the middle 16:9; without it, the game's 16:9 picture is
   stretched across the 32:9 output, sharp but wide. For a size the menu does not offer (3440x1440, 2560x1080, ...), set
-  `output_res=<width>x<height>` in `hookshot_options.ini`: each side a multiple of 8, at least 640x360, at most 5120x2880's
+  `output_res=<width>x<height>` in `longshot_options.ini`: each side a multiple of 8, at least 640x360, at most 5120x2880's
   pixels, and between 5:4 and 32:9 in shape; anything else uses the game's 2048x1152. The menu then offers it as its own
   choice. With **Ultrawide** on, a picture wider than 16:9 is kept to 3840x2160's pixels, so above that a wide size is not a
   native frame. For one run, set `HOS_OUTPUT_RES` to a size, such as `HOS_OUTPUT_RES=3840x2160`.
@@ -380,7 +382,7 @@ HDR peak brightness show only while HDR is on.
   scale the left-right and up-down aim (100% is the console's), **Invert motion X/Y** turn either direction around. The game gets the motion
   state as a Switch (and Eden) builds it, so how you hold the pad when motion starts does not matter. Motion follows the pad used
   last. The gyroscope's drift is learned while the pad rests on a table, so set it down for a second if the aim
-  creeps. `HOS_MOTION_DEBUG=1` (in `hookshot_env.txt`) logs what the game gets twice a second.
+  creeps. `HOS_MOTION_DEBUG=1` (in `longshot_env.txt`) logs what the game gets twice a second.
 - **Layout preset:** Nintendo has A on the right face button, Xbox / PC and Swap Face put A on the bottom one. Changing
   a button yourself sets it to Custom.
 
@@ -412,10 +414,10 @@ To change which gamepad button or key presses a Switch button, or which keys mov
 Controls tab's Controls page. Choose a row and a column (Gamepad or Keyboard), press <kbd>Enter</kbd> (or the bottom
 face button), then the new button or key. <kbd>Esc</kbd> cancels, <kbd>Delete</kbd> clears it, and Reset to defaults
 puts them all back. A gamepad button taken from another Switch button swaps with it. The page saves them in
-`hookshot_options.ini`.
+`longshot_options.ini`.
 
 <details>
-<summary>Writing the controls in hookshot_options.ini yourself</summary>
+<summary>Writing the controls in longshot_options.ini yourself</summary>
 
 ```ini
 pad_a=0
@@ -436,13 +438,13 @@ its default.
 
 ## Mods
 
-Put mods in a `mods` folder in the game folder, beside `hookshot.exe` (or point `HOS_MODS` at another folder), in the
+Put mods in a `mods` folder in the game folder, beside `longshot.exe` (or point `HOS_MODS` at another folder), in the
 layout emulators use: `mods/<name>/romfs/...` holds files that replace or add to the game's own. Deeper layouts such as
 `mods/contents/<title id>/<name>/romfs` work too. A folder whose name starts with `-` or `_` is off. When two mods
 have the same file, the one whose folder name sorts last wins, so name them `01-...`, `02-...` to set the order.
 
-Only RomFS mods are loaded. `exefs` patches (`.pchtxt`, `.ips`) are left out: Hookshot compiles the game's code ahead
-of time, so patching its instructions would need a rebuild. The log (`hookshot_log.txt`) names each mod and the files
+Only RomFS mods are loaded. `exefs` patches (`.pchtxt`, `.ips`) are left out: Longshot compiles the game's code ahead
+of time, so patching its instructions would need a rebuild. The log (`longshot_log.txt`) names each mod and the files
 read from it.
 
 A mod file larger than the game's own does not load unless the resource size table allows for it:
@@ -461,29 +463,29 @@ For developers, and for players who prefer the command line. The builder windows
 <summary>Windows, from the command line</summary>
 
 ```powershell
-python -I nx2/make_game.py --nup "C:\path\your-game.nup" --out "C:\Games\Hookshot" --language en-US
-python -I nx2/make_game.py --romfs "C:\path\romfs" --exefs "C:\path\exefs" --out "C:\Games\Hookshot" --language en-US
+python -I nx2/make_game.py --nup "C:\path\your-game.nup" --out "C:\Games\Longshot" --language en-US
+python -I nx2/make_game.py --romfs "C:\path\romfs" --exefs "C:\path\exefs" --out "C:\Games\Longshot" --language en-US
 ```
 
 Add `--check` with your `.nup` or `--exefs` to only check the game's version. It builds nothing.
 Add `--log "C:\path\build.log"` to also save the build's output to a file (UTF-8, replaced if it exists); it works
 with `--check` and `--update` too, and on Linux.
-`HOOKSHOT_JOBS=<n>` (or `--jobs <n>`) limits how many files compile at once.
-`HOOKSHOT_MEM_LIMIT_GB=<n>` lets the compilers take that many GB together, whatever is free now; up to 4 always run.
+`LONGSHOT_JOBS=<n>` (or `--jobs <n>`) limits how many files compile at once.
+`LONGSHOT_MEM_LIMIT_GB=<n>` lets the compilers take that many GB together, whatever is free now; up to 4 always run.
 
 You need:
 
 - Python 3 from python.org (the Microsoft Store's Python installs packages where `python -I` does not look), with
   `pip install -r requirements.txt` (core tools plus the button-prompt packages).
 - [llvm-mingw](https://github.com/mstorsjo/llvm-mingw) (the `ucrt-x86_64` build), unpacked as `llvm-mingw` in the
-  clone or with `HOOKSHOT_MINGW` set to its folder. Without it the build uses the clang from
+  clone or with `LONGSHOT_MINGW` set to its folder. Without it the build uses the clang from
   [emsdk](https://github.com/emscripten-core/emsdk) at `C:\emsdk` with Visual Studio's C++ tools and the Windows SDK
-  (`HOOKSHOT_MSVC=1` forces that route).
-- What the builder's `tools` folder carries and a clone does not. Run `HookshotBuilder.exe` once: the folder is
-  `%LOCALAPPDATA%\HookshotBuilder\versions\<version>\HookshotBuilder\tools`. The builder sets the variables itself;
+  (`LONGSHOT_MSVC=1` forces that route).
+- What the builder's `tools` folder carries and a clone does not. Run `LongshotBuilder.exe` once: the folder is
+  `%LOCALAPPDATA%\LongshotBuilder\versions\<version>\LongshotBuilder\tools`. The builder sets the variables itself;
   from the command line, set them before you run `make_game.py`:
   - `tools\cpm`: the Vulkan headers and FFmpeg. Set `RX_CPM` to this folder. Without it (and without system
-    Vulkan / SPIR-V / VMA headers or `HOOKSHOT_*_HEADERS`), the standalone build stops instead of shipping a
+    Vulkan / SPIR-V / VMA headers or `LONGSHOT_*_HEADERS`), the standalone build stops instead of shipping a
     game with no renderer.
   - `tools\wgpu-native`: set `WGPU_NATIVE` to this folder.
   - `tools\third_party`: the prebuilt files a clone lacks (`a64emit`, `lld-link`, `zbic` and SDL2). Copy its `.dll`,
@@ -498,18 +500,18 @@ You need:
 <summary>Linux, the AppImage from the command line</summary>
 
 ```sh
-./Hookshot-<version>-x86_64.AppImage --cli --nup ~/your-game.nup --out ~/Games/Hookshot   # make_game.py's options
-./Hookshot-<version>-x86_64.AppImage --play                    # the game the builder built last, without the window
-./Hookshot-<version>-x86_64.AppImage --play ~/Games/Hookshot   # the game in that folder
-./Hookshot-<version>-x86_64.AppImage --update ~/Games/Hookshot # the new release, and that folder built again
+./Longshot-<version>-x86_64.AppImage --cli --nup ~/your-game.nup --out ~/Games/Longshot   # make_game.py's options
+./Longshot-<version>-x86_64.AppImage --play                    # the game the builder built last, without the window
+./Longshot-<version>-x86_64.AppImage --play ~/Games/Longshot   # the game in that folder
+./Longshot-<version>-x86_64.AppImage --update ~/Games/Longshot # the new release, and that folder built again
 ```
 
-`HOOKSHOT_JOBS=<n>` (or `--jobs <n>` with `--cli`) limits how many files compile at once.
-`HOOKSHOT_MEM_LIMIT_GB=<n>` lets the compilers take that many GB together, whatever is free now. Linux stops a compiler
+`LONGSHOT_JOBS=<n>` (or `--jobs <n>` with `--cli`) limits how many files compile at once.
+`LONGSHOT_MEM_LIMIT_GB=<n>` lets the compilers take that many GB together, whatever is free now. Linux stops a compiler
 that does not fit; it is then compiled again alone at the end.
 
-In a game folder, `hookshot` is the launcher and the game itself is `bin/hookshot`. The builder's settings are in
-`~/.config/hookshot/builder.ini`.
+In a game folder, `longshot` is the launcher and the game itself is `bin/longshot`. The builder's settings are in
+`~/.config/longshot/builder.ini`.
 
 </details>
 
@@ -519,10 +521,10 @@ In a game folder, `hookshot` is the launcher and the game itself is `bin/hooksho
 You need `clang` and `lld` (LLVM 23 or newer reads the play profile; an older one builds without it), Python 3 with
 `pip install -r requirements.txt`, FFmpeg's development files (with dav1d, for the movies) and SDL3 (SDL2 works too).
 Then run `python -I nx2/make_game.py ...` as on Windows. Vulkan / SPIR-V / VMA headers come from the distro, from
-`HOOKSHOT_*_HEADERS`, or from a CPM cache via `RX_CPM`.
+`LONGSHOT_*_HEADERS`, or from a CPM cache via `RX_CPM`.
 
 `scripts/linux/deps.sh` fetches and builds all of these into `build-linux/deps`, and `scripts/linux/appimage.sh` makes
-the AppImage from them. A folder built from a source checkout has no launcher: `hookshot` there is the game.
+the AppImage from them. A folder built from a source checkout has no launcher: `longshot` there is the game.
 
 </details>
 
@@ -530,44 +532,44 @@ the AppImage from them. A folder built from a source checkout has no launcher: `
 <summary>The Windows game, built on Linux</summary>
 
 Unpack llvm-mingw's Linux build (`ucrt-ubuntu-22.04-x86_64`), then run `make_game.py` with `RX_TARGET=windows` and
-`HOOKSHOT_MINGW` set to its folder. The objects go to `~/.cache/hookshot-builder-windows`, apart from the Linux game's.
+`LONGSHOT_MINGW` set to its folder. The objects go to `~/.cache/longshot-builder-windows`, apart from the Linux game's.
 The game folder runs under Proton or on Windows.
 
 </details>
 
 ### Running the game from the command line
 
-The built game is `bin\hookshot.exe` on Windows and `bin/hookshot` in a packaged Linux game folder. A build from a
-source checkout has `hookshot.exe` or `hookshot` in its build folder, with no launcher beside it. The `hookshot.exe`
-or `hookshot` launcher in the game folder does not pass these arguments to the game, so start the game directly to
+The built game is `bin\longshot.exe` on Windows and `bin/longshot` in a packaged Linux game folder. A build from a
+source checkout has `longshot.exe` or `longshot` in its build folder, with no launcher beside it. The `longshot.exe`
+or `longshot` launcher in the game folder does not pass these arguments to the game, so start the game directly to
 use them.
 
 | Argument | What it does |
 |---|---|
 | `image.bin` | The game image to run. Without it the game uses the `image.bin`, `romfs` and `user` in its folder |
 | `--romfs <folder>` | The extracted RomFS folder |
-| `--user <folder>` | Where the game keeps per-user data: saves, caches and temp files (and `mouse_sens.txt` when `HOS_MOUSE_SENS` is set; the menu keeps the sensitivity otherwise). Default: `user` in the game folder on Windows, `~/.local/share/hookshot` on Linux; with an explicit image path, `user` in the current folder |
+| `--user <folder>` | Where the game keeps per-user data: saves, caches and temp files (and `mouse_sens.txt` when `HOS_MOUSE_SENS` is set; the menu keeps the sensitivity otherwise). Default: `user` in the game folder on Windows, `~/.local/share/longshot` on Linux; with an explicit image path, `user` in the current folder |
 | `--trace` | Log every Horizon OS call (the same as `HOS_TRACE=1`) |
 | `--prepare-shaders` | Prepare the shaders as the first start does, then exit without starting the game (no build step runs it) |
 
 For example, keep saves somewhere else:
 
 ```powershell
-cd "C:\Games\Hookshot"
-.\bin\hookshot.exe --user "D:\Hookshot data"
+cd "C:\Games\Longshot"
+.\bin\longshot.exe --user "D:\Longshot data"
 ```
 
 ```sh
-cd ~/Games/Hookshot
-./bin/hookshot --user "$HOME/hookshot-data"
+cd ~/Games/Longshot
+./bin/longshot --user "$HOME/longshot-data"
 ```
 
-`hookshot_env.txt` and the other test switches are documented below.
+`longshot_env.txt` and the other test switches are documented below.
 
 <details>
 <summary>AMD FSR 3.1 (every build)</summary>
 
-**AMD FSR 3.1** in the Graphics tab's **Upscaler** row (`dlss=3` in `hookshot_options.ini`; `RX_VK_FSR=1` for one run,
+**AMD FSR 3.1** in the Graphics tab's **Upscaler** row (`dlss=3` in `longshot_options.ini`; `RX_VK_FSR=1` for one run,
 `RX_VK_FSR=0` never) upscales in place of the game's own network, and with **Frame generation** at 2x its frame
 interpolation can make the frame in between with `RX_VK_FSR_FG=1` (opt-in: the game draws its HUD into the same picture
 and FSR 3.1 has no HUD-less colour to keep it still, so the HUD smears; by default the renderer's own makes it). Both are AMD's FidelityFX
@@ -583,35 +585,35 @@ themselves can trail for now.
 <summary>NVIDIA DLSS (optional, NVIDIA's SDK under NVIDIA's license)</summary>
 
 A game built with NVIDIA's DLSS SDK offers **NVIDIA DLSS** and **NVIDIA DLAA** in the Graphics tab's **Upscaler** row on
-NVIDIA RTX cards (`dlss=` in `hookshot_options.ini`, `RX_VK_DLSS=0/1/2` for one run): DLSS Super Resolution in place of
+NVIDIA RTX cards (`dlss=` in `longshot_options.ini`, `RX_VK_DLSS=0/1/2` for one run): DLSS Super Resolution in place of
 the game's own upscaler, with camera jitter (**NVIDIA Reflex** needs no SDK and is in
 every build). NVIDIA's files are NVIDIA's, under its own license, the
 [NVIDIA RTX SDKs license](https://github.com/NVIDIA/DLSS/blob/9981c6350dc58c0ce21f024fd65e31e851c31689/LICENSE.txt).
-Hookshot never includes or redistributes them: each build downloads them for itself, and only after you accept that
+Longshot never includes or redistributes them: each build downloads them for itself, and only after you accept that
 license. Never share a game folder built with them, and do not post builds made with them.
 
-- **Windows, the Hookshot Builder:** tick **NVIDIA DLSS (downloads NVIDIA's SDK under NVIDIA's license)** before you
+- **Windows, the Longshot Builder:** tick **NVIDIA DLSS (downloads NVIDIA's SDK under NVIDIA's license)** before you
   build. It is off by default and shows NVIDIA's license when you tick it. The build downloads the SDK into
-  `%LOCALAPPDATA%\HookshotBuilder\ngx-sdk` and puts DLSS's runtime, `nvngx_dlss.dll`, in the game folder's `ngx` folder.
+  `%LOCALAPPDATA%\LongshotBuilder\ngx-sdk` and puts DLSS's runtime, `nvngx_dlss.dll`, in the game folder's `ngx` folder.
 - **Windows, the command line:** `python -I scripts/ngx_sdk.py --platform windows <sdk folder>` asks you to accept
   NVIDIA's license (or pass `--accept-nvidia-license`) and fetches the headers, `nvsdk_ngx_s.lib` and `nvngx_dlss.dll`,
-  each checked against its SHA-256. Then build with `HOOKSHOT_NGX_SDK=<sdk folder>`: `make_game.py` copies
-  `nvngx_dlss.dll` into `<game folder>\ngx`. NGX is also pointed at `%LOCALAPPDATA%\Hookshot\ngx`, and at
+  each checked against its SHA-256. Then build with `LONGSHOT_NGX_SDK=<sdk folder>`: `make_game.py` copies
+  `nvngx_dlss.dll` into `<game folder>\ngx`. NGX is also pointed at `%LOCALAPPDATA%\Longshot\ngx`, and at
   `RX_VK_DLSS_DIR` when it is set, and uses the newest `nvngx_dlss.dll` it finds across them (to try a given one, make
   sure no other folder has a newer one). Never copy NGX's core, `_nvngx.dll`, beside the game: it comes with NVIDIA's
   driver.
 - **Linux:** the same with `--platform linux` (or `scripts/linux/ngx-sdk.sh`): `libnvsdk_ngx.a` for the build and
-  `libnvidia-ngx-dlss.so` for the game folder's `ngx` folder (also looked for in `$XDG_DATA_HOME/hookshot/ngx`). NGX's
+  `libnvidia-ngx-dlss.so` for the game folder's `ngx` folder (also looked for in `$XDG_DATA_HOME/longshot/ngx`). NGX's
   core comes with NVIDIA's Linux driver. NVIDIA's NGX on Linux loads the runtime only from a folder whose path is all
   ASCII: with the game in a folder named otherwise (`~/Games/Zelda-Café`), put `libnvidia-ngx-dlss.so.*` in
-  `$XDG_DATA_HOME/hookshot/ngx` (`~/.local/share/hookshot/ngx`) or another ASCII folder named by `RX_VK_DLSS_DIR`.
+  `$XDG_DATA_HOME/longshot/ngx` (`~/.local/share/longshot/ngx`) or another ASCII folder named by `RX_VK_DLSS_DIR`.
 
 The **DLSS model** row chooses DLSS's network, by NVIDIA's preset letter, for every mode: **Transformer (K)**, the
 transformer model and the one tested most here (the default); **Transformer 2 (M)**, NVIDIA's second-generation
 transformer as it picks it for Performance; **Transformer 2 (L)**, the same generation as tuned for Ultra Performance;
 **NVIDIA default**, which lets DLSS's runtime pick for each mode, so it can change with a runtime update. The runtime
 the SDK comes with (310.9.16) has all of them. A change applies at once, without a restart (`dlss_model=` in
-`hookshot_options.ini`, 0 to 3 in that order). `RX_VK_DLSS_PRESET=<letter>` (or `0` for NVIDIA's default) chooses
+`longshot_options.ini`, 0 to 3 in that order). `RX_VK_DLSS_PRESET=<letter>` (or `0` for NVIDIA's default) chooses
 the preset for one run and wins over the row; the log's `vk: NVIDIA DLSS: ... preset <letter>` line says which one was
 asked for, and with `RX_VK_DLSS_LOG=1` NGX's own `Using App hint Preset <letter>` lines say which it took.
 
@@ -621,7 +623,7 @@ The log's `vk: status:` line every 600 frames shows the video memory in use of t
 (its images' size, the jitter and the actor motion) appended while it draws, and a `vk: over the driver's
 video-memory allowance` line says when the game passed it.
 
-The game's log says whether DLSS started, and why not when it did not (`vk: NVIDIA DLSS:` lines in `hookshot_log.txt`).
+The game's log says whether DLSS started, and why not when it did not (`vk: NVIDIA DLSS:` lines in `longshot_log.txt`).
 NGX starts on demand: when the Insert menu first opens (to know whether the Upscaler can offer DLSS) or at the first
 gameplay upscale with DLSS chosen, so on the title screen the log has no NGX lines yet.
 With `RX_VK_DLSS_LOG=1` NGX's own lines go there too (`ngx:`). Some of them look like errors but are not:
@@ -638,16 +640,16 @@ A game built with FSR 4 offers **AMD FSR 4** and **AMD FSR 4 Native AA** in the 
 machine-learned temporal upscaler in place of the game's own, on the same inputs as DLSS (the scene's colour and depth, the
 camera's and the characters' motion, and the camera jitter). Native AA draws the 3D at full size and smooths its edges.
 Unlike FSR 3.1 (above), it runs AMD's own DLLs, so it needs them beside the game. Choose it in the menu (`dlss=4` or `5`
-in `hookshot_options.ini`, `RX_VK_FSR4=1` or `2` for one run, `RX_VK_FSR4=0` to leave it out).
+in `longshot_options.ini`, `RX_VK_FSR4=1` or `2` for one run, `RX_VK_FSR4=0` to leave it out).
 
-- **Windows, the Hookshot Builder:** tick **AMD FSR 4** before you build. Nothing is downloaded.
-- **The command line:** `make_game.py --fsr` (or `HOOKSHOT_FSR=1` for `nx2/build.py`). Rebuilding a folder built with
+- **Windows, the Longshot Builder:** tick **AMD FSR 4** before you build. Nothing is downloaded.
+- **The command line:** `make_game.py --fsr` (or `LONGSHOT_FSR=1` for `nx2/build.py`). Rebuilding a folder built with
   it (`--update`) keeps it; `--no-fsr` takes it out.
-- **AMD's files:** Hookshot includes only AMD's MIT-licensed API headers (`third_party/fidelityfx`). Put
+- **AMD's files:** Longshot includes only AMD's MIT-licensed API headers (`third_party/fidelityfx`). Put
   `amd_fidelityfx_loader_vk.dll` and `amd_fidelityfx_upscaler_vk.dll` from the
   [FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) 2.4 release (`Kits/FidelityFX/signedbin`)
-  beside the game's exe (`bin\hookshot.exe`) or in the game folder. (`RX_VK_FSR_DIR` names another folder, for testing:
-  set it in the environment or a `HOS_ENV_FILE` file; `hookshot_env.txt` takes no paths.) Without them the Upscaler row
+  beside the game's exe (`bin\longshot.exe`) or in the game folder. (`RX_VK_FSR_DIR` names another folder, for testing:
+  set it in the environment or a `HOS_ENV_FILE` file; `longshot_env.txt` takes no paths.) Without them the Upscaler row
   says so and offers the rest. On Linux, a Vulkan FSR 4 library (`amd_fidelityfx_upscaler_vk.so`, such as fsr4-vk's)
   takes their place.
 
@@ -657,12 +659,12 @@ never an older FSR in its place), and why not when it did not start. Tested on a
 </details>
 
 <details>
-<summary>Switches for testing (hookshot_env.txt)</summary>
+<summary>Switches for testing (longshot_env.txt)</summary>
 
-Switches to test (`RX_VK_NOOPT=1` and the others) go in `hookshot_env.txt` in the game folder, one `NAME=VALUE` a
+Switches to test (`RX_VK_NOOPT=1` and the others) go in `longshot_env.txt` in the game folder, one `NAME=VALUE` a
 line, on Windows and Linux. The running game reads it, not the builder. A test run can name another file with
-`HOS_ENV_FILE=<path>`; the game then reads that one instead and leaves `hookshot_env.txt` alone.
-`hookshot_env.txt` sets only the game's own switches (names that start with `RX_`, `HOS_`, `HOOKSHOT_`, `EDEN_`,
+`HOS_ENV_FILE=<path>`; the game then reads that one instead and leaves `longshot_env.txt` alone.
+`longshot_env.txt` sets only the game's own switches (names that start with `RX_`, `HOS_`, `LONGSHOT_`, `EDEN_`,
 `NVN_`, `TOTK_` or `SDL_`, but not SDL's library names such as `SDL_VULKAN_LIBRARY`), and no value that is a path except
 `RX_VK_DLSS_DIR`'s (a folder on this PC, not a network share), and no value at all for the switches that name a file
 or folder (`HOS_AUDIO_DUMP`, `RX_VK_SHOTS` and the like) or press buttons on a timer (`HOS_INPUT_SCRIPT`,
@@ -670,7 +672,7 @@ or folder (`HOS_AUDIO_DUMP`, `RX_VK_SHOTS` and the like) or press buttons on a t
 in a file named by `HOS_ENV_FILE`.
 
 To enable the debug tools, turn **Debug tools** on in the menu's Debug tab (or add `HOS_OOT_CHEATS=1` to
-`hookshot_env.txt` in the game folder). The tools then show below it on the same tab. The tab's Developer section,
+`longshot_env.txt` in the game folder). The tools then show below it on the same tab. The tab's Developer section,
 always shown, has the Descriptor reuse and Sampler cache rows.
 
 `RX_VK_UI_GAME_FONT=0` draws the menu with the included font (Libertinus) even when the game's files have the game's own
@@ -678,7 +680,7 @@ menu font. `RX_VK_UI_PROMPTS=pad` (or `keys`) shows the controller's (or the key
 for screenshots.
 
 For a first run on a 4 GB card such as a GTX 1650, `RX_VK_LOW_SPEC=1` starts with the Minimum (4GB) preset, with
-frame generation and upscaling off. It applies only when there is no `hookshot_options.ini` yet; after that, change
+frame generation and upscaling off. It applies only when there is no `longshot_options.ini` yet; after that, change
 the settings in the in-game menu.
 
 `RX_VK_MOVIE_UPSCALE=linear` replaces the movies' neural upscale with the plain linear one. The default, `auto`, keeps
@@ -732,8 +734,10 @@ looks like.
 
 ## Credits
 
-Hookshot exists thanks to the work of many people:
+Longshot exists thanks to the work of many people:
 
+- **[Hookshot](https://github.com/NotRexed/Hookshot)**: Longshot is a fork of Hookshot, and everything here up to the fork is
+  Hookshot's work, by NotRexed and its contributors.
 - **NotRexed**: Hookshot, BlueShell (Mario Kart World), Skybound (Tears of the Kingdom) and the a64-kit tools.
 - **[Eden](https://git.eden-emu.dev/eden-emu/eden)** and **Eglantine**: the shader recompiler and Switch 2 shader work.
 - **suyu**: the graphics decoders and the AArch64 translator.
@@ -761,10 +765,10 @@ Hookshot exists thanks to the work of many people:
 
 ## License
 
-Hookshot is free software under the [GNU General Public License, version 3 or later](LICENSE) (GPL-3.0-or-later).
+Longshot is free software under the [GNU General Public License, version 3 or later](LICENSE) (GPL-3.0-or-later).
 It includes code from Eden, suyu and Orchid, which are under the GPL too. Third-party parts under other licenses that
 work with the GPL (Sirit, the Vulkan Memory Allocator, SDL, Opus, Dear ImGui, zstd, the Libertinus fonts, zbic and the
 a64-kit tools) keep their own notices in their folders.
 
-Hookshot is an unofficial fan project, not affiliated with or endorsed by Nintendo. The Legend of Zelda and Ocarina of
+Longshot is an unofficial fan project, not affiliated with or endorsed by Nintendo. The Legend of Zelda and Ocarina of
 Time are trademarks of Nintendo.

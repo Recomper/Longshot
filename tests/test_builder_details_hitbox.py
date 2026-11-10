@@ -27,7 +27,7 @@ def main():
     if args.artifacts and args.artifacts.exists():
         parser.error("artifact directory already exists; preserve the earlier run")
     flags = subprocess.CREATE_NO_WINDOW | subprocess.BELOW_NORMAL_PRIORITY_CLASS
-    builder = args.source / "builder/HookshotBuilder"
+    builder = args.source / "builder/LongshotBuilder"
     with tempfile.TemporaryDirectory(prefix="builder-details-hitbox-") as folder:
         root = Path(folder)
         inputs, output = root / "source", root / "output"

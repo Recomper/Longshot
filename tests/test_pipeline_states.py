@@ -32,7 +32,7 @@ def main():
     magic = re.search(r"kStateMagic\[8\] = \{([^}]*)\}", draw).group(1)
     if "".join(re.findall(r"'(.)'", magic)).encode() != tool.MAGIC:
         raise SystemExit("the back end's magic and the tool's differ")
-    if "hookshot_pipeline_states_shipped.bin" not in draw:
+    if "longshot_pipeline_states_shipped.bin" not in draw:
         raise SystemExit("the back end does not read the shipped list")
 
     def rec(vs, fs, topo):
@@ -59,7 +59,7 @@ def main():
                              capture_output=True, text=True)
         if ran.returncode or open(xz, "rb").read(6) != tool.XZ_MAGIC or tool.read(xz) != merged:
             raise SystemExit("--out .xz: not an xz file of the same records\n" + ran.stderr)
-        # make_game: assets/pipeline_states.bin.xz unpacked beside the game as hookshot_pipeline_states_shipped.bin, none
+        # make_game: assets/pipeline_states.bin.xz unpacked beside the game as longshot_pipeline_states_shipped.bin, none
         # when there is none
         make_game = load("make_game_under_test", ROOT / "nx2" / "make_game.py")
         game = os.path.join(d, "game")
@@ -71,7 +71,7 @@ def main():
         os.makedirs(os.path.join(d, "assets"))
         os.replace(xz, os.path.join(d, *tool.SHIPPED))
         make_game.ship_state_list(game)
-        shipped = os.path.join(game, "hookshot_pipeline_states_shipped.bin")
+        shipped = os.path.join(game, "longshot_pipeline_states_shipped.bin")
         if open(shipped, "rb").read(8) != tool.MAGIC or tool.read(shipped) != merged:
             raise SystemExit("make_game did not unpack assets/pipeline_states.bin.xz beside the game")
         # one that does not read (another format, damaged) is left out, and the build goes on

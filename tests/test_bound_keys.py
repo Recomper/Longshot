@@ -2,7 +2,7 @@
 the Switch's buttons (host/nn_hid.c).
 
 host/nn_hid.c's binding table and its bound_down are compiled alone, against fake key states and a fake
-hookshot_options.ini: the defaults (WASD, the arrows, the mouse's left button Y and right button ZL), a mouse button
+longshot_options.ini: the defaults (WASD, the arrows, the mouse's left button Y and right button ZL), a mouse button
 only while the mouse is captured and only once the click that captured it was let go, key_move_up from the file, a
 pad_ line for a keys-only control ignored, a key taken from the control that had it, and Enter with Alt still no key.
 python -I -B tests/test_bound_keys.py   (needs a C compiler)
@@ -74,7 +74,7 @@ static const char *ini_dir;
 #else
 #define EXE_SEP "/"
 #endif
-static DWORD GetModuleFileNameA(void *m, char *b, DWORD n) { (void)m; return (DWORD)snprintf(b, n, "%s" EXE_SEP "hookshot.exe", ini_dir); }
+static DWORD GetModuleFileNameA(void *m, char *b, DWORD n) { (void)m; return (DWORD)snprintf(b, n, "%s" EXE_SEP "longshot.exe", ini_dir); }
 #define hos_game_path_a(b,n) GetModuleFileNameA(0,b,n)
 static int held[256];
 static int key(int vk) { return held[vk & 255]; }
@@ -135,9 +135,9 @@ class BoundKeysTests(unittest.TestCase):
         for needle in ("bound_down(HOS_KEY_MOVE_UP,", "bound_down(HOS_KEY_CAM_RIGHT,", "mouse_buttons_arm(", "bound_down(i, 1)"):
             self.assertIn(needle, read, "read_input does not read the bound keys: " + needle)
         self.assertNotIn("key('W')", read, "read_input still reads WASD itself")
-        with tempfile.TemporaryDirectory(prefix="hookshot-bound-keys-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="longshot-bound-keys-") as tmp:
             tmp = Path(tmp)
-            (tmp / "hookshot_options.ini").write_text("key_move_up=90,0\npad_move_up=0\n", encoding="utf-8")
+            (tmp / "longshot_options.ini").write_text("key_move_up=90,0\npad_move_up=0\n", encoding="utf-8")
             (tmp / "t.c").write_text(PRELUDE + code + MAIN, encoding="utf-8")
             binary = tmp / ("t.exe" if sys.platform == "win32" else "t")
             build = subprocess.run([compiler, "-std=gnu11", "-Wall", "-Wno-unused-function", "-I", str(ROOT / "gpu" / "vk"),

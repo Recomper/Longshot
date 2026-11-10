@@ -7,9 +7,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../builder/HookshotBuilder/BuildWorkers.cs" Link="BuildWorkers.cs"/>
-    <Compile Include="../../builder/HookshotBuilder/Runner.cs" Link="Runner.cs"/>
-    <Compile Include="../../builder/HookshotBuilder/BuilderSettings.cs" Link="BuilderSettings.cs"/>
-    <Compile Include="../../builder/HookshotBuilder/ShaderStep.cs" Link="ShaderStep.cs"/>
+    <Compile Include="../../builder/LongshotBuilder/BuildWorkers.cs" Link="BuildWorkers.cs"/>
+    <Compile Include="../../builder/LongshotBuilder/Runner.cs" Link="Runner.cs"/>
+    <Compile Include="../../builder/LongshotBuilder/BuilderSettings.cs" Link="BuilderSettings.cs"/>
+    <Compile Include="../../builder/LongshotBuilder/ShaderStep.cs" Link="ShaderStep.cs"/>
   </ItemGroup>
 </Project>

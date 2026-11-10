@@ -3,7 +3,7 @@
 # version stays the same. Run on the oldest system the AppImage is for (CI: Ubuntu 22.04, glibc 2.35).
 #
 #   emsdk/upstream/   LLVM's clang and lld (the layout third_party/a64-kit/tools/toolchain.py finds through EMSDK):
-#                     the player's PC compiles the game with them. The play profile (work/hookshot_pieces.prof) wants
+#                     the player's PC compiles the game with them. The play profile (work/longshot_pieces.prof) wants
 #                     LLVM 23 or newer.
 #   python/           CPython (python-build-standalone) with lz4, numpy, capstone, unicorn and zstandard: the tools
 #                     (and nx2/prompt_requirements.txt's, which draw the button prompts)

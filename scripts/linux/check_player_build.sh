@@ -4,10 +4,10 @@
 # made nx2/build.py write the menu's fonts from third_party/fonts at every build start, the AppImage does not carry that
 # folder, and every Linux build stopped at LibertinusSans-Regular.ttf while CI stayed green (2026-11-10, #1567).
 #
-#   scripts/linux/check_player_build.sh [<Hookshot-...-x86_64.AppImage>]   (default: the newest in build-linux/)
+#   scripts/linux/check_player_build.sh [<Longshot-...-x86_64.AppImage>]   (default: the newest in build-linux/)
 #
 # The image is extracted, as its runtime does, and run with AppRun's own environment (the AppImage's Python, compiler,
-# sysroot, FFmpeg and the prebuilt Vulkan back end, HOOKSHOT_VK_PREBUILT) in an otherwise empty one, so nothing of the
+# sysroot, FFmpeg and the prebuilt Vulkan back end, LONGSHOT_VK_PREBUILT) in an otherwise empty one, so nothing of the
 # checkout or of CI's caches stands in for what the image lacks:
 #   - AppRun --cli --help: nx2/make_game.py, as the builder window starts it;
 #   - nx2/build.py --standalone --dry-run, as make_game.py runs it: its whole start-up up to the compile, which is where
@@ -15,14 +15,14 @@
 # Neither may write into the image's tree: on a player's PC it is read-only.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-IMAGE=${1:-$(ls -t build-linux/Hookshot-*-x86_64.AppImage 2>/dev/null | head -1 || true)}
+IMAGE=${1:-$(ls -t build-linux/Longshot-*-x86_64.AppImage 2>/dev/null | head -1 || true)}
 [ -n "$IMAGE" ] && [ -f "$IMAGE" ] || { echo "no AppImage to check (scripts/linux/appimage.sh makes one)"; exit 1; }
 IMAGE=$(readlink -f "$IMAGE")
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 (cd "$TMP" && "$IMAGE" --appimage-extract >/dev/null)
 R=$TMP/squashfs-root
-T=$R/usr/share/hookshot
+T=$R/usr/share/longshot
 mkdir -p "$TMP/home" "$TMP/work"
 # (AppRun's environment, from AppRun itself: its lines before it starts Python, sourced with $0 naming it, so HERE is the image)
 sed '/^PY=/,$d' "$R/AppRun" > "$TMP/apprun-env.sh"

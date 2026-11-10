@@ -1,4 +1,4 @@
-"""The stage libraries are kept in Hookshot's own pipeline cache, and a warm pass only counts once that cache is on disk
+"""The stage libraries are kept in Longshot's own pipeline cache, and a warm pass only counts once that cache is on disk
 (gpu/vk/vk_draw.cpp build_graphics, warm_libraries; source checks, no game/GPU).
 
 Asked for under the compile-required flag, the driver answers from a cache it is handed: a library the warm pass built into

@@ -50,7 +50,7 @@ static const char *desired_language(void) {
                 if ((unsigned char)p[0] == 0xEF && (unsigned char)p[1] == 0xBB && (unsigned char)p[2] == 0xBF) p += 3;   /* (a BOM: Notepad's UTF-8) */
                 while (*p == ' ' || *p == '\t') p++;
                 if (*p == '#' || *p == '\r' || *p == '\n' || !*p) continue;
-                /* (only a code the game has: a stray line was taken before, and the game stayed in English, Hookshot issue 75) */
+                /* (only a code the game has: a stray line was taken before, and the game stayed in English, Longshot issue 75) */
                 char code[32];
                 snprintf(code, sizeof code, "%s", p);
                 code[strcspn(code, " \t\r\n")] = 0;
@@ -87,14 +87,14 @@ HLE(_ZN2nn2oe18GetDesiredLanguageEv) {
    (MKW docked composes 3840 x 2160) */
 int hos_ini_option(const char *key, int otherwise);
 #define ini_option hos_ini_option
-/* (hookshot) An option's text in hookshot_options.ini, the game folder's (the Insert menu's choices, gpu/vk/vk_menu.cpp), the last
+/* (hookshot) An option's text in longshot_options.ini, the game folder's (the Insert menu's choices, gpu/vk/vk_menu.cpp), the last
    line that sets it, its line end cut: whether there was one */
 static int ini_text(const char *key, char *out, size_t size) {
     char path[MAX_PATH];
     const DWORD n = hos_game_path_a(path, MAX_PATH);
     char *slash = n ? (strrchr(path, 92) ? strrchr(path, 92) : strrchr(path, 47)) : NULL;   /* (linux: '/'; the game folder's, not bin\\'s) */
     if (!slash || !size) return 0;
-    snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "hookshot_options.ini");
+    snprintf(slash + 1, (size_t)(path + MAX_PATH - slash - 1), "longshot_options.ini");
     FILE *f = fopen(path, "r");
     if (!f) return 0;
     char line[80];
@@ -109,7 +109,7 @@ static int ini_text(const char *key, char *out, size_t size) {
     fclose(f);
     return found;
 }
-int hos_ini_option(const char *key, int otherwise) {   /* (hookshot: the Insert menu's choice, gpu/vk/vk_menu.cpp; nn_vi.c reads it too) */
+int hos_ini_option(const char *key, int otherwise) {   /* (longshot: the Insert menu's choice, gpu/vk/vk_menu.cpp; nn_vi.c reads it too) */
     char text[80];
     return ini_text(key, text, sizeof text) ? atoi(text) : otherwise;
 }
@@ -291,7 +291,7 @@ HLE(_ZN2nn3nsd24GetEnvironmentIdentifierEPNS0_21EnvironmentIdentifierE) {
 
 static void calendar(uint64_t out, uint64_t info, int64_t posix, int local) {
     time_t t = (time_t)posix;
-    struct tm tmv = {0};   /* (hookshot: a time the C library cannot convert left it as the stack had it) */
+    struct tm tmv = {0};   /* (longshot: a time the C library cannot convert left it as the stack had it) */
     if (local) localtime_s(&tmv, &t); else gmtime_s(&tmv, &t);
     /* CalendarTime { s16 year; s8 month, day, hour, minute, second; pad } */
     uint8_t ct[8] = {0};

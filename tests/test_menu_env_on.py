@@ -1,7 +1,7 @@
 """A Debug row read before the menu loads (gpu/vk/vk_draw.cpp menu_env_on): Descriptor reuse on by default from options_version 4.
 
 The real menu_env_on from gpu/vk/vk_draw.cpp is compiled over a stub game path (the fixture's folder); each case writes a
-hookshot_options.ini (or none) and checks the answer for descriptor_reuse (on by default since options_version 4: an older
+longshot_options.ini (or none) and checks the answer for descriptor_reuse (on by default since options_version 4: an older
 file wrote its 0 as the off default it then was) and sampler_cache (off by default, no version rule):
 
 - no file: the default; a file without the line: the default;
@@ -38,7 +38,7 @@ FIXTURE = r"""
 #include <string>
 using DWORD = unsigned long;
 constexpr int MAX_PATH = 260;
-static DWORD game_module_path(char *path, DWORD size) { return snprintf(path, size, "./hookshot.exe"); }
+static DWORD game_module_path(char *path, DWORD size) { return snprintf(path, size, "./longshot.exe"); }
 BODY
 int main(int argc, char **argv) {
     if (argc != 3) return 2;
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 }
 """
 
-# (hookshot_options.ini's text or None for no file, RX_VK_DESC_SLOTGEN or None, descriptor reuse, sampler cache)
+# (longshot_options.ini's text or None for no file, RX_VK_DESC_SLOTGEN or None, descriptor reuse, sampler cache)
 CASES = (
     (None, None, 1, 0),
     ("output_res=1\noptions_version=4\n", None, 1, 0),
@@ -78,7 +78,7 @@ def main():
         source.write_text(FIXTURE.replace("BODY", body), encoding="utf-8")
         subprocess.run([args.cxx, "-std=c++17", "-Wall", "-Wextra", "-Werror", str(source), "-o", str(exe)], check=True)
         for text, env_value, reuse, sampler in CASES:
-            ini = work / "hookshot_options.ini"
+            ini = work / "longshot_options.ini"
             if ini.exists():
                 ini.unlink()
             if text is not None:

@@ -153,8 +153,8 @@ enum {
     NOP_DRAW_INDIRECT, NOP_DISPATCH_INDIRECT,   /* (mkw-recomp: NVN2's GPU-driven draws) */
     NOP_DRAW_MESH,                              /* (mkw-recomp: NVN2 mesh shading; the WebGPU replay leaves it out) */
     NOP_WAIT_EVENT,                             /* (mkw-recomp: a wait for an event another queue's work signals) */
-    NOP_PUSH_CONST,                             /* (hookshot: nvnCommandBufferPushComputeConstants) */
-    NOP_CLEAR_BUF,                              /* (hookshot: nvnCommandBufferClearBuffer) */
+    NOP_PUSH_CONST,                             /* (longshot: nvnCommandBufferPushComputeConstants) */
+    NOP_CLEAR_BUF,                              /* (longshot: nvnCommandBufferClearBuffer) */
     NOP_COUNT_
 };
 typedef struct { int32_t n; const nvn_tex *color[8]; nvn_view cview[8]; uint8_t has_cview[8]; const nvn_tex *depth; nvn_view dview; uint8_t has_dview; } nvn_p_set_rt;
